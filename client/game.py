@@ -1,117 +1,141 @@
-import sys
-
-import pygame
-from pygame import Vector2
-
-from tanky.Tank import Tank
-from tanky.structure import SCREEN_WIDTH, BLUE, GREEN, RED, WHITE, SCREEN_HEIGHT, screen, BLACK, FPS, clock
+import arcade
+from Tank import Tank
+from Bullet import Bullet
+import time
 
 
-class TankGame:
-    def __init__(self, num_players=2):
-        # Sprite groups
-        self.all_sprites = pygame.sprite.Group()
-        self.tanks = pygame.sprite.Group()
-        self.bullets = pygame.sprite.Group()
+class Game(arcade.Window):
+    def __init__(self):
+        # Create a resizable window
+        super().__init__(800, 600, "Tank Game", resizable=True)
+
+        # Maximize the window after creation
+        self.maximize()
+
+        arcade.set_background_color(arcade.color.DARK_GRAY)
+
+        # Create sprite lists
+        self.tankList = arcade.SpriteList()
+        self.bullet_list = arcade.SpriteList()
+
+        # Create the tank and add it to the sprite list
+        self.tank = Tank("imgs/tank.png", 0.5)
+        self.tank.center_x = self.width // 2
+        self.tank.center_y = self.height // 2
+        self.tank.is_rotating = True
+        self.tankList.append(self.tank)
+
+        # Add timer for auto-spawning test bullets
+        self.last_bullet_time = time.time()
+        self.bullet_spawn_interval = 2.0  # 2 seconds
+
+        # Flag to show hitboxes for debugging
+        self.show_hitboxes = True
+        self.game_over = False
+
+    def on_resize(self, width, height):
+        """Handle window resizing events"""
+        # Call the parent implementation first
+        super().on_resize(width, height)
+
+        # Reposition the tank to maintain center position when window resizes
+        if hasattr(self, 'tank'):
+            self.tank.center_x = width // 2
+            self.tank.center_y = height // 2
+
+    def on_draw(self):
+        self.clear()
+        # Draw bullets first so they appear behind tanks
+        self.bullet_list.draw()
+        # Draw tanks on top of bullets
+        self.tankList.draw()
+
+        # Draw hitboxes for debugging
+        if self.show_hitboxes:
+            self.bullet_list.draw_hit_boxes(arcade.color.RED)
+            self.tankList.draw_hit_boxes(arcade.color.GREEN)
+
+        if self.game_over:
+            arcade.draw_text("GAME OVER - TANK DESTROYED!",
+                             self.width / 2, self.height / 2,
+                             arcade.color.RED, 24, anchor_x="center")
+
+    def on_key_press(self, key, modifiers):
+        if key == arcade.key.SPACE and not self.game_over:
+            # Stop rotating and start moving forward
+            self.tank.is_rotating = False
+            self.tank.is_moving = True
+
+            # Create a bullet and add it to the bullet list
+            bullet = Bullet(
+                "imgs/bullet.png",
+                0.4,
+                self.tank.get_barrel_position()[0],
+                self.tank.get_barrel_position()[1],
+                self.tank.angle,
+                self.tank  # Pass source tank to prevent self-damage
+            )
+            self.bullet_list.append(bullet)
+        # Toggle hitbox display with 'H' key
+        elif key == arcade.key.H:
+            self.show_hitboxes = not self.show_hitboxes
+
+    def on_key_release(self, key, modifiers):
+        if key == arcade.key.SPACE:
+            # Stop moving forward and resume rotating
+            self.tank.is_moving = False
+            self.tank.is_rotating = True
+            # Reverse rotation direction when tank stops
+            self.tank.clockwise = not self.tank.clockwise
+
+    def spawn_test_bullet(self):
+        """Spawn a bullet from the left side moving right for hitbox testing"""
+        bullet = Bullet(
+            "imgs/bullet.png",
+            0.4,
+            0,  # Start at the left edge
+            self.height // 2,  # Center height
+            90,  # Angle pointing right
+            None  # No source tank - will collide with player tank
+        )
+        self.bullet_list.append(bullet)
+
+    def on_update(self, delta_time):
+        if self.game_over:
+            return
+
+        # Update all sprites in the sprite list
+        self.tankList.update()
+
+        # Update bullets
+        self.bullet_list.update(delta_time)
+
+        # Check for collisions between bullets and tanks
+        for bullet in self.bullet_list:
+            for tank in self.tankList:
+                # Skip collision check if this is the source tank (no self-damage)
+                if tank != bullet.source_tank and arcade.check_for_collision(bullet, tank):
+                    print("Bullet hit tank! Game Over.")
+                    self.game_over = True
+                    return
+
+        # Remove bullets that have gone off-screen
+        for bullet in self.bullet_list:
+            if (bullet.center_x < 0 or bullet.center_x > self.width or
+                    bullet.center_y < 0 or bullet.center_y > self.height):
+                bullet.remove_from_sprite_lists()
+
+        # Check if it's time to spawn a new test bullet
+        current_time = time.time()
+        if current_time - self.last_bullet_time >= self.bullet_spawn_interval:
+            self.spawn_test_bullet()
+            self.last_bullet_time = current_time
 
 
-        self.players = []
-        colors = [BLUE, GREEN, RED, WHITE]
-        start_positions = [
-            (SCREEN_WIDTH * 0.25, SCREEN_HEIGHT * 0.5),
-            (SCREEN_WIDTH * 0.75, SCREEN_HEIGHT * 0.5),
-            (SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.25),
-            (SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.75)
-        ]
+def main():
+    game = Game()
+    arcade.run()
 
 
-        for i in range(min(num_players, 4)):
-            tank = Tank(start_positions[i][0], start_positions[i][1], colors[i], i)
-            self.tanks.add(tank)
-            self.all_sprites.add(tank)
-            self.players.append({
-                'tank': tank,
-                'score': 0,
-                'spacebar_pressed_last_frame': False
-            })
-
-    def handle_input(self):
-        keys = pygame.key.get_pressed()
-
-
-        player1_spacebar = keys[pygame.K_SPACE]
-        if player1_spacebar and not self.players[0]['spacebar_pressed_last_frame']:
-            self.players[0]['tank'].handle_spacebar()
-            # Handle bullet creation
-            if not self.players[0]['tank'].spinning and self.players[0]['tank'].bullet:
-                self.bullets.add(self.players[0]['tank'].bullet)
-                self.all_sprites.add(self.players[0]['tank'].bullet)
-                self.players[0]['tank'].bullet = None
-        self.players[0]['spacebar_pressed_last_frame'] = player1_spacebar
-
-
-        if len(self.players) > 1:
-            player2_spacebar = keys[pygame.K_RETURN]
-            if player2_spacebar and not self.players[1]['spacebar_pressed_last_frame']:
-                self.players[1]['tank'].handle_spacebar()
-                # Handle bullet creation
-                if not self.players[1]['tank'].spinning and self.players[1]['tank'].bullet:
-                    self.bullets.add(self.players[1]['tank'].bullet)
-                    self.all_sprites.add(self.players[1]['tank'].bullet)
-                    self.players[1]['tank'].bullet = None
-            self.players[1]['spacebar_pressed_last_frame'] = player2_spacebar
-
-    def update(self):
-        # Update all game objects
-        self.all_sprites.update()
-
-
-        for bullet in self.bullets:
-            hits = pygame.sprite.spritecollide(bullet, self.tanks, False)
-            for tank in hits:
-                # Don't allow tanks to hit themselves
-                if tank.player_id != bullet.owner_id:
-                    # Handle hit
-                    self.players[bullet.owner_id]['score'] += 1
-                    tank.position = Vector2(tank.rect.centerx, tank.rect.centery)
-                    tank.spinning = True
-                    bullet.kill()
-
-    def draw(self):
-        # Clear the screen
-        screen.fill(BLACK)
-
-
-        self.all_sprites.draw(screen)
-
-        # Draw scores
-        font = pygame.font.Font(None, 36)
-        for i, player in enumerate(self.players):
-            score_text = font.render(f"Player {i + 1}: {player['score']}", True, WHITE)
-            screen.blit(score_text, (10, 10 + i * 40))
-
-        # Update the display
-        pygame.display.flip()
-
-    def run(self):
-        running = True
-        while running:
-            # Keep the game running at the right speed
-            clock.tick(FPS)
-
-            # Process events
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-
-            # Handle user input
-            self.handle_input()
-
-            # Update game state
-            self.update()
-
-            # Draw everything
-            self.draw()
-
-        pygame.quit()
-        sys.exit()
+if __name__ == "__main__":
+    main()
