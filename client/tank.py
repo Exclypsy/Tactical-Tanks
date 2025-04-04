@@ -1,79 +1,44 @@
 import math
-
-from pygame import Vector2
-
-from tanky.Bullet import Bullet
-import pygame
-
-from tanky.structure import BLACK
+import arcade
+from arcade.hitbox import calculate_hit_box_points_simple, HitBox
 
 
-class Tank(pygame.sprite.Sprite):
-    def __init__(self, x, y, color, player_id):
-        super().__init__()
+class Tank(arcade.Sprite):
+    """Tank sprite that rotates around its center."""
+
+    def __init__(self, image_file, scale=1.0):
+        # Call the parent class initializer first
+        super().__init__(image_file, scale)
+        self.rotation_speed = 90  # degrees per second
+        self.is_rotating = False  # Initialize rotation state
+        self.is_moving = False  # Movement state
+        self.speed = 200  # Movement speed in pixels per second
+        self.clockwise = True  # Track rotation direction
+        self.barrel_length = 80
 
 
-        self.original_image = pygame.Surface((30, 40), pygame.SRCALPHA)
-        pygame.draw.rect(self.original_image, color, (0, 0, 30, 40))
-
-        pygame.draw.rect(self.original_image, BLACK, (10, 0, 10, 20))
-
-        self.image = self.original_image.copy()
-        self.rect = self.image.get_rect(center=(x, y))
-
-
-        self.position = Vector2(x, y)
-        self.direction = Vector2(0, -1)
-        self.speed = 3
-
-
-        self.angle = 0
-        self.rotation_speed = 2
-        self.spinning = True
-        self.clockwise = True
-
-
-        self.bullet = None
-
-
-        self.player_id = player_id
-
-    def update(self):
-        if self.spinning:
-            # Rotate the tank
+    # Rest of your methods remain the same
+    def update(self, delta_time: float):
+        # Rotate if rotating is enabled
+        if self.is_rotating:
+            # Use direction flag to determine rotation direction
             if self.clockwise:
-                self.angle += self.rotation_speed
+                self.angle += self.rotation_speed * delta_time
             else:
-                self.angle -= self.rotation_speed
+                self.angle -= self. rotation_speed * delta_time
 
+        # Move forward if moving is enabled
+        if self.is_moving:
+            # In Arcade, angle 0 points right and increases clockwise
+            # We need to adjust our math calculations accordingly
+            radian_angle = math.radians(self.angle)
+            self.center_x += math.sin(radian_angle) * self.speed * delta_time
+            self.center_y += math.cos(radian_angle) * self.speed * delta_time
 
-            self.angle %= 360
+    def get_barrel_position(self):
+        """Returns the position at the end of the barrel"""
+        angle_rad = math.radians(self.angle)
+        offset_x = math.sin(angle_rad) * self.barrel_length
+        offset_y = math.cos(angle_rad) * self.barrel_length
 
-
-            self.direction.x = math.sin(math.radians(self.angle))
-            self.direction.y = -math.cos(math.radians(self.angle))
-
-            # Rotate the tank image
-            self.image = pygame.transform.rotate(self.original_image, self.angle)
-            self.rect = self.image.get_rect(center=self.position)
-        else:
-            # Move in the current direction if not spinning
-            self.position += self.direction * self.speed
-            self.rect.center = self.position
-
-    def handle_spacebar(self):
-        if self.spinning:
-            # Stop spinning and start moving
-            self.spinning = False
-            # Fire a bullet
-            self.shoot()
-        else:
-            # Start spinning again but reverse direction
-            self.spinning = True
-            self.clockwise = not self.clockwise
-
-    def shoot(self):
-        # Create a bullet at the tank's position, moving in the tank's direction
-        bullet_pos = self.position + self.direction * 20  # Start bullet away from tank center
-        self.bullet = Bullet(bullet_pos.x, bullet_pos.y, self.direction, self.player_id)
-        return self.bullet
+        return self.center_x + offset_x, self.center_y + offset_y
