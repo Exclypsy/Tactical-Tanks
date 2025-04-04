@@ -5,7 +5,7 @@ from Tank import Tank
 class Game(arcade.Window):
     def __init__(self):
         super().__init__(800, 600, "Tank Game")
-        arcade.set_background_color(arcade.color.DESERT)
+        arcade.set_background_color(arcade.color.GRAY)
 
         # Create a sprite list to manage drawing
         self.sprites_list = arcade.SpriteList()
