@@ -36,7 +36,7 @@ class Tank(arcade.Sprite):
             self.center_y += math.cos(radian_angle) * self.speed * delta_time
 
     def get_barrel_position(self):
-        """Returns the position at the end of the barrel"""
+        """Returns the position at the end of the barrel   """
         angle_rad = math.radians(self.angle)
         offset_x = math.sin(angle_rad) * self.barrel_length
         offset_y = math.cos(angle_rad) * self.barrel_length
