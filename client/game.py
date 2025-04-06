@@ -19,7 +19,7 @@ class Game(arcade.Window):
         self.bullet_list = arcade.SpriteList()
 
         # Create the tank and add it to the sprite list
-        self.tank = Tank("imgs/tank.png", 0.5)
+        self.tank = Tank("assets/images/tank.png", 0.5)
         self.tank.center_x = self.width // 2
         self.tank.center_y = self.height // 2
         self.tank.is_rotating = True
@@ -68,7 +68,7 @@ class Game(arcade.Window):
 
             # Create a bullet and add it to the bullet list
             bullet = Bullet(
-                "imgs/bullet.png",
+                "assets/images/bullet.png",
                 0.4,
                 self.tank.get_barrel_position()[0],
                 self.tank.get_barrel_position()[1],
@@ -91,7 +91,7 @@ class Game(arcade.Window):
     def spawn_test_bullet(self):
         """Spawn a bullet from the left side moving right for hitbox testing"""
         bullet = Bullet(
-            "imgs/bullet.png",
+            "assets/images/bullet.png",
             0.4,
             0,  # Start at the left edge
             self.height // 2,  # Center height
