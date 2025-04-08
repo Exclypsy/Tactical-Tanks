@@ -1,192 +1,97 @@
+from pathlib import Path
+
 import arcade
-from arcade.gui import UIManager, UIAnchorLayout, UIFlatButton, UIGridLayout, UILabel
+from arcade.gui import (
+    UIManager,
+    UITextureButton,
+    UIAnchorLayout,
+    UIView, UIGridLayout,
+)
+
+# Preload textures, because they are mostly used multiple times, so they are not
+# loaded multiple times
+TEX_RED_BUTTON_NORMAL = arcade.load_texture(":resources:gui_basic_assets/button/red_normal.png")
+TEX_RED_BUTTON_HOVER = arcade.load_texture(":resources:gui_basic_assets/button/red_hover.png")
+TEX_RED_BUTTON_PRESS = arcade.load_texture(":resources:gui_basic_assets/button/red_press.png")
+
+WINDOW_WIDTH = 800
+WINDOW_HEIGHT = 600
 
 
-class MainMenuView(arcade.View):
+class mainview(UIView):
+    """Uses the arcade.gui.UIView which takes care about the UIManager setup."""
+
     def __init__(self):
         super().__init__()
-        self.ui_manager = UIManager()
-        self.setup()
+        # backup background color
+        self.background_color = arcade.uicolor.PURPLE_AMETHYST
 
-    def setup(self):
-        self.ui_manager.clear()
+        project_root = Path(__file__).resolve().parent
+        assets_path = project_root / "client" / "assets"
+        arcade.resources.add_resource_handle("assets", str(assets_path.resolve()))
 
-        grid_layout = UIGridLayout(column_count=1, row_count=4,
-                                   horizontal_spacing=20, vertical_spacing=20)
+        self.background = arcade.load_texture(":assets:images/background.png")
 
-        # Heading
-        heading = UILabel(
-            text="Tactical Tanks",
-            width=450,
-            height=60,
-            font_size=32,
-            font_name="Kenney Future",
-            text_color=arcade.color.WHITE
+
+
+        grid = UIGridLayout(
+            column_count=1,
+            row_count=5,
+            size_hint=(0, 0),
+            vertical_spacing=10,
         )
 
-        # Buttons
-        self.create_game_btn = UIFlatButton(text="Create Game", width=250)
-        self.join_game_btn = UIFlatButton(text="Join Game", width=250)
-        self.settings_btn = UIFlatButton(text="Settings", width=250)  # Settings button
+        self.ui.add(UIAnchorLayout(children=[grid]))
 
-        grid_layout.add(heading, row=0, column=0)
-        grid_layout.add(self.join_game_btn, row=1, column=0)
-        grid_layout.add(self.create_game_btn, row=2, column=0)
-        grid_layout.add(self.settings_btn, row=3, column=0)  # Add settings button
+        # Main title (image)
+        titlepath = arcade.load_texture(":assets:images/title.png")
+        logoscale = 0.4
+        title = arcade.gui.UIImage(texture=titlepath,width=titlepath.width*logoscale, height=titlepath.height*logoscale)
 
-        anchor = UIAnchorLayout(children=[grid_layout])
-        self.ui_manager.add(anchor)
+        grid.add(title, row=0, column=0)
 
-        # Connect buttons
-        self.create_game_btn.on_click = self.on_create_game
-        self.join_game_btn.on_click = self.on_join_game
-        self.settings_btn.on_click = self.on_settings  # Connect settings button
+        btn_join = UITextureButton(text="Join Game",
+                                              texture=TEX_RED_BUTTON_NORMAL,
+                                              texture_hovered=TEX_RED_BUTTON_HOVER,
+                                              texture_pressed=TEX_RED_BUTTON_PRESS,
+                                              )
 
-    def on_create_game(self, event):
-        print("Create Game clicked")
-        # Create and show new view
-        create_view = CreateServerView(self)
-        self.window.show_view(create_view)
+        grid.add(btn_join, row=2, column=0)
 
-    def on_join_game(self, event):
-        print("Join Game clicked")
-        # Create and show new view
-        list_view = ServerListView(self)
-        self.window.show_view(list_view)
+        btn_create = UITextureButton(text="Create Game",
+                                 texture=TEX_RED_BUTTON_NORMAL,
+                                 texture_hovered=TEX_RED_BUTTON_HOVER,
+                                 texture_pressed=TEX_RED_BUTTON_PRESS,
+                                 )
 
-    def on_settings(self, event):  # Settings button event
-        print("Settings clicked")
-        settings_view = SettingsView(self)
-        self.window.show_view(settings_view)
+        grid.add(btn_create, row=3, column=0)
 
-    def on_show_view(self):
-        arcade.set_background_color(arcade.color.DARK_SLATE_GRAY)
-        try:
-            arcade.load_font("kenney_future.ttf")
-        except:
-            print("Note: kenney_future.ttf not found - using default font")
+        btn_settings = UITextureButton(text="Settings",
+                                     texture=TEX_RED_BUTTON_NORMAL,
+                                     texture_hovered=TEX_RED_BUTTON_HOVER,
+                                     texture_pressed=TEX_RED_BUTTON_PRESS,
+                                     )
 
-    def on_draw(self):
-        self.clear()
-        self.ui_manager.draw()
+        grid.add(btn_settings, row=4, column=0)
 
 
-class CreateServerView(arcade.View):
-    def __init__(self, previous_view):
-        super().__init__()
-        self.previous_view = previous_view
-        self.ui_manager = UIManager()
-        self.setup()
-
-    def setup(self):
-        self.ui_manager.clear()
-
-        grid = UIGridLayout(column_count=1, row_count=2, vertical_spacing=20)
-
-        # Back button
-        back_btn = UIFlatButton(text="Back", width=200)
-        back_btn.on_click = self.on_back
-
-        grid.add(back_btn, row=0, column=0)
-
-        anchor = UIAnchorLayout(children=[grid])
-        self.ui_manager.add(anchor)
-
-    def on_back(self, event):
-        self.window.show_view(self.previous_view)
-
-    def on_draw(self):
-        self.clear()
-        arcade.draw_text(
-            "Create Server Screen",
-            self.window.width / 2,
-            self.window.height / 2,
-            arcade.color.WHITE,
-            font_size=30,
-            anchor_x="center"
+    def on_draw_before_ui(self):
+        # Draw the background texture
+        arcade.draw_texture_rect(
+            self.background,arcade.LBWH(0, 0, self.width, self.height),
         )
-        self.ui_manager.draw()
-
-
-class ServerListView(arcade.View):
-    def __init__(self, previous_view):
-        super().__init__()
-        self.previous_view = previous_view
-        self.ui_manager = UIManager()
-        self.setup()
-
-    def setup(self):
-        self.ui_manager.clear()
-
-        grid = UIGridLayout(column_count=1, row_count=2, vertical_spacing=20)
-
-        back_btn = UIFlatButton(text="Back", width=200)
-        back_btn.on_click = self.on_back
-
-        grid.add(back_btn, row=0, column=0)
-
-        anchor = UIAnchorLayout(children=[grid])
-        self.ui_manager.add(anchor)
-
-    def on_back(self, event):
-        self.window.show_view(self.previous_view)
-
-    def on_draw(self):
-        self.clear()
-        arcade.draw_text(
-            "Server List Screen",
-            self.window.width / 2,
-            self.window.height / 2,
-            arcade.color.WHITE,
-            font_size=30,
-            anchor_x="center"
-        )
-        self.ui_manager.draw()
-
-
-class SettingsView(arcade.View):  # Create settings view
-    def __init__(self, previous_view):
-        super().__init__()
-        self.previous_view = previous_view
-        self.ui_manager = UIManager()
-        self.setup()
-
-    def setup(self):
-        self.ui_manager.clear()
-
-        grid = UIGridLayout(column_count=1, row_count=2, vertical_spacing=20)
-
-        back_btn = UIFlatButton(text="Back", width=200)
-        back_btn.on_click = self.on_back
-
-        grid.add(back_btn, row=0, column=0)
-
-        anchor = UIAnchorLayout(children=[grid])
-        self.ui_manager.add(anchor)
-
-    def on_back(self, event):
-        self.window.show_view(self.previous_view)
-
-    def on_draw(self):
-        self.clear()
-        arcade.draw_text(
-            "Settings Screen",
-            self.window.width / 2,
-            self.window.height / 2,
-            arcade.color.WHITE,
-            font_size=30,
-            anchor_x="center"
-        )
-        self.ui_manager.draw()
 
 
 def main():
-    window = arcade.Window(800, 600, "Tactical Tanks", resizable=False)
-    window.set_vsync(True)
-    menu_view = MainMenuView()
-    window.show_view(menu_view)
-    arcade.run()
+    """ Main function """
+    # Create a window class. This is what actually shows up on screen
+    window = arcade.Window(title="Tactical Tank Game", width=WINDOW_WIDTH, height=WINDOW_HEIGHT)
 
+    # Show the view on screen
+    window.show_view(mainview())
+
+    # Start the arcade game loop
+    arcade.run()
 
 if __name__ == "__main__":
     main()
