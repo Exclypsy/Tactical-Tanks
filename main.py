@@ -78,8 +78,8 @@ class mainview(UIView):
                                      texture=TEX_RED_BUTTON_NORMAL,
                                      texture_hovered=TEX_RED_BUTTON_HOVER,
                                      texture_pressed=TEX_RED_BUTTON_PRESS,
-                                       width=300,
-                                       height=80
+                                       width=280,
+                                       height=60
                                      )
 
         grid.add(btn_settings, row=4, column=0)
