@@ -80,5 +80,5 @@ class SettingsView(UIView):
         self.ui.add(anchor)
 
     def on_back_click(self, event):
-        from MainMenu import mainview
-        self.window.show_view(mainview(self.window))
+        from MainMenu import Mainview
+        self.window.show_view(Mainview(self.window))
