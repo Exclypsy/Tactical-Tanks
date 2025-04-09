@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="943984de-205b-4b9b-a54d-0d0f9a3a3d64" name="Changes" comment="Pridanie zelenych buttonov">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Exclypsy&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Exclypsy/OPGP-Projekt-MOS-.git&quot;,
+    &quot;accountId&quot;: &quot;2cd0244d-c7fe-4ef2-8719-27b585d88dcd&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
+  <component name="ProjectId" id="2uqb5c34kRogPImbTWuoJ2tUuHR" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Python.game.executor": "Run",
+    "Python.main.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "main",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.keymap",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/client/assets/butons" />
+      <recent name="$PROJECT_DIR$/assets/sounds" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-1d06a55b98c1-0b3e54e931b4-JavaScript-PY-241.19416.19" />
+        <option value="bundled-python-sdk-337b0a7a993a-2767605e8bc2-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-241.19416.19" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="943984de-205b-4b9b-a54d-0d0f9a3a3d64" name="Changes" comment="" />
+      <created>1742978871086</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1742978871086</updated>
+      <workItem from="1742978873025" duration="1914000" />
+      <workItem from="1742981233649" duration="1305000" />
+      <workItem from="1743579770201" duration="1494000" />
+      <workItem from="1744184961642" duration="308000" />
+      <workItem from="1744185279627" duration="1440000" />
+    </task>
+    <task id="LOCAL-00001" summary="Push 1 test">
+      <option name="closed" value="true" />
+      <created>1742979708118</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1742979708118</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Push 1 test">
+      <option name="closed" value="true" />
+      <created>1742979776210</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1742979776210</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Push 3 test, delete Test_folder">
+      <option name="closed" value="true" />
+      <created>1742979806679</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1742979806679</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Push 4 test, pridanie suboru">
+      <option name="closed" value="true" />
+      <created>1742981282956</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1742981282956</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Push 5 test, odsranenie suboru">
+      <option name="closed" value="true" />
+      <created>1742981322780</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1742981322780</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Push, &#10;Pridanie Assets (Images, Sounds), server.py a main.py">
+      <option name="closed" value="true" />
+      <created>1742983009938</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1742983009938</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Push, &#10;Pridanie zvukov do Assets/sounds">
+      <option name="closed" value="true" />
+      <created>1742983202886</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1742983202886</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Game a Tank">
+      <option name="closed" value="true" />
+      <created>1743581614417</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1743581614417</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Game # comms">
+      <option name="closed" value="true" />
+      <created>1743581647690</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1743581647690</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Pridanie zelenych buttonov">
+      <option name="closed" value="true" />
+      <created>1744186143185</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1744186143185</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <MESSAGE value="Push 1 test" />
+    <MESSAGE value="Push 3 test, delete Test_folder" />
+    <MESSAGE value="Push 4 test, pridanie suboru" />
+    <MESSAGE value="Push 5 test, odsranenie suboru" />
+    <MESSAGE value="Push, &#10;Pridanie Assets (Images, Sounds), server.py a main.py" />
+    <MESSAGE value="Push, &#10;Pridanie zvukov do Assets/sounds" />
+    <MESSAGE value="Game a Tank" />
+    <MESSAGE value="Game # comms" />
+    <MESSAGE value="Pridanie zelenych buttonov" />
+    <option name="LAST_COMMIT_MESSAGE" value="Pridanie zelenych buttonov" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$main.coverage" NAME="main Coverage Results" MODIFIED="1744186683171" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$game.coverage" NAME="game Coverage Results" MODIFIED="1744186722628" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
+  </component>
+</project>
