@@ -7,6 +7,7 @@ from arcade.gui import (
     UIAnchorLayout,
     UIView,
     UIGridLayout,
+    UIFlatButton,
 )
 from settings import SettingsView
 
@@ -118,9 +119,10 @@ def main():
     """ Main function """
     window = arcade.Window(
         title="Tactical Tank Game",
-        fullscreen=True,
+        fullscreen=False,  # Start windowed to ensure manual control
         resizable=True
     )
+    window.set_fullscreen(True)
     window.show_view(mainview(window))
     arcade.run()
 

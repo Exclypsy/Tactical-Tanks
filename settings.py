@@ -32,6 +32,25 @@ class SettingsView(UIView):
         # Nadpis
         layout.add(UILabel(text="Settings", font_size=30, text_color=arcade.color.WHITE))
 
+        # Výber režimu zobrazenia
+        self.display_mode = "fullscreen"  # Default
+
+        def set_display_mode(mode):
+            self.display_mode = mode
+            if mode == "fullscreen":
+                self.window.set_fullscreen(True)
+            elif mode == "windowed":
+                self.window.set_fullscreen(False)
+
+        btn_fullscreen = UIFlatButton(text="Fullscreen", width=200, height=50)
+        btn_fullscreen.on_click = lambda event: set_display_mode("fullscreen")
+
+        btn_windowed = UIFlatButton(text="Windowed", width=200, height=50)
+        btn_windowed.on_click = lambda event: set_display_mode("windowed")
+
+        layout.add(btn_fullscreen)
+        layout.add(btn_windowed)
+
         # Tlačidlo späť v pravom hornom rohu
         exit_button = UITextureButton(
             texture=TEX_EXIT_BUTTON,
