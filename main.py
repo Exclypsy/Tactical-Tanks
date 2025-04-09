@@ -14,9 +14,9 @@ arcade.resources.add_resource_handle("assets", str(assets_path.resolve()))
 
 # Preload textures, because they are mostly used multiple times, so they are not
 # loaded multiple times
-TEX_RED_BUTTON_NORMAL = arcade.load_texture(":resources:gui_basic_assets/button/red_normal.png")
-TEX_RED_BUTTON_HOVER = arcade.load_texture(":resources:gui_basic_assets/button/red_hover.png")
-TEX_RED_BUTTON_PRESS = arcade.load_texture(":resources:gui_basic_assets/button/red_press.png")
+TEX_RED_BUTTON_NORMAL = arcade.load_texture(":assets:butons/red_button_normal.png")
+TEX_RED_BUTTON_HOVER = arcade.load_texture(":assets:butons/red_button_hover.png")
+TEX_RED_BUTTON_PRESS = arcade.load_texture(":assets:butons/red_button_pressed.png")
 
 TEX_GREEN_BUTTON_NORMAL = arcade.load_texture(":assets:butons/green_normal.png")
 TEX_GREEN_BUTTON_HOVER = arcade.load_texture(":assets:butons/green_hover.png")
