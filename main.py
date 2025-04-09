@@ -8,6 +8,7 @@ from arcade.gui import (
     UIView,
     UIGridLayout,
 )
+from settings import SettingsView
 
 project_root = Path(__file__).resolve().parent
 assets_path = project_root / "client" / "assets"
@@ -31,8 +32,9 @@ WINDOW_HEIGHT = 600
 class mainview(UIView):
     """Uses the arcade.gui.UIView which takes care about the UIManager setup."""
 
-    def __init__(self):
+    def __init__(self, window):
         super().__init__()
+        self.window = window
         self.background_color = arcade.uicolor.PURPLE_AMETHYST
         self.background = arcade.load_texture(":assets:images/background.png")
 
@@ -82,6 +84,7 @@ class mainview(UIView):
             width=280,
             height=60
         )
+        btn_settings.on_click = lambda event: self.window.show_view(SettingsView(self.window))
         grid.add(btn_settings, row=4, column=0)
 
         # Exit button in top-right corner
@@ -118,7 +121,7 @@ def main():
         fullscreen=True,
         resizable=True
     )
-    window.show_view(mainview())
+    window.show_view(mainview(window))
     arcade.run()
 
 
