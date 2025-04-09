@@ -1,3 +1,4 @@
+import json
 import arcade
 from arcade.gui import (
     UIView,
@@ -5,18 +6,29 @@ from arcade.gui import (
     UIAnchorLayout,
     UIBoxLayout,
     UILabel,
-    UISpace,
     UIFlatButton,
 )
 
 from pathlib import Path
 
-# Register resource handle
 project_root = Path(__file__).resolve().parent
-assets_path = project_root / "client" / "assets"
-arcade.resources.add_resource_handle("assets", str(assets_path.resolve()))
+path = project_root / "client" / "assets"
+arcade.resources.add_resource_handle("assets", str(path.resolve()))
+
+SETTINGS_FILE = project_root / ".config" / "settings.json"
 
 TEX_EXIT_BUTTON = arcade.load_texture(":assets:images/exit.png")
+
+def save_setting(key, value):
+    settings = {}
+    if SETTINGS_FILE.exists():
+        with open(SETTINGS_FILE, "r") as file:
+            settings = json.load(file)
+    settings[key] = value
+    with open(SETTINGS_FILE, "w") as file:
+        json.dump(settings, file, indent=4)
+
+
 
 class SettingsView(UIView):
     def __init__(self, window):
@@ -39,8 +51,10 @@ class SettingsView(UIView):
             self.display_mode = mode
             if mode == "fullscreen":
                 self.window.set_fullscreen(True)
+                save_setting("fullscreen", True)
             elif mode == "windowed":
                 self.window.set_fullscreen(False)
+                save_setting("fullscreen", False)
 
         btn_fullscreen = UIFlatButton(text="Fullscreen", width=200, height=50)
         btn_fullscreen.on_click = lambda event: set_display_mode("fullscreen")
@@ -66,5 +80,5 @@ class SettingsView(UIView):
         self.ui.add(anchor)
 
     def on_back_click(self, event):
-        from main import mainview
+        from MainMenu import mainview
         self.window.show_view(mainview(self.window))

@@ -1,4 +1,6 @@
 from pathlib import Path
+import json
+from SettingsWindow import save_setting,SettingsView
 
 import arcade
 from arcade.gui import (
@@ -7,13 +9,13 @@ from arcade.gui import (
     UIAnchorLayout,
     UIView,
     UIGridLayout,
-    UIFlatButton,
 )
-from settings import SettingsView
 
 project_root = Path(__file__).resolve().parent
-assets_path = project_root / "client" / "assets"
-arcade.resources.add_resource_handle("assets", str(assets_path.resolve()))
+path = project_root / "client" / "assets"
+arcade.resources.add_resource_handle("assets", str(path.resolve()))
+
+SETTINGS_FILE = project_root / ".config" / "settings.json"
 
 # Preload textures
 TEX_RED_BUTTON_NORMAL = arcade.load_texture(":assets:butons/red_button_normal.png")
@@ -26,11 +28,13 @@ TEX_GREEN_BUTTON_PRESS = arcade.load_texture(":assets:butons/green_press.png")
 
 TEX_EXIT_BUTTON = arcade.load_texture(":assets:images/exit.png")
 
-WINDOW_WIDTH = 800
-WINDOW_HEIGHT = 600
+def load_settings():
+    """Load settings from the JSON file."""
+    with open(SETTINGS_FILE, "r") as file:
+        return json.load(file)
 
 
-class mainview(UIView):
+class Mainview(UIView):
     """Uses the arcade.gui.UIView which takes care about the UIManager setup."""
 
     def __init__(self, window):
@@ -108,6 +112,15 @@ class mainview(UIView):
         )
         self.ui.add(anchor_layout)
 
+    def on_resize(self, width: int, height: int):
+        """Update settings when the window is resized."""
+        super().on_resize(width, height)
+
+        # Update and save new window dimensions in the settings file
+        save_setting("window_width", width)
+        save_setting("window_height", height)
+
+
     def on_draw_before_ui(self):
         arcade.draw_texture_rect(
             self.background,
@@ -117,15 +130,26 @@ class mainview(UIView):
 
 def main():
     """ Main function """
+    # Load user settings
+    settings = load_settings()
+
+    # Create a window with user-defined settings
     window = arcade.Window(
         title="Tactical Tank Game",
-        fullscreen=False,  # Start windowed to ensure manual control
+        fullscreen=settings["fullscreen"],
+        width=settings["window_width"],
+        height=settings["window_height"],
         resizable=True
     )
-    window.set_fullscreen(True)
-    window.show_view(mainview(window))
-    arcade.run()
 
+    # Set minimum size for the window
+    window.set_minimum_size(800, 500)
+
+    # Show the main view
+    window.show_view(Mainview(window))
+
+    # Run the application
+    arcade.run()
 
 if __name__ == "__main__":
     main()
