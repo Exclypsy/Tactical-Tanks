@@ -8,11 +8,20 @@ from arcade.gui import (
     UIView, UIGridLayout,
 )
 
+project_root = Path(__file__).resolve().parent
+assets_path = project_root / "client" / "assets"
+arcade.resources.add_resource_handle("assets", str(assets_path.resolve()))
+
 # Preload textures, because they are mostly used multiple times, so they are not
 # loaded multiple times
 TEX_RED_BUTTON_NORMAL = arcade.load_texture(":resources:gui_basic_assets/button/red_normal.png")
 TEX_RED_BUTTON_HOVER = arcade.load_texture(":resources:gui_basic_assets/button/red_hover.png")
 TEX_RED_BUTTON_PRESS = arcade.load_texture(":resources:gui_basic_assets/button/red_press.png")
+
+TEX_GREEN_BUTTON_NORMAL = arcade.load_texture(":assets:butons/green_normal.png")
+TEX_GREEN_BUTTON_HOVER = arcade.load_texture(":assets:butons/green_hover.png")
+TEX_GREEN_BUTTON_PRESS = arcade.load_texture(":assets:butons/green_press.png")
+
 
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600
@@ -26,9 +35,6 @@ class mainview(UIView):
         # backup background color
         self.background_color = arcade.uicolor.PURPLE_AMETHYST
 
-        project_root = Path(__file__).resolve().parent
-        assets_path = project_root / "client" / "assets"
-        arcade.resources.add_resource_handle("assets", str(assets_path.resolve()))
 
         self.background = arcade.load_texture(":assets:images/background.png")
 
@@ -59,9 +65,9 @@ class mainview(UIView):
         grid.add(btn_join, row=2, column=0)
 
         btn_create = UITextureButton(text="Create Game",
-                                 texture=TEX_RED_BUTTON_NORMAL,
-                                 texture_hovered=TEX_RED_BUTTON_HOVER,
-                                 texture_pressed=TEX_RED_BUTTON_PRESS,
+                                 texture=TEX_GREEN_BUTTON_NORMAL,
+                                 texture_hovered=TEX_GREEN_BUTTON_HOVER,
+                                 texture_pressed=TEX_GREEN_BUTTON_PRESS,
                                  )
 
         grid.add(btn_create, row=3, column=0)
