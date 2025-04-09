@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="943984de-205b-4b9b-a54d-0d0f9a3a3d64" name="Changes" comment="Pridanie zelenych buttonov" />
+    <list default="true" id="943984de-205b-4b9b-a54d-0d0f9a3a3d64" name="Changes" comment="Norma; zmenene na normal">
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -19,7 +21,6 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-    <option name="UPDATE_TYPE" value="REBASE" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
   &quot;lastFilter&quot;: {
@@ -89,7 +90,7 @@
       <workItem from="1743579770201" duration="1494000" />
       <workItem from="1744184961642" duration="308000" />
       <workItem from="1744185279627" duration="1440000" />
-      <workItem from="1744188866142" duration="728000" />
+      <workItem from="1744188866142" duration="1036000" />
     </task>
     <task id="LOCAL-00001" summary="Push 1 test">
       <option name="closed" value="true" />
@@ -187,7 +188,23 @@
       <option name="project" value="LOCAL" />
       <updated>1744188964904</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Custom red button (JOIN GAME)">
+      <option name="closed" value="true" />
+      <created>1744190511660</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1744190511660</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Norma; zmenene na normal">
+      <option name="closed" value="true" />
+      <created>1744190628805</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1744190628805</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -205,10 +222,12 @@
     <MESSAGE value="Game # comms" />
     <MESSAGE value="buttons color" />
     <MESSAGE value="Pridanie zelenych buttonov" />
-    <option name="LAST_COMMIT_MESSAGE" value="Pridanie zelenych buttonov" />
+    <MESSAGE value="Custom red button (JOIN GAME)" />
+    <MESSAGE value="Norma; zmenene na normal" />
+    <option name="LAST_COMMIT_MESSAGE" value="Norma; zmenene na normal" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$main.coverage" NAME="main Coverage Results" MODIFIED="1744188969680" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$main.coverage" NAME="main Coverage Results" MODIFIED="1744190694121" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$game.coverage" NAME="game Coverage Results" MODIFIED="1744186722628" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
   </component>
 </project>

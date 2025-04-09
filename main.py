@@ -60,6 +60,8 @@ class mainview(UIView):
                                               texture=TEX_RED_BUTTON_NORMAL,
                                               texture_hovered=TEX_RED_BUTTON_HOVER,
                                               texture_pressed=TEX_RED_BUTTON_PRESS,
+                                              width= 300,
+                                              height=80
                                               )
 
         grid.add(btn_join, row=2, column=0)
@@ -76,6 +78,8 @@ class mainview(UIView):
                                      texture=TEX_RED_BUTTON_NORMAL,
                                      texture_hovered=TEX_RED_BUTTON_HOVER,
                                      texture_pressed=TEX_RED_BUTTON_PRESS,
+                                       width=300,
+                                       height=80
                                      )
 
         grid.add(btn_settings, row=4, column=0)
