@@ -1,5 +1,5 @@
 {
-    "fullscreen": false,
-    "window_width": 803,
-    "window_height": 620
+    "fullscreen": true,
+    "window_width": 1920,
+    "window_height": 1080
 }

@@ -1,15 +1,15 @@
-from pathlib import Path
 import json
-from SettingsWindow import save_setting,SettingsView
-
 import arcade
 from arcade.gui import (
-    UIManager,
+    UIView,
     UITextureButton,
     UIAnchorLayout,
-    UIView,
     UIGridLayout,
 )
+from pathlib import Path
+from SettingsWindow import save_setting, SettingsView  # Importing save_setting and SettingsView
+from Join import JoinGameView  # Import JoinGameView from the Join file
+from Create import CreateGameView  # Import CreateGameView from the Create file
 
 project_root = Path(__file__).resolve().parent
 path = project_root / "client" / "assets"
@@ -18,13 +18,13 @@ arcade.resources.add_resource_handle("assets", str(path.resolve()))
 SETTINGS_FILE = project_root / ".config" / "settings.json"
 
 # Preload textures
-TEX_RED_BUTTON_NORMAL = arcade.load_texture(":assets:butons/red_button_normal.png")
-TEX_RED_BUTTON_HOVER = arcade.load_texture(":assets:butons/red_button_hover.png")
-TEX_RED_BUTTON_PRESS = arcade.load_texture(":assets:butons/red_button_pressed.png")
+TEX_RED_BUTTON_NORMAL = arcade.load_texture(":assets:buttons/red_button_normal.png")
+TEX_RED_BUTTON_HOVER = arcade.load_texture(":assets:buttons/red_button_hover.png")
+TEX_RED_BUTTON_PRESS = arcade.load_texture(":assets:buttons/red_button_pressed.png")
 
-TEX_GREEN_BUTTON_NORMAL = arcade.load_texture(":assets:butons/green_normal.png")
-TEX_GREEN_BUTTON_HOVER = arcade.load_texture(":assets:butons/green_hover.png")
-TEX_GREEN_BUTTON_PRESS = arcade.load_texture(":assets:butons/green_press.png")
+TEX_GREEN_BUTTON_NORMAL = arcade.load_texture(":assets:buttons/green_normal.png")
+TEX_GREEN_BUTTON_HOVER = arcade.load_texture(":assets:buttons/green_hover.png")
+TEX_GREEN_BUTTON_PRESS = arcade.load_texture(":assets:buttons/green_press.png")
 
 TEX_EXIT_BUTTON = arcade.load_texture(":assets:images/exit.png")
 
@@ -63,6 +63,7 @@ class Mainview(UIView):
         )
         grid.add(title, row=0, column=0)
 
+        # Join button
         btn_join = UITextureButton(
             text="Join Game",
             texture=TEX_RED_BUTTON_NORMAL,
@@ -71,16 +72,24 @@ class Mainview(UIView):
             width=300,
             height=80
         )
+        # Open JoinGameView when the Join button is clicked
+        btn_join.on_click = lambda event: self.window.show_view(JoinGameView(self.window))  # Opens JoinGameView
         grid.add(btn_join, row=2, column=0)
 
+        # Create button
         btn_create = UITextureButton(
             text="Create Game",
             texture=TEX_GREEN_BUTTON_NORMAL,
             texture_hovered=TEX_GREEN_BUTTON_HOVER,
             texture_pressed=TEX_GREEN_BUTTON_PRESS,
+            width=300,
+            height=80
         )
+        # Open CreateGameView when the Create button is clicked
+        btn_create.on_click = lambda event: self.window.show_view(CreateGameView(self.window))  # Opens CreateGameView
         grid.add(btn_create, row=3, column=0)
 
+        # Settings button
         btn_settings = UITextureButton(
             text="Settings",
             texture=TEX_RED_BUTTON_NORMAL,
@@ -119,7 +128,6 @@ class Mainview(UIView):
         # Update and save new window dimensions in the settings file
         save_setting("window_width", width)
         save_setting("window_height", height)
-
 
     def on_draw_before_ui(self):
         arcade.draw_texture_rect(
