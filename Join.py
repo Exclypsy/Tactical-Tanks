@@ -1,8 +1,6 @@
-import json
 import arcade
 from arcade.gui import (
     UIView,
-    UITextureButton,
     UIAnchorLayout,
     UIBoxLayout,
     UILabel,
@@ -10,6 +8,8 @@ from arcade.gui import (
 )
 
 from pathlib import Path
+
+from GameButton import GameButton
 
 project_root = Path(__file__).resolve().parent
 path = project_root / "client" / "assets"
@@ -24,6 +24,8 @@ class JoinGameView(UIView):
         self.window = window
 
         self.background_color = arcade.color.DARK_BLUE
+
+        self.background = arcade.load_texture(":assets:images/background.png")
 
         # Central layout
         layout = UIBoxLayout(vertical=True, space_between=20)
@@ -41,12 +43,8 @@ class JoinGameView(UIView):
 
 
         # Exit button in top-right corner
-        exit_button = UITextureButton(
-            texture=TEX_EXIT_BUTTON,
-            texture_hovered=TEX_EXIT_BUTTON,
-            texture_pressed=TEX_EXIT_BUTTON,
-            width=40,
-            height=40
+        exit_button = GameButton(
+            color="green",
         )
         exit_button.on_click = self.on_back_click
 
@@ -57,3 +55,9 @@ class JoinGameView(UIView):
     def on_back_click(self, event):
         from MainMenu import Mainview
         self.window.show_view(Mainview(self.window))
+
+    def on_draw_before_ui(self):
+        arcade.draw_texture_rect(
+            self.background,
+            arcade.LBWH(0, 0, self.width, self.height),
+        )

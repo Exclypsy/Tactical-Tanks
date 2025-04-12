@@ -24,6 +24,8 @@ class CreateGameView(UIView):
         self.window = window
 
         self.background_color = arcade.color.DARK_GREEN
+        self.background = arcade.load_texture(":assets:images/background.png")
+
 
         # Central layout
         layout = UIBoxLayout(vertical=True, space_between=20)
@@ -57,3 +59,9 @@ class CreateGameView(UIView):
     def on_back_click(self, event):
         from MainMenu import Mainview
         self.window.show_view(Mainview(self.window))
+
+    def on_draw_before_ui(self):
+        arcade.draw_texture_rect(
+            self.background,
+            arcade.LBWH(0, 0, self.width, self.height),
+        )

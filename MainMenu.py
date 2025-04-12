@@ -4,9 +4,11 @@ from arcade.gui import (
     UIView,
     UITextureButton,
     UIAnchorLayout,
-    UIGridLayout,
+    UIGridLayout, UITextureButtonStyle,
 )
 from pathlib import Path
+
+from GameButton import GameButton
 from SettingsWindow import save_setting, SettingsView  # Importing save_setting and SettingsView
 from Join import JoinGameView  # Import JoinGameView from the Join file
 from Create import CreateGameView  # Import CreateGameView from the Create file
@@ -17,14 +19,7 @@ arcade.resources.add_resource_handle("assets", str(path.resolve()))
 
 SETTINGS_FILE = project_root / ".config" / "settings.json"
 
-# Preload textures
-TEX_RED_BUTTON_NORMAL = arcade.load_texture(":assets:buttons/red_button_normal.png")
-TEX_RED_BUTTON_HOVER = arcade.load_texture(":assets:buttons/red_button_hover.png")
-TEX_RED_BUTTON_PRESS = arcade.load_texture(":assets:buttons/red_button_pressed.png")
 
-TEX_GREEN_BUTTON_NORMAL = arcade.load_texture(":assets:buttons/green_normal.png")
-TEX_GREEN_BUTTON_HOVER = arcade.load_texture(":assets:buttons/green_hover.png")
-TEX_GREEN_BUTTON_PRESS = arcade.load_texture(":assets:buttons/green_press.png")
 
 TEX_EXIT_BUTTON = arcade.load_texture(":assets:images/exit.png")
 
@@ -64,39 +59,33 @@ class Mainview(UIView):
         grid.add(title, row=0, column=0)
 
         # Join button
-        btn_join = UITextureButton(
+        btn_join = GameButton(
             text="Join Game",
-            texture=TEX_RED_BUTTON_NORMAL,
-            texture_hovered=TEX_RED_BUTTON_HOVER,
-            texture_pressed=TEX_RED_BUTTON_PRESS,
-            width=300,
-            height=80
+            width=250,
+            height=70,
+            style=UITextureButtonStyle(font_size=23,font_name=("ARCO", "arial"), font_color=(255, 255, 255, 255)),
         )
+
         # Open JoinGameView when the Join button is clicked
         btn_join.on_click = lambda event: self.window.show_view(JoinGameView(self.window))  # Opens JoinGameView
         grid.add(btn_join, row=2, column=0)
 
         # Create button
-        btn_create = UITextureButton(
+        btn_create = GameButton(
             text="Create Game",
-            texture=TEX_GREEN_BUTTON_NORMAL,
-            texture_hovered=TEX_GREEN_BUTTON_HOVER,
-            texture_pressed=TEX_GREEN_BUTTON_PRESS,
-            width=300,
-            height=80
+            color="green",
+            width=190,
+            height=50,
         )
         # Open CreateGameView when the Create button is clicked
         btn_create.on_click = lambda event: self.window.show_view(CreateGameView(self.window))  # Opens CreateGameView
         grid.add(btn_create, row=3, column=0)
 
         # Settings button
-        btn_settings = UITextureButton(
+        btn_settings = GameButton(
             text="Settings",
-            texture=TEX_RED_BUTTON_NORMAL,
-            texture_hovered=TEX_RED_BUTTON_HOVER,
-            texture_pressed=TEX_RED_BUTTON_PRESS,
-            width=280,
-            height=60
+            width=190,
+            height=50
         )
         btn_settings.on_click = lambda event: self.window.show_view(SettingsView(self.window))
         grid.add(btn_settings, row=4, column=0)

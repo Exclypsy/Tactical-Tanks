@@ -11,6 +11,8 @@ from arcade.gui import (
 
 from pathlib import Path
 
+from GameButton import GameButton
+
 project_root = Path(__file__).resolve().parent
 path = project_root / "client" / "assets"
 arcade.resources.add_resource_handle("assets", str(path.resolve()))
@@ -18,6 +20,7 @@ arcade.resources.add_resource_handle("assets", str(path.resolve()))
 SETTINGS_FILE = project_root / ".config" / "settings.json"
 
 TEX_EXIT_BUTTON = arcade.load_texture(":assets:images/exit.png")
+
 
 def save_setting(key, value):
     settings = {}
@@ -28,14 +31,18 @@ def save_setting(key, value):
     with open(SETTINGS_FILE, "w") as file:
         json.dump(settings, file, indent=4)
 
-
-
+# read "fullscreen" setting from settings.json once
+with open(SETTINGS_FILE, "r") as file:
+    settings = json.load(file)
+    is_fullscreen = settings.get("fullscreen", False)
 class SettingsView(UIView):
     def __init__(self, window):
         super().__init__()
         self.window = window
 
         self.background_color = arcade.color.DARK_SLATE_GRAY
+
+        self.background = arcade.load_texture(":assets:images/background.png")
 
         # Stredové rozloženie
         layout = UIBoxLayout(vertical=True, space_between=20)
@@ -51,15 +58,17 @@ class SettingsView(UIView):
             self.display_mode = mode
             if mode == "fullscreen":
                 self.window.set_fullscreen(True)
+                is_fullscreen= True
                 save_setting("fullscreen", True)
             elif mode == "windowed":
                 self.window.set_fullscreen(False)
+                is_fullscreen= False
                 save_setting("fullscreen", False)
 
-        btn_fullscreen = UIFlatButton(text="Fullscreen", width=200, height=50)
+        btn_fullscreen = GameButton(color="red" if is_fullscreen else "green", text="Fullscreen", width=200, height=50)
         btn_fullscreen.on_click = lambda event: set_display_mode("fullscreen")
 
-        btn_windowed = UIFlatButton(text="Windowed", width=200, height=50)
+        btn_windowed = GameButton(color="green" if is_fullscreen else "red", text="Windowed", width=200, height=50)
         btn_windowed.on_click = lambda event: set_display_mode("windowed")
 
         layout.add(btn_fullscreen)
@@ -82,3 +91,9 @@ class SettingsView(UIView):
     def on_back_click(self, event):
         from MainMenu import Mainview
         self.window.show_view(Mainview(self.window))
+
+    def on_draw_before_ui(self):
+        arcade.draw_texture_rect(
+            self.background,
+            arcade.LBWH(0, 0, self.width, self.height),
+        )
