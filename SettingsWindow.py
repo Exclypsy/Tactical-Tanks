@@ -59,29 +59,26 @@ class SettingsView(UIView):
         layout.add(UILabel(text="Settings", font_size=30, text_color=arcade.color.WHITE))
 
         # Výber režimu zobrazenia
-        self.display_mode = "fullscreen"  # Default
         self.music_on = settings.get("music_on", True)
         self.music_volume = settings.get("music_volume", 1.0)
 
-        def set_display_mode(mode):
-            self.display_mode = mode
-            if mode == "fullscreen":
-                self.window.set_fullscreen(True)
-                is_fullscreen = True
-                save_setting("fullscreen", True)
-            elif mode == "windowed":
-                self.window.set_fullscreen(False)
-                is_fullscreen = False
-                save_setting("fullscreen", False)
+        fullscreen_button = GameButton(
+            text="Fullscreen: ON" if is_fullscreen else "Fullscreen: OFF",
+            width=200,
+            height=50,
+            color="green" if is_fullscreen else "red"
+        )
 
-        btn_fullscreen = GameButton(color="red" if is_fullscreen else "green", text="Fullscreen", width=200, height=50)
-        btn_fullscreen.on_click = lambda event: set_display_mode("fullscreen")
+        def toggle_fullscreen():
+            global is_fullscreen
+            is_fullscreen = not is_fullscreen
+            self.window.set_fullscreen(is_fullscreen)
+            save_setting("fullscreen", is_fullscreen)
+            fullscreen_button.text = "Fullscreen: ON" if is_fullscreen else "Fullscreen: OFF"
+            fullscreen_button.color = "green" if is_fullscreen else "red"
 
-        btn_windowed = GameButton(color="green" if is_fullscreen else "red", text="Windowed", width=200, height=50)
-        btn_windowed.on_click = lambda event: set_display_mode("windowed")
-
-        layout.add(btn_fullscreen)
-        layout.add(btn_windowed)
+        fullscreen_button.on_click = lambda event: toggle_fullscreen()
+        layout.add(fullscreen_button)
 
         def toggle_music():
             global music_player
@@ -98,10 +95,10 @@ class SettingsView(UIView):
             if self.music_on:
                 music_player = background_music.play(volume=self.music_volume, loop=True)
 
-        music_toggle = GameButton(text="Music: On" if self.music_on else "Music: Off", width=200, height=50)
+        music_toggle = GameButton(text="Music: ON" if self.music_on else "Music: OFF", width=200, height=50)
 
         def update_music_toggle():
-            music_toggle.text = "Music: On" if self.music_on else "Music: Off"
+            music_toggle.text = "Music: ON" if self.music_on else "Music: OFF"
 
         music_toggle.on_click = lambda event: (toggle_music(), update_music_toggle())
 
