@@ -4,7 +4,7 @@ from arcade.gui import (
     UIAnchorLayout,
     UIBoxLayout,
     UILabel,
-    UIFlatButton,
+    UIFlatButton, UITextureButton,
 )
 
 from pathlib import Path
@@ -37,14 +37,18 @@ class JoinGameView(UIView):
         # Server input could be added here
 
         # Join button
-        btn_join = UIFlatButton(text="Join Server", width=200, height=50)
+        btn_join = GameButton(text="Join Server", width=200, height=50)
         # btn_join.on_click = self.on_join_server
         layout.add(btn_join)
 
 
         # Exit button in top-right corner
-        exit_button = GameButton(
-            color="green",
+        exit_button = UITextureButton(
+            texture=TEX_EXIT_BUTTON,
+            texture_hovered=TEX_EXIT_BUTTON,
+            texture_pressed=TEX_EXIT_BUTTON,
+            width=40,
+            height=40
         )
         exit_button.on_click = self.on_back_click
 
