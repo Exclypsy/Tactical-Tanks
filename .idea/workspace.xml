@@ -4,21 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="943984de-205b-4b9b-a54d-0d0f9a3a3d64" name="Changes" comment="preklik fix">
-      <change afterPath="$PROJECT_DIR$/GameButton.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/client/assets/buttons/red_hover.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/client/assets/buttons/red_normal.png" afterDir="false" />
+    <list default="true" id="943984de-205b-4b9b-a54d-0d0f9a3a3d64" name="Changes" comment="buttons color">
+      <change afterPath="$PROJECT_DIR$/client/assets/sounds/musica.mp3" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.config/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/.config/settings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/OPGP-Projekt-MOS-.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/OPGP-Projekt-MOS-.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Create.py" beforeDir="false" afterPath="$PROJECT_DIR$/Create.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Join.py" beforeDir="false" afterPath="$PROJECT_DIR$/Join.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MainMenu.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainMenu.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SettingsWindow.py" beforeDir="false" afterPath="$PROJECT_DIR$/SettingsWindow.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/assets/buttons/green_hover.png" beforeDir="false" afterPath="$PROJECT_DIR$/client/assets/buttons/green_hover.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/assets/buttons/green_normal.png" beforeDir="false" afterPath="$PROJECT_DIR$/client/assets/buttons/green_normal.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/assets/buttons/green_press.png" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -62,12 +54,9 @@
   &quot;keyToString&quot;: {
     &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
     &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;Python.ButtonRed.executor&quot;: &quot;Run&quot;,
-    &quot;Python.Create.executor&quot;: &quot;Run&quot;,
     &quot;Python.MainMenu.executor&quot;: &quot;Run&quot;,
     &quot;Python.SettingsWindow.executor&quot;: &quot;Run&quot;,
     &quot;Python.Tank.executor&quot;: &quot;Run&quot;,
-    &quot;Python.TimesNewRomanButton.executor&quot;: &quot;Run&quot;,
     &quot;Python.game.executor&quot;: &quot;Run&quot;,
     &quot;Python.main.executor&quot;: &quot;Run&quot;,
     &quot;Python.settings.executor&quot;: &quot;Run&quot;,
@@ -86,58 +75,13 @@
 }</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/client/assets/sounds" />
       <recent name="$PROJECT_DIR$/client/assets/images" />
       <recent name="$PROJECT_DIR$/client/assets/butons" />
       <recent name="$PROJECT_DIR$/assets/sounds" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.MainMenu">
-    <configuration name="MainMenu" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="OPGP-Projekt-MOS-" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/MainMenu.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="game" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="OPGP-Projekt-MOS-" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/client" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/client/game.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
+  <component name="RunManager">
     <configuration name="game" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="OPGP-Projekt-MOS-" />
       <option name="ENV_FILES" value="" />
@@ -163,7 +107,6 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.MainMenu" />
         <item itemvalue="Python.game" />
       </list>
     </recent_temporary>
@@ -171,8 +114,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-1d06a55b98c1-91d5c284f522-JavaScript-PY-241.15989.155" />
-        <option value="bundled-python-sdk-babbdf50b680-7c6932dee5e4-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-241.15989.155" />
+        <option value="bundled-js-predefined-1d06a55b98c1-0b3e54e931b4-JavaScript-PY-241.19416.19" />
+        <option value="bundled-python-sdk-337b0a7a993a-2767605e8bc2-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-241.19416.19" />
       </set>
     </attachedChunks>
   </component>
@@ -192,9 +135,8 @@
       <workItem from="1744188866142" duration="1399000" />
       <workItem from="1744201766477" duration="1664000" />
       <workItem from="1744312638359" duration="2516000" />
-      <workItem from="1744490255606" duration="300000" />
-      <workItem from="1744490714944" duration="6750000" />
-      <workItem from="1744497549295" duration="561000" />
+      <workItem from="1744652146723" duration="2358000" />
+      <workItem from="1744654519605" duration="399000" />
     </task>
     <task id="LOCAL-00001" summary="Push 1 test">
       <option name="closed" value="true" />
@@ -395,14 +337,11 @@
     <option name="LAST_COMMIT_MESSAGE" value="preklik fix" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$ButtonRed.coverage" NAME="ButtonRed Coverage Results" MODIFIED="1744493543268" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$SettingsWindow.coverage" NAME="SettingsWindow Coverage Results" MODIFIED="1744223591669" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$game.coverage" NAME="game Coverage Results" MODIFIED="1744490925149" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
-    <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$Create.coverage" NAME="Create Coverage Results" MODIFIED="1744490465086" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$MainMenu.coverage" NAME="MainMenu Coverage Results" MODIFIED="1744498057263" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$main.coverage" NAME="main Coverage Results" MODIFIED="1744223023859" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$Tank.coverage" NAME="Tank Coverage Results" MODIFIED="1744314027094" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
-    <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$TimesNewRomanButton.coverage" NAME="TimesNewRomanButton Coverage Results" MODIFIED="1744494008322" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$MainMenu.coverage" NAME="MainMenu Coverage Results" MODIFIED="1744654899162" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$settings.coverage" NAME="settings Coverage Results" MODIFIED="1744220937438" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$SettingsWindow.coverage" NAME="SettingsWindow Coverage Results" MODIFIED="1744653779228" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$game.coverage" NAME="game Coverage Results" MODIFIED="1744654673707" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
   </component>
 </project>

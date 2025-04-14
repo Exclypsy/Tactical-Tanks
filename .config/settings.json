@@ -1,5 +1,7 @@
 {
     "fullscreen": true,
-    "window_width": 1920,
-    "window_height": 1080
+    "window_width": 1710,
+    "window_height": 1112,
+    "music_on": true,
+    "music_volume": 1.0
 }

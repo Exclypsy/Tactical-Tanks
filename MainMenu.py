@@ -7,11 +7,11 @@ from arcade.gui import (
     UIGridLayout, UITextureButtonStyle,
 )
 from pathlib import Path
-
-from GameButton import GameButton
-from SettingsWindow import save_setting, SettingsView  # Importing save_setting and SettingsView
+from SettingsWindow import save_setting, SettingsView, settings  # Importing save_setting, SettingsView, and settings
 from Join import JoinGameView  # Import JoinGameView from the Join file
 from Create import CreateGameView  # Import CreateGameView from the Create file
+from SettingsWindow import background_music, music_player
+from GameButton import GameButton
 
 project_root = Path(__file__).resolve().parent
 path = project_root / "client" / "assets"
@@ -19,9 +19,9 @@ arcade.resources.add_resource_handle("assets", str(path.resolve()))
 
 SETTINGS_FILE = project_root / ".config" / "settings.json"
 
-
-
 TEX_EXIT_BUTTON = arcade.load_texture(":assets:images/exit.png")
+MUSIC_FILE = str(path / "sounds" / "musica.mp3")
+background_music = arcade.sound.load_sound(MUSIC_FILE)
 
 def load_settings():
     """Load settings from the JSON file."""
@@ -110,6 +110,11 @@ class Mainview(UIView):
         )
         self.ui.add(anchor_layout)
 
+        global music_player
+        if settings.get("music_on", True):
+            if not music_player or not music_player.playing:
+                music_player = background_music.play(volume=settings.get("music_volume", 1.0), loop=True)
+
     def on_resize(self, width: int, height: int):
         """Update settings when the window is resized."""
         super().on_resize(width, height)
@@ -147,6 +152,10 @@ def main():
 
     # Run the application
     arcade.run()
+
+def play_music():
+    global music_player
+    music_player = background_music.play(volume=settings.get("music_volume", 1.0), loop=True)
 
 if __name__ == "__main__":
     main()
