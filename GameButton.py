@@ -20,6 +20,16 @@ class GameButton(UITextureButton):
         # You can add more colors as needed
     }
 
+    def set_color(self, color):
+        """Change the button color dynamically."""
+        if color not in self.BUTTON_TEXTURES:
+            color = "red"  # Fallback to red if invalid color
+
+        # Load textures for the specified color
+        self.texture = arcade.load_texture(self.BUTTON_TEXTURES[color]["normal"])
+        self.texture_hovered = arcade.load_texture(self.BUTTON_TEXTURES[color]["hover"])
+        self.texture_pressed = arcade.load_texture(self.BUTTON_TEXTURES[color]["press"])
+
     def __init__(
             self,
             x=0,
