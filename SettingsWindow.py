@@ -58,10 +58,15 @@ class SettingsView(UIView):
         # Nadpis
         layout.add(UILabel(text="Settings", font_size=30, text_color=arcade.color.WHITE))
 
+        # Kategória: Profil
+        layout.add(UILabel(text="Profil", font_size=20, text_color=arcade.color.LIGHT_GRAY))
+        layout.add(UIBoxLayout(vertical=True, space_between=10))  # placeholder
+
         # Výber režimu zobrazenia
         self.music_on = settings.get("music_on", True)
         self.music_volume = settings.get("music_volume", 1.0)
 
+        layout.add(UILabel(text="Screen", font_size=20, text_color=arcade.color.LIGHT_GRAY))
         fullscreen_button = GameButton(
             text="Fullscreen: ON" if is_fullscreen else "Fullscreen: OFF",
             width=200,
@@ -80,6 +85,7 @@ class SettingsView(UIView):
         fullscreen_button.on_click = lambda event: toggle_fullscreen()
         layout.add(fullscreen_button)
 
+        layout.add(UILabel(text="Music FS/SX", font_size=20, text_color=arcade.color.LIGHT_GRAY))
         def toggle_music():
             global music_player
             # Vypni aktuálne hrajúcu hudbu
