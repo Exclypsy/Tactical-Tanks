@@ -22,13 +22,6 @@
         "font_size": 20,
         "text_color": "LIGHT_GRAY"
     },
-    "buttons": {
-        "save": {
-            "text": "Save",
-            "width": 80,
-            "height": 40
-        }
-    },
     "title_position": {
         "anchor_x": "center",
         "anchor_y": "top",

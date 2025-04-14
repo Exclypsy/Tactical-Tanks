@@ -52,24 +52,28 @@ class SettingsView(UIView):
 
         self.background = arcade.load_texture(":assets:images/background.png")
 
+        # Title label
+        anchor = UIAnchorLayout()
+        anchor.add(child=UILabel(text="Settings", font_size=30, text_color=arcade.color.WHITE), anchor_x="center", anchor_y="top", align_y=-10)
+        self.ui.add(anchor)
+
         # Stredové rozloženie
         layout = UIBoxLayout(vertical=True, space_between=20)
-        layout.add(UILabel(text="Settings", font_size=30, text_color=arcade.color.WHITE))
         self.ui.add(UIAnchorLayout(children=[layout], anchor_x="center", anchor_y="center"))
 
         # Kategória: Profil
-        layout.add(UILabel(text="Profil", font_size=20, text_color=arcade.color.LIGHT_GRAY))
+        layout.add(UILabel(text="Profile", font_size=20, text_color=arcade.color.LIGHT_GRAY))
         layout.add(UIBoxLayout(vertical=True, space_between=10))
 
         self.player_name = settings.get("player_name", "Player")
-        self.name_input = UIInputText(text=self.player_name, width=300, height=40, font_size=18)
+        name_row = UIBoxLayout(horizontal=True, space_between=10)
+        self.name_input = UIInputText(text=self.player_name, width=300, height=40, font_size=20)
+        name_row.add(self.name_input)
+
         def on_name_change(event):
             self.player_name = event.source.text
 
         self.name_input.on_change = on_name_change
-        layout.add(self.name_input)
-
-        button_row = UIBoxLayout(horizontal=True, space_between=10)
 
         def on_save_click(event):
             new_name = self.name_input.text.strip() or "Player"
@@ -77,11 +81,11 @@ class SettingsView(UIView):
             self.name_input.text = new_name
             save_setting("player_name", new_name)
 
-        save_button = GameButton(text="Save", width=80, height=40)
+        save_button = GameButton(text="Save", width=120, height=40)
         save_button.on_click = on_save_click
 
-        button_row.add(save_button)
-        layout.add(button_row)
+        name_row.add(save_button)
+        layout.add(name_row)
 
         # Výber režimu zobrazenia
         self.music_on = settings.get("music_on", True)
