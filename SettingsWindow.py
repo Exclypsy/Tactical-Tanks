@@ -109,7 +109,7 @@ class SettingsView(UIView):
 
         from arcade.gui import UISlider
         volume_slider = UISlider(value=self.music_volume, min_value=0.0, max_value=1.0, width=200)
-        volume_slider.on_change = lambda value: set_volume(value)
+        volume_slider.on_change = lambda event: self.set_volume(event.source.value)
         layout.add(volume_slider)
 
         # Tlačidlo späť v pravom hornom rohu
@@ -125,6 +125,12 @@ class SettingsView(UIView):
         anchor = UIAnchorLayout()
         anchor.add(child=exit_button, anchor_x="right", anchor_y="top", align_x=-10, align_y=-10)
         self.ui.add(anchor)
+
+    def set_volume(self, value):
+        self.music_volume = value
+        save_setting("music_volume", value)
+        if music_player:
+            music_player.volume = value
 
     def on_back_click(self, event):
         from MainMenu import Mainview

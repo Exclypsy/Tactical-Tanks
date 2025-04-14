@@ -2,8 +2,6 @@
     "fullscreen": false,
     "window_width": 1710,
     "window_height": 1040,
-    "music_on": true,
-    "music_volume": 1.0,
-    "toggle_music": "def toggle_music():\n            global music_player\n            # Vypni aktu\u00e1lne hraj\u00facu hudbu\n            if music_player and music_player.playing:\n                music_player.pause()\n                music_player = None\n\n            # Prepni stav\n            self.music_on = not self.music_on\n            save_setting(\"music_on\", self.music_on)\n\n            # Ak je hudba zapnut\u00e1, spusti ju znovu\n            if self.music_on:\n                music_player = background_music.play(volume=self.music_volume, loop=True)",
-    "music_toggle": "music_toggle = GameButton(text=\"Music: On\" if self.music_on else \"Music: Off\", width=200, height=50)\n\n        def update_music_toggle():\n            music_toggle.text = \"Music: On\" if self.music_on else \"Music: Off\"\n\n        music_toggle.on_click = lambda event: (toggle_music(), update_music_toggle())"
+    "music_on": false,
+    "music_volume": 1.1
 }
