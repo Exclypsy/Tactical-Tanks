@@ -85,25 +85,25 @@ class SettingsView(UIView):
 
         def toggle_music():
             global music_player
-            self.music_on = not self.music_on
-            save_setting("music_on", self.music_on)  # Uloženie stavu hudby
-            if self.music_on:
-                if not music_player or not music_player.playing:
-                    music_player = background_music.play(volume=self.music_volume, loop=True)
-            else:
-                if music_player:
-                    music_player.stop()
-                    music_player = None
+            # Vypni aktuálne hrajúcu hudbu
+            if music_player and music_player.playing:
+                music_player.pause()
+                music_player = None
 
-        def set_volume(value):
-            global music_player
-            self.music_volume = value
-            save_setting("music_volume", value)  # Uloženie hlasitosti
-            if music_player:
-                music_player.volume = value
+            # Prepni stav
+            self.music_on = not self.music_on
+            save_setting("music_on", self.music_on)
+
+            # Ak je hudba zapnutá, spusti ju znovu
+            if self.music_on:
+                music_player = background_music.play(volume=self.music_volume, loop=True)
 
         music_toggle = GameButton(text="Music: On" if self.music_on else "Music: Off", width=200, height=50)
-        music_toggle.on_click = lambda event: [toggle_music(), setattr(music_toggle, 'text', "Music: On" if self.music_on else "Music: Off")]
+
+        def update_music_toggle():
+            music_toggle.text = "Music: On" if self.music_on else "Music: Off"
+
+        music_toggle.on_click = lambda event: (toggle_music(), update_music_toggle())
 
         layout.add(music_toggle)
 

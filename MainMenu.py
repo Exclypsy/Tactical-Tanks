@@ -112,8 +112,9 @@ class Mainview(UIView):
 
         global music_player
         if settings.get("music_on", True):
-            if not music_player or not music_player.playing:
-                music_player = background_music.play(volume=settings.get("music_volume", 1.0), loop=True)
+            if music_player and music_player.playing:
+                music_player.pause()
+            music_player = background_music.play(volume=settings.get("music_volume", 1.0), loop=True)
 
     def on_resize(self, width: int, height: int):
         """Update settings when the window is resized."""
