@@ -7,7 +7,6 @@ from arcade.gui import (
     UIAnchorLayout,
     UIBoxLayout,
     UILabel,
-    UIFlatButton,
 )
 
 from pathlib import Path
@@ -63,25 +62,41 @@ class SettingsView(UIView):
         self.music_on = settings.get("music_on", True)
         self.music_volume = settings.get("music_volume", 1.0)
 
+        self.btn_fullscreen = GameButton(color="green" if is_fullscreen else "red", text="Fullscreen", width=200,
+                                         height=50)
+        self.btn_windowed = GameButton(color="red" if is_fullscreen else "green", text="Windowed", width=200, height=50)
+
+        # Define the display mode toggle function
         def set_display_mode(mode):
             self.display_mode = mode
+            global is_fullscreen
+
             if mode == "fullscreen":
                 self.window.set_fullscreen(True)
                 is_fullscreen = True
                 save_setting("fullscreen", True)
+                # Update button colors
+                self.btn_fullscreen.set_color("green")
+                self.btn_windowed.set_color("red")
             elif mode == "windowed":
                 self.window.set_fullscreen(False)
                 is_fullscreen = False
                 save_setting("fullscreen", False)
+                # Update button colors
+                self.btn_fullscreen.set_color("red")
+                self.btn_windowed.set_color("green")
 
-        btn_fullscreen = GameButton(color="red" if is_fullscreen else "green", text="Fullscreen", width=200, height=50)
-        btn_fullscreen.on_click = lambda event: set_display_mode("fullscreen")
+        # Assign click handlers
+        self.btn_fullscreen.on_click = lambda event: set_display_mode("fullscreen")
+        self.btn_windowed.on_click = lambda event: set_display_mode("windowed")
 
-        btn_windowed = GameButton(color="green" if is_fullscreen else "red", text="Windowed", width=200, height=50)
-        btn_windowed.on_click = lambda event: set_display_mode("windowed")
+        # Create a horizontal layout for the buttons
+        buttons_row = UIBoxLayout(vertical=False, space_between=10)
+        buttons_row.add(self.btn_fullscreen)
+        buttons_row.add(self.btn_windowed)
 
-        layout.add(btn_fullscreen)
-        layout.add(btn_windowed)
+        # Add the button row to the main layout
+        layout.add(buttons_row)
 
         def toggle_music():
             global music_player

@@ -2,6 +2,6 @@
     "fullscreen": false,
     "window_width": 1710,
     "window_height": 1040,
-    "music_on": false,
-    "music_volume": 1.1
+    "music_on": true,
+    "music_volume": 0.07608695652173914
 }
