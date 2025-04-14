@@ -11,6 +11,8 @@ from arcade.gui import (
 
 from pathlib import Path
 
+from GameButton import GameButton
+
 project_root = Path(__file__).resolve().parent
 path = project_root / "client" / "assets"
 arcade.resources.add_resource_handle("assets", str(path.resolve()))
@@ -37,7 +39,7 @@ class CreateGameView(UIView):
         # Game settings could be added here
 
         # Create button
-        btn_create = UIFlatButton(text="Create Server", width=200, height=50)
+        btn_create = GameButton(text="Create Server",color="green", width=200, height=50)
         # btn_create.on_click = self.on_create_server
         layout.add(btn_create)
 
