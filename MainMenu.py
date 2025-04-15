@@ -16,7 +16,7 @@ from GameButton import GameButton
 project_root = Path(__file__).resolve().parent
 path = project_root / "client" / "assets"
 arcade.resources.add_resource_handle("assets", str(path.resolve()))
-arcade.load_font(":assets:fonts/ARCO.ttf")
+arcade.load_font(":assets:fonts/ARCO.ttf") #font load
 
 SETTINGS_FILE = project_root / ".config" / "settings.json"
 
