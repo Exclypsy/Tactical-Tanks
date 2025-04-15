@@ -105,7 +105,7 @@ class SettingsView(UIView):
             self.window.set_fullscreen(is_fullscreen)
             save_setting("fullscreen", is_fullscreen)
             fullscreen_button.text = "Fullscreen: ON" if is_fullscreen else "Fullscreen: OFF"
-            fullscreen_button.color = "green" if is_fullscreen else "red"
+            fullscreen_button.set_color("green" if is_fullscreen else "red")
 
         fullscreen_button.on_click = lambda event: toggle_fullscreen()
         layout.add(fullscreen_button)
@@ -130,6 +130,7 @@ class SettingsView(UIView):
 
         def update_music_toggle():
             music_toggle.text = "Music: ON" if self.music_on else "Music: OFF"
+            music_toggle.set_color("green" if self.music_on else "red")
 
         music_toggle.on_click = lambda event: (toggle_music(), update_music_toggle())
 
