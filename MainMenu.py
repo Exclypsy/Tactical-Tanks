@@ -16,6 +16,7 @@ from GameButton import GameButton
 project_root = Path(__file__).resolve().parent
 path = project_root / "client" / "assets"
 arcade.resources.add_resource_handle("assets", str(path.resolve()))
+arcade.load_font(":assets:fonts/ARCO.ttf")
 
 SETTINGS_FILE = project_root / ".config" / "settings.json"
 
@@ -63,7 +64,7 @@ class Mainview(UIView):
             text="Join Game",
             width=250,
             height=70,
-            style=UITextureButtonStyle(font_size=23,font_name=("ARCO", "arial"), font_color=(255, 255, 255, 255)),
+            style=UITextureButtonStyle(font_size=23, font_name="ARCO", font_color=(255, 255, 255, 255)),
         )
 
         # Open JoinGameView when the Join button is clicked
