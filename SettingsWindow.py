@@ -7,7 +7,6 @@ from arcade.gui import (
     UIAnchorLayout,
     UIBoxLayout,
     UILabel,
-    UIFlatButton,
     UIInputText,
 )
 

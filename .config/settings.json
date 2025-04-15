@@ -4,32 +4,5 @@
     "window_height": 552,
     "music_on": false,
     "music_volume": 1.0,
-    "categories": {
-        "Profil": {
-            "player_name": "Player"
-        },
-        "Screen": {
-            "fullscreen": false
-        },
-        "Music FS/SX": {
-            "music_on": false,
-            "music_volume": 1.0
-        }
-    },
-    "player_name": "Player",
-    "profil_title": {
-        "text": "Profil",
-        "font_size": 20,
-        "text_color": "LIGHT_GRAY"
-    },
-    "title_position": {
-        "anchor_x": "center",
-        "anchor_y": "top",
-        "align_y": -40
-    },
-    "settings_title": {
-        "text": "Settings",
-        "font_size": 30,
-        "text_color": "WHITE"
-    }
+    "player_name": "Player"
 }
