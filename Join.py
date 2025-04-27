@@ -1,14 +1,16 @@
 import arcade
+import client.Client as Client
+from Lobby import LobbyView
 from arcade.gui import (
     UIView,
     UIAnchorLayout,
     UIBoxLayout,
     UILabel,
-    UIFlatButton, UITextureButton,
+    UIFlatButton,
+    UITextureButton,
+    UIInputText,  # Import UIInputText
 )
-
 from pathlib import Path
-
 from GameButton import GameButton
 
 project_root = Path(__file__).resolve().parent
@@ -24,7 +26,6 @@ class JoinGameView(UIView):
         self.window = window
 
         self.background_color = arcade.color.DARK_BLUE
-
         self.background = arcade.load_texture(":assets:images/background.png")
 
         # Central layout
@@ -32,15 +33,18 @@ class JoinGameView(UIView):
         self.ui.add(UIAnchorLayout(children=[layout], anchor_x="center", anchor_y="center"))
 
         # Title
-        layout.add(UILabel(text="Join Game", font_size=30, text_color=arcade.color.WHITE))
+        layout.add(UILabel(text="Join Game", font_size=45, text_color=arcade.color.WHITE))
 
-        # Server input could be added here
+        layout.add(UILabel(text="IP servera:", font_size=30, text_color=arcade.color.WHITE))
+
+        # Server IP input field
+        self.server_ip_input = UIInputText(width=200, height=40, text="")
+        layout.add(self.server_ip_input)
 
         # Join button
         btn_join = GameButton(text="Join Server", width=200, height=50)
-        # btn_join.on_click = self.on_join_server
+        btn_join.on_click = self.join_server
         layout.add(btn_join)
-
 
         # Exit button in top-right corner
         exit_button = UITextureButton(
@@ -65,3 +69,24 @@ class JoinGameView(UIView):
             self.background,
             arcade.LBWH(0, 0, self.width, self.height),
         )
+    def join_server(self,event):
+        server_ip = self.server_ip_input.text
+        if not server_ip:
+            print("Please enter a valid server IP address.")
+            return
+        ip = server_ip.split(":")[0]
+        port = server_ip.split(":")[1]
+        print(f"input: {ip, port}")
+        # Attempt to connect to the server
+        client = Client.Client(ip, port)
+        client.run()
+        # Send my name to the server (from settings)
+        # GO TO LOBBY VIEW
+        self.window.show_view(LobbyView(self.window))
+
+
+if __name__ == "__main__":
+    window = arcade.Window(800, 600, "Join Game View")
+    view = JoinGameView(window)
+    window.show_view(view)
+    arcade.run()
