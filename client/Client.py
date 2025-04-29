@@ -43,7 +43,13 @@ class Client:
 
             data = json.loads(data)
             if data["type"] == "clients":
-                return data["clients"]
+                # Convert strings like "127.0.0.1:5000" back to tuples
+                client_tuples = []
+                for client_str in data["clients"]:
+                    ip, port_str = client_str.split(":")
+                    client_tuples.append((ip, int(port_str)))
+                return client_tuples
+
             else:
                 print(f"Unexpected response type: {data.get('type', 'unknown')}")
                 return []

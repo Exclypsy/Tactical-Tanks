@@ -5,12 +5,12 @@ import json
 
 class Server:
     def __init__(self, ip='127.0.0.1', port=5000):
-        self.ip = ip
-        self.port = port
+        self.ip = str(ip)
+        self.port = int(port)
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         print(f"Server socket created at {self.ip}:{self.port}")
         # Store client addresses instead of sockets (server is also a client)
-        self.clients = [str(self.ip) + ":" + str(self.port)]
+        self.clients = [(self.ip, self.port)]
         print(f"Initial client list: {self.clients}")
         self.clients_lock = threading.Lock()
 
@@ -46,9 +46,9 @@ class Server:
                 if addr not in self.clients:
                     print(f"Connection from {addr}")
                     with self.clients_lock:
-                        self.clients.append(addr)
+                        self.clients.append((addr[0], addr[1]))
                     self.broadcast_client_list()
-                    print(f"Clients: {[f'{client[0]}:{client[1]}' for client in self.clients]}")
+                    print(f"Clients: {self.clients}")
 
                 decoded = data.decode()
                 print(f"Received from {addr}: {decoded}")
@@ -56,9 +56,10 @@ class Server:
                 # Handle get_players command. returns list of players
                 if decoded == "get_players":
                     print(f"Sending player list to {addr}")
-                    with self.clients_lock:
-                        players = [f"{client[0]}:{client[1]}" for client in self.clients]
-                    response = json.dumps({"type": "clients", "clients": players})
+                    print(self.clients)
+                    # Format client addresses consistently as strings first
+                    client_addresses = [f"{client[0]}:{client[1]}" for client in self.clients]
+                    response = json.dumps({"type": "clients", "clients": client_addresses})
                     self.server_socket.sendto(response.encode(), addr)
                     continue
 
@@ -73,8 +74,8 @@ class Server:
                     continue
 
                 # Echo response
-                response = json.dumps({"type": "echo", "message": decoded})
-                self.server_socket.sendto(response.encode(), addr)
+                # response = json.dumps({"type": "echo", "message": decoded})
+                # self.server_socket.sendto(response.encode(), addr)
 
             except Exception as e:
                 print(f"Error: {e}")

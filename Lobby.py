@@ -1,5 +1,4 @@
 import arcade
-import client.Client as Client
 from arcade.gui import (
     UIView,
     UIAnchorLayout,
@@ -22,7 +21,7 @@ class LobbyView(UIView):
     def __init__(self, window, client):
         super().__init__()
         self.window = window
-
+        self.client = client
         self.background_color = arcade.color.DARK_BLUE
         self.background = arcade.load_texture(":assets:images/background.png")
 
@@ -38,7 +37,7 @@ class LobbyView(UIView):
 
         players = client.get_players()
         for i in range(len(players)):
-            player_placeholder = GameButton(text="Player"+str(i), width=200, height=50)
+            player_placeholder = GameButton(text=f"Player {str(i)}\n {players[i][0]}:{players[i][1]}", width=200, height=50)
             layout.add(player_placeholder)
 
         # Exit button in top-right corner
@@ -56,9 +55,9 @@ class LobbyView(UIView):
         self.ui.add(anchor)
 
     def on_back_click(self, event):
-        from MainMenu import Mainview
         #disconnect from server
-        self.window.client.disconnect()
+        self.client.disconnect()
+        from MainMenu import Mainview
         self.window.show_view(Mainview(self.window))
 
     def on_draw_before_ui(self):
@@ -66,9 +65,3 @@ class LobbyView(UIView):
             self.background,
             arcade.LBWH(0, 0, self.width, self.height),
         )
-if __name__ == "__main__":
-    window = arcade.Window(800, 600, "Lobby", resizable=True)
-    client = Client.Client()
-    view = LobbyView(window, client)
-    window.show_view(view)
-    arcade.run()
