@@ -6,7 +6,6 @@ from arcade.gui import (
     UIAnchorLayout,
     UIBoxLayout,
     UILabel,
-    UIFlatButton,
     UITextureButton,
     UIInputText,  # Import UIInputText
 )
@@ -69,20 +68,22 @@ class JoinGameView(UIView):
             self.background,
             arcade.LBWH(0, 0, self.width, self.height),
         )
-    def join_server(self,event):
+
+    def join_server(self, event):
         server_ip = self.server_ip_input.text
         if not server_ip:
-            print("Please enter a valid server IP address.")
-            return
+            print("Defaulting to localhost")
+            server_ip="127.0.0.1:5000"
         ip = server_ip.split(":")[0]
         port = server_ip.split(":")[1]
-        print(f"input: {ip, port}")
-        # Attempt to connect to the server
+
         client = Client.Client(ip, port)
-        client.run()
-        # Send my name to the server (from settings)
-        # GO TO LOBBY VIEW
-        self.window.show_view(LobbyView(self.window))
+        client.connect()  # Just connect
+
+        if client.connected:
+            self.window.show_view(LobbyView(self.window, client))
+        else:
+            print("Error connecting")
 
 
 if __name__ == "__main__":

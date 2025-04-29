@@ -7,10 +7,11 @@ class Server:
     def __init__(self, ip='127.0.0.1', port=5000):
         self.ip = ip
         self.port = port
-        # Change to SOCK_DGRAM for UDP
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        # Store client addresses instead of sockets
-        self.clients = []
+        print(f"Server socket created at {self.ip}:{self.port}")
+        # Store client addresses instead of sockets (server is also a client)
+        self.clients = [str(self.ip) + ":" + str(self.port)]
+        print(f"Initial client list: {self.clients}")
         self.clients_lock = threading.Lock()
 
     def start(self):
@@ -51,6 +52,15 @@ class Server:
 
                 decoded = data.decode()
                 print(f"Received from {addr}: {decoded}")
+
+                # Handle get_players command. returns list of players
+                if decoded == "get_players":
+                    print(f"Sending player list to {addr}")
+                    with self.clients_lock:
+                        players = [f"{client[0]}:{client[1]}" for client in self.clients]
+                    response = json.dumps({"type": "clients", "clients": players})
+                    self.server_socket.sendto(response.encode(), addr)
+                    continue
 
                 # Handle disconnect message
                 if decoded == "disconnect":

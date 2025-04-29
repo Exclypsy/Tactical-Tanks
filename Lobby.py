@@ -1,152 +1,74 @@
 import arcade
-from arcade.gui import UIView, UIAnchorLayout
+import client.Client as Client
+from arcade.gui import (
+    UIView,
+    UIAnchorLayout,
+    UIBoxLayout,
+    UILabel,
+    UITextureButton,
+    UIInputText,
+)
 from pathlib import Path
 from GameButton import GameButton
 
+project_root = Path(__file__).resolve().parent
+path = project_root / "client" / "assets"
+arcade.resources.add_resource_handle("assets", str(path.resolve()))
+
+TEX_EXIT_BUTTON = arcade.load_texture(":assets:images/exit.png")
+
 
 class LobbyView(UIView):
-    def __init__(self, window):
+    def __init__(self, window, client):
         super().__init__()
         self.window = window
 
-        # Set background color
-        self.background_color = arcade.color.PURPLE
-
-        # Load background image with radial pattern
-        project_root = Path(__file__).resolve().parent
-        path = project_root / "client" / "assets"
-        arcade.resources.add_resource_handle("assets", str(path.resolve()))
+        self.background_color = arcade.color.DARK_BLUE
         self.background = arcade.load_texture(":assets:images/background.png")
 
-        # Load tank texture
-        self.tank_texture = arcade.load_texture(":assets:images/tank.png")
+        serverIP = UILabel(text="Server IP: "+client.get_server_ip(), font_size=20, text_color=arcade.color.WHITE)
+        anchor = UIAnchorLayout()
+        anchor.add(child=serverIP, anchor_x="left", anchor_y="top", align_x=10, align_y=-10)
+        self.ui.add(anchor)
 
-        # Create start game button
-        start_button = GameButton(text="START GAME", width=200, height=60)
-        start_button.on_click = self.on_start_game
+        # Central layout
+        layout = UIBoxLayout(vertical=False, space_between=20)
+        self.ui.add(UIAnchorLayout(children=[layout], anchor_x="center", anchor_y="center"))
 
-        # Add START GAME button
-        bottom_anchor = UIAnchorLayout()
-        bottom_anchor.add(
-            child=start_button,
-            anchor_x="center",
-            anchor_y="bottom",
-            align_y=40
+
+        players = client.get_players()
+        for i in range(len(players)):
+            player_placeholder = GameButton(text="Player"+str(i), width=200, height=50)
+            layout.add(player_placeholder)
+
+        # Exit button in top-right corner
+        exit_button = UITextureButton(
+            texture=TEX_EXIT_BUTTON,
+            texture_hovered=TEX_EXIT_BUTTON,
+            texture_pressed=TEX_EXIT_BUTTON,
+            width=40,
+            height=40
         )
-        self.ui.add(bottom_anchor)
+        exit_button.on_click = self.on_back_click
 
-    def on_start_game(self, event):
-        # Handle start game button click
-        pass
+        anchor = UIAnchorLayout()
+        anchor.add(child=exit_button, anchor_x="right", anchor_y="top", align_x=-10, align_y=-10)
+        self.ui.add(anchor)
+
+    def on_back_click(self, event):
+        from MainMenu import Mainview
+        #disconnect from server
+        self.window.client.disconnect()
+        self.window.show_view(Mainview(self.window))
 
     def on_draw_before_ui(self):
-        # Draw background - using draw_texture_rect instead of draw_texture_rectangle
         arcade.draw_texture_rect(
             self.background,
             arcade.LBWH(0, 0, self.width, self.height),
         )
-
-        # Draw server info at the top
-        self.draw_text_with_stroke(
-            "SERVER: 192.168.1.1:8080",
-            self.width / 2,
-            self.height - 40,
-            arcade.color.WHITE,
-            28,
-            True
-        )
-
-        # Calculate positions for player boxes
-        total_width = 4 * 120 + 3 * 40  # 4 boxes + 3 spaces
-        start_x = (self.width - total_width) / 2 + 60  # center of first box
-        center_y = self.height / 2
-
-        # Draw player boxes
-        for i in range(4):
-            center_x = start_x + i * (120 + 40)
-
-            # Draw blue box
-            arcade.draw_rectangle_filled(
-                center_x=center_x,
-                center_y=center_y,
-                width=120,
-                height=120,
-                color=arcade.color.CORNFLOWER_BLUE
-            )
-
-            # Draw white border
-            arcade.draw_rectangle_outline(
-                center_x=center_x,
-                center_y=center_y,
-                width=120,
-                height=120,
-                color=arcade.color.WHITE,
-                border_width=4
-            )
-
-            # Draw diagonal "TANK.PNG" text
-            arcade.draw_text(
-                "TANK.PNG",
-                center_x,
-                center_y,
-                arcade.color.WHITE,
-                font_size=20,
-                anchor_x="center",
-                anchor_y="center",
-                rotation=45,
-                bold=True
-            )
-
-            # Draw player name with stroke
-            self.draw_text_with_stroke(
-                "PLAYER NAME",
-                center_x,
-                center_y - 80,
-                arcade.color.WHITE,
-                18,
-                True
-            )
-
-            # Draw IP with stroke
-            self.draw_text_with_stroke(
-                "192.168.1.127",
-                center_x,
-                center_y - 110,
-                arcade.color.WHITE,
-                14
-            )
-
-    def draw_text_with_stroke(self, text, x, y, color, font_size, bold=False):
-        # Draw black stroke outline
-        stroke_width = 2
-        for offset_x, offset_y in [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, -1), (1, -1), (-1, 1)]:
-            arcade.draw_text(
-                text,
-                x + (offset_x * stroke_width),
-                y + (offset_y * stroke_width),
-                arcade.color.BLACK,
-                font_size,
-                anchor_x="center",
-                anchor_y="center",
-                bold=bold
-            )
-
-        # Draw the main text
-        arcade.draw_text(
-            text,
-            x,
-            y,
-            color,
-            font_size,
-            anchor_x="center",
-            anchor_y="center",
-            bold=bold
-        )
-
-
-# Main entry point
 if __name__ == "__main__":
-    window = arcade.Window(1024, 768, "Tank Game Lobby")
-    lobby_view = LobbyView(window)
-    window.show_view(lobby_view)
+    window = arcade.Window(800, 600, "Lobby", resizable=True)
+    client = Client.Client()
+    view = LobbyView(window, client)
+    window.show_view(view)
     arcade.run()
