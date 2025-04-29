@@ -1,6 +1,5 @@
 import socket
 import json
-import time
 
 class Client:
     def __init__(self, ip='127.0.0.1', port=5000):
@@ -13,8 +12,14 @@ class Client:
 
     def connect(self):
         try:
+            # Create a new socket for each connection
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            # Set socket option to reuse address
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+            # Now send the connection message
             self.socket.sendto(b"connection", self.server_address)
-            print(f"{time.time()} Tarying connection -> {self.server_ip}:{self.server_port}")
+            print(f"Trying connection -> {self.server_ip}:{self.server_port}")
         except Exception as e:
             print(e)
         else:
@@ -24,8 +29,36 @@ class Client:
     def get_server_ip(self):
         return self.server_ip + ":" + str(self.server_port)
 
+    def check_socket_connection(self):
+        if not self.connected or self.socket is None:
+            return False
+        try:
+            # Try a non-destructive operation on the socket
+            self.socket.getsockname()
+
+            # Optional: Test if we can send data
+            try:
+                # Send a harmless zero-byte packet
+                self.socket.sendto(b"", self.server_address)
+            except OSError:
+                self.connected = False
+                return False
+
+            return True
+        except OSError:
+            self.connected = False
+            return False
+
     def get_players(self):
         try:
+            # Check if socket is valid
+            if not self.check_socket_connection():
+                print("Socket is invalid or closed, reconnecting...")
+                # Create a new socket
+                self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                self.connect()
+
             # Send request to the server
             self.socket.sendto(b"get_players", self.server_address)
 
@@ -35,8 +68,10 @@ class Client:
             # Get response
             data = self.receive_data()
             print(f"Received data: {data}")
-            # Reset timeout to blocking mode
-            self.socket.settimeout(None)
+
+            # Only reset timeout if socket is still valid
+            if self.connected:
+                self.socket.settimeout(None)
 
             if data is None:
                 return []
@@ -53,12 +88,6 @@ class Client:
             else:
                 print(f"Unexpected response type: {data.get('type', 'unknown')}")
                 return []
-        except json.JSONDecodeError:
-            print("Error decoding JSON response")
-            return []
-        except KeyError as e:
-            print(f"Missing expected key in response: {e}")
-            return []
         except Exception as e:
             print(f"Error getting player list: {e}")
             return []
@@ -76,11 +105,17 @@ class Client:
         try:
             # Use recvfrom instead of recv
             data, addr = self.socket.recvfrom(1024)
+
             if not data:
                 print("Server closed the connection")
                 self.disconnect()
                 return None
+
             return data.decode()
+        except socket.timeout:
+            # For timeouts, just return None without disconnecting
+            print("Socket timed out waiting for data")
+            return None
         except Exception as e:
             print(f"Error receiving data: {e}")
             self.disconnect()
@@ -88,24 +123,11 @@ class Client:
 
     def disconnect(self):
         try:
-            # Send disconnect message to server
             if self.connected:
                 self.socket.sendto(b"disconnect", self.server_address)
-            self.socket.close()
-            self.connected = False
-            print("Disconnected from server")
+                self.socket.close()
+                self.socket = None  # Set to None after closing
+                self.connected = False
+                print("Disconnected from server")
         except Exception as e:
             print(f"Error disconnecting: {e}")
-
-    def run(self):
-        self.connect()
-        while self.connected:
-            data = self.receive_data()
-            if data is None:
-                break
-            print(data)
-
-
-if __name__ == "__main__":
-    client = Client(ip="127.0.0.1", port=5000)
-    client.run()

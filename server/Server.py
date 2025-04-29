@@ -8,7 +8,11 @@ class Server:
         self.ip = str(ip)
         self.port = int(port)
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+        # Enable address reuse
+        self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         print(f"Server socket created at {self.ip}:{self.port}")
+
         # Store client addresses instead of sockets (server is also a client)
         self.clients = [(self.ip, self.port)]
         print(f"Initial client list: {self.clients}")
@@ -16,10 +20,9 @@ class Server:
 
     def start(self):
         self.server_socket.bind((self.ip, self.port))
-        # No listen() or accept() calls in UDP
         print(f"Server started at {self.ip}:{self.port}")
         try:
-            # Single thread handles all clients in UDP
+            # Single thread handles all clients
             self.handle_clients()
         except KeyboardInterrupt:
             print("Server shutting down.")
@@ -39,7 +42,6 @@ class Server:
     def handle_clients(self):
         while True:
             try:
-                # Use recvfrom to get data and client address
                 data, addr = self.server_socket.recvfrom(1024)
 
                 # Check if this is a new client
@@ -65,17 +67,15 @@ class Server:
 
                 # Handle disconnect message
                 if decoded == "disconnect":
+                    print(f"{addr} is disconnecting")
                     with self.clients_lock:
                         if addr in self.clients:
                             self.clients.remove(addr)
-                    print(f"Client {addr} disconnected")
-                    print(f"Clients: {[f'{client[0]}:{client[1]}' for client in self.clients]}")
-                    self.broadcast_client_list()
+                            print(f"Client {addr} disconnected")
+                            print(f"Clients: {[f'{client[0]}:{client[1]}' for client in self.clients]}")
+                            self.broadcast_client_list()
                     continue
 
-                # Echo response
-                # response = json.dumps({"type": "echo", "message": decoded})
-                # self.server_socket.sendto(response.encode(), addr)
 
             except Exception as e:
                 print(f"Error: {e}")

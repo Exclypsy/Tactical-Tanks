@@ -37,7 +37,7 @@ class LobbyView(UIView):
 
         players = client.get_players()
         for i in range(len(players)):
-            player_placeholder = GameButton(text=f"Player {str(i)}\n {players[i][0]}:{players[i][1]}", width=200, height=50)
+            player_placeholder = GameButton(text=f"{players[i][0]}:{players[i][1]}", width=200, height=50)
             layout.add(player_placeholder)
 
         # Exit button in top-right corner
@@ -57,6 +57,7 @@ class LobbyView(UIView):
     def on_back_click(self, event):
         #disconnect from server
         self.client.disconnect()
+        self.client = None
         from MainMenu import Mainview
         self.window.show_view(Mainview(self.window))
 
