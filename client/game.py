@@ -1,5 +1,4 @@
 import arcade
-import time
 from Tank import Tank
 
 
@@ -25,23 +24,10 @@ class Game(arcade.Window):
         self.player_tank.is_rotating = True
         self.tanks.append(self.player_tank)
 
-        # Test bullet spawning
-        self.last_test_bullet_time = time.time()
-        self.bullet_spawn_interval = 2.0  # seconds
 
-        # Create enemy tank for test bullets
-        self.enemy_tank = Tank(
-            "assets/images/tank.png",
-            "assets/images/bullet.png",
-            0.5,
-            player_id="enemy"
-        )
-        self.enemy_tank.center_x = -100  # Off-screen
-        self.enemy_tank.center_y = self.height // 2
-        self.enemy_tank.angle = 90  # Pointing right
 
         # Debug flags
-        self.show_hitboxes = True
+        self.show_hitboxes = False
         self.game_over = False
 
     def on_resize(self, width, height):
@@ -59,9 +45,6 @@ class Game(arcade.Window):
         for tank in self.tanks:
             tank.bullet_list.draw()
 
-        # Draw enemy tank bullets for testing
-        self.enemy_tank.bullet_list.draw()
-
         # Draw tanks
         self.tanks.draw()
 
@@ -69,7 +52,6 @@ class Game(arcade.Window):
         if self.show_hitboxes:
             for tank in self.tanks:
                 tank.bullet_list.draw_hit_boxes(arcade.color.RED)
-            self.enemy_tank.bullet_list.draw_hit_boxes(arcade.color.RED)
             self.tanks.draw_hit_boxes(arcade.color.GREEN)
 
         if self.game_over:
@@ -90,14 +72,6 @@ class Game(arcade.Window):
         if not self.game_over and key == arcade.key.SPACE:
             self.player_tank.handle_key_release(key)
 
-    def spawn_test_bullet(self):
-        """Spawn a test bullet from the left side of the screen"""
-        self.enemy_tank.center_y = self.height // 2
-        bullet = self.enemy_tank.fire()
-        if bullet:
-            # Position bullet at left edge
-            bullet.center_x = 0
-            bullet.center_y = self.height // 2
 
     def on_update(self, delta_time):
         if self.game_over:
@@ -112,25 +86,8 @@ class Game(arcade.Window):
             if hit_tank and hit_tank == self.player_tank and hit_tank.destroyed:
                 self.game_over = True
 
-        # Update enemy tank for test bullets
-        self.enemy_tank.update(delta_time, self.width, self.height)
-
-        # Check enemy bullets hitting player tanks
-        hit_tank = self.enemy_tank.check_bullet_collisions(self.tanks)
-        if hit_tank and hit_tank.destroyed and hit_tank == self.player_tank:
-            self.game_over = True
-
-        # Spawn test bullets periodically
-        current_time = time.time()
-        if current_time - self.last_test_bullet_time >= self.bullet_spawn_interval:
-            self.spawn_test_bullet()
-            self.last_test_bullet_time = current_time
-
-
-def main():
-    game = Game()
-    arcade.run()
 
 
 if __name__ == "__main__":
-    main()
+    game = Game()
+    arcade.run()
