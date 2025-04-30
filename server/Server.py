@@ -9,6 +9,8 @@ class Server:
         self.port = int(port)
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
+        self.running = True
+
         # Enable address reuse
         self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         print(f"Server socket created at {self.ip}:{self.port}")
@@ -29,7 +31,15 @@ class Server:
         finally:
             self.server_socket.close()
 
-    def broadcast_client_list(self):
+    def get_server_ip(self):
+        return self.ip + ":" + str(self.port)
+
+    def get_players(self):
+        """Return a list of connected players"""
+        with self.clients_lock:
+            return self.clients
+
+    def     broadcast_client_list(self):
         with self.clients_lock:
             client_addresses = [f"{addr[0]}:{addr[1]}" for addr in self.clients]
             message = json.dumps({"type": "clients", "clients": client_addresses})
@@ -40,9 +50,24 @@ class Server:
                     print(f"Error sending to client {client_addr}: {e}")
 
     def handle_clients(self):
-        while True:
+        # Set a timeout so we can check the running flag periodically
+        self.server_socket.settimeout(0.5)
+
+        while self.running:
             try:
-                data, addr = self.server_socket.recvfrom(1024)
+                try:
+                    data, addr = self.server_socket.recvfrom(1024)
+                except socket.timeout:
+                    # No data received, just check if we should still be running
+                    continue
+                except OSError as e:
+                    # Socket error (likely closed during shutdown)
+                    if not self.running:
+                        print("Socket closed during shutdown")
+                        break
+                    else:
+                        print(f"Socket error: {e}")
+                        continue
 
                 # Check if this is a new client
                 if addr not in self.clients:
@@ -52,10 +77,15 @@ class Server:
                     self.broadcast_client_list()
                     print(f"Clients: {self.clients}")
 
-                decoded = data.decode()
-                print(f"Received from {addr}: {decoded}")
+                # Process the received data
+                try:
+                    decoded = data.decode()
+                    print(f"Received from {addr}: {decoded}")
+                except UnicodeDecodeError:
+                    print(f"Received non-text data from {addr}")
+                    continue
 
-                # Handle get_players command. returns list of players
+                # Handle get_players command
                 if decoded == "get_players":
                     print(f"Sending player list to {addr}")
                     print(self.clients)
@@ -76,9 +106,32 @@ class Server:
                             self.broadcast_client_list()
                     continue
 
-
             except Exception as e:
                 print(f"Error: {e}")
+                if not self.running:
+                    break
+
+        print("Client handler loop exited")
+
+    def shutdown(self):
+        print("Shutting down server...")
+
+        # Flag to stop the server loop
+        self.running = False
+
+        # Unblock the recvfrom call with a quick message to self
+        try:
+            temp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            temp_socket.sendto(b"", (self.ip, self.port))
+            temp_socket.close()
+        except:
+            pass
+
+        # Close the socket
+        if self.server_socket:
+            self.server_socket.close()
+
+        print("Server shutdown complete")
 
 
 if __name__ == "__main__":

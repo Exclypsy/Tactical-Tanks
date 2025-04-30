@@ -33,21 +33,16 @@ class Tank(arcade.Sprite):
         if self.destroyed:
             return
 
-        # Handle rotation
         if self.is_rotating:
-            rotation_amount = self.rotation_speed * delta_time
-            self.angle += rotation_amount if self.clockwise else -rotation_amount
-
-        # Handle movement
+            if self.clockwise:
+                self.angle += self.rotation_speed * delta_time
+            else:
+                self.angle -= self.rotation_speed * delta_time
         if self.is_moving:
-            radian_angle = math.radians(self.angle)
-            self.center_x += math.sin(radian_angle) * self.speed * delta_time
-            self.center_y += math.cos(radian_angle) * self.speed * delta_time
+            angle_rad = math.radians(self.angle)
+            self.center_x += self.speed * math.sin(angle_rad) * delta_time
+            self.center_y += self.speed * math.cos(angle_rad) * delta_time
 
-            # Keep within bounds if window dimensions provided
-            if window_width and window_height:
-                self.center_x = max(0, int(min(self.center_x, window_width)))
-                self.center_y = max(0, int(min(self.center_y, window_height)))
 
         # Update bullets
         self.bullet_list.update(delta_time)
@@ -55,6 +50,20 @@ class Tank(arcade.Sprite):
         # Clean up out-of-bounds bullets
         if window_width and window_height:
             self.cleanup_bullets(window_width, window_height)
+
+    def draw_debug_direction_line(self, window_width, window_height):
+        # Calculate the angle in radians
+        angle_rad = math.radians(self.angle)
+
+        # Calculate a far point in the direction the self is facing
+        # We use a large multiplier to simulate an infinite line
+        line_length = max(window_width, window_height) * 2
+
+        end_x = self.center_x + math.sin(angle_rad) * line_length
+        end_y = self.center_y + math.cos(angle_rad) * line_length
+
+        # Draw the line from self center to the far point
+        arcade.draw_line(self.center_x, self.center_y, end_x, end_y, arcade.color.RED, 2)
 
     def get_barrel_position(self):
         """Returns the position at the end of the barrel"""

@@ -81,7 +81,7 @@ class JoinGameView(UIView):
         client.connect()  # Just connect
 
         if client.connected:
-            self.window.show_view(LobbyView(self.window, client))
+            self.window.show_view(LobbyView(self.window, client, True))
         else:
             print("Error connecting")
 

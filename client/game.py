@@ -48,6 +48,10 @@ class Game(arcade.Window):
         # Draw tanks
         self.tanks.draw()
 
+        # DEBUG
+        # Draw debug direction line for player tank
+        self.player_tank.draw_debug_direction_line(self.width, self.height)
+
         # Draw hitboxes for debugging
         if self.show_hitboxes:
             for tank in self.tanks:

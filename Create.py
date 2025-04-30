@@ -1,16 +1,16 @@
-import json
 import arcade
+import socket
+import threading
 from arcade.gui import (
     UIView,
     UITextureButton,
     UIAnchorLayout,
     UIBoxLayout,
     UILabel,
-    UIFlatButton,
 )
 
 from pathlib import Path
-
+from server.Server import Server
 from GameButton import GameButton
 
 project_root = Path(__file__).resolve().parent
@@ -24,10 +24,12 @@ class CreateGameView(UIView):
     def __init__(self, window):
         super().__init__()
         self.window = window
+        self.server = None
+        self.server_thread = None
+        self.status_label = None
 
         self.background_color = arcade.color.DARK_GREEN
         self.background = arcade.load_texture(":assets:images/background.png")
-
 
         # Central layout
         layout = UIBoxLayout(vertical=True, space_between=20)
@@ -36,13 +38,24 @@ class CreateGameView(UIView):
         # Title
         layout.add(UILabel(text="Create Game", font_size=30, text_color=arcade.color.WHITE))
 
-        # Game settings could be added here
+        # Get LAN IP
+        lan_ip = self.get_lan_ip()
 
-        # Create button
-        btn_create = GameButton(text="Create Server",color="green", width=200, height=50)
-        # btn_create.on_click = self.on_create_server
-        layout.add(btn_create)
+        # IP info label
+        ip_label = UILabel(
+            text=f"Your LAN IP: {lan_ip}",
+            font_size=16,
+            text_color=arcade.color.WHITE
+        )
+        layout.add(ip_label)
+        # Create buttons for different server options
+        btn_localhost = GameButton(text="Localhost", width=200, height=50)
+        btn_localhost.on_click = self.on_localhost_click
+        layout.add(btn_localhost)
 
+        btn_lan = GameButton(text=f"LAN", color="green", width=200, height=50)
+        btn_lan.on_click = self.on_lan_click
+        layout.add(btn_lan)
 
         # Exit button in top-right corner
         exit_button = UITextureButton(
@@ -58,7 +71,53 @@ class CreateGameView(UIView):
         anchor.add(child=exit_button, anchor_x="right", anchor_y="top", align_x=-10, align_y=-10)
         self.ui.add(anchor)
 
+    def get_lan_ip(self):
+        """Get the LAN IP address of this computer"""
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            # Connect to an external server to determine the correct interface
+            s.connect(("8.8.8.8", 80))
+            ip = s.getsockname()[0]
+            s.close()
+            return ip
+        except Exception:
+            return "127.0.0.1"  # Fallback to localhost
+
+    def on_localhost_click(self, event):
+        """Start server on localhost"""
+        self.start_server("127.0.0.1", 5000)
+        # go to lobby
+        from Lobby import LobbyView
+        self.window.show_view(LobbyView(self.window, self.server, False))
+
+    def on_lan_click(self, event):
+        """Start server on LAN IP"""
+        lan_ip = self.get_lan_ip()
+        self.start_server(lan_ip, 5000)
+        # go to lobby
+        from Lobby import LobbyView
+        self.window.show_view(LobbyView(self.window, self.server, False))
+
+    def start_server(self, ip, port):
+        """Start the game server in a separate thread"""
+        if self.server_thread and self.server_thread.is_alive():
+            return
+
+        # Create server in the main thread
+        self.server = Server(ip=ip, port=port)
+
+        # Start server in a separate thread
+        def run_server():
+            try:
+                self.server.start()
+            except Exception as e:
+                print(f"Error: {str(e)}")
+
+        self.server_thread = threading.Thread(target=run_server)
+        self.server_thread.daemon = True
+        self.server_thread.start()
     def on_back_click(self, event):
+        # No need to stop the server when going back, it runs in a daemon thread
         from MainMenu import Mainview
         self.window.show_view(Mainview(self.window))
 
@@ -67,3 +126,10 @@ class CreateGameView(UIView):
             self.background,
             arcade.LBWH(0, 0, self.width, self.height),
         )
+
+if __name__ == "__main__":
+    # Create a window
+    window = arcade.Window(title="Create Game", width=800, height=600)
+    create_game_view = CreateGameView(window)
+    window.show_view(create_game_view)
+    arcade.run()
