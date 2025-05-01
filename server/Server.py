@@ -34,23 +34,13 @@ class Server:
     def get_server_ip(self):
         return self.ip + ":" + str(self.port)
 
-    def get_players(self):
+    def get_players_list(self):
         """Return a list of connected players"""
         with self.clients_lock:
             return self.clients
 
-    def     broadcast_client_list(self):
-        with self.clients_lock:
-            client_addresses = [f"{addr[0]}:{addr[1]}" for addr in self.clients]
-            message = json.dumps({"type": "clients", "clients": client_addresses})
-            for client_addr in self.clients:
-                try:
-                    self.server_socket.sendto(message.encode(), client_addr)
-                except Exception as e:
-                    print(f"Error sending to client {client_addr}: {e}")
-
     def handle_clients(self):
-        # Set a timeout so we can check the running flag periodically
+        # Set a timeout, so we can check the running flag periodically
         self.server_socket.settimeout(0.5)
 
         while self.running:
@@ -74,7 +64,7 @@ class Server:
                     print(f"Connection from {addr}")
                     with self.clients_lock:
                         self.clients.append((addr[0], addr[1]))
-                    self.broadcast_client_list()
+                    # self.broadcast_client_list()
                     print(f"Clients: {self.clients}")
 
                 # Process the received data
@@ -103,7 +93,6 @@ class Server:
                             self.clients.remove(addr)
                             print(f"Client {addr} disconnected")
                             print(f"Clients: {[f'{client[0]}:{client[1]}' for client in self.clients]}")
-                            self.broadcast_client_list()
                     continue
 
             except Exception as e:
@@ -112,6 +101,30 @@ class Server:
                     break
 
         print("Client handler loop exited")
+
+    def send_command(self, command, client_addr=None):
+        """Send a command to a specific client or broadcast to all"""
+        command_msg = json.dumps({"type": "command", "command": command})
+
+        if client_addr:
+            # Send to specific client
+            try:
+                self.server_socket.sendto(command_msg.encode(), client_addr)
+                print(f"Command '{command}' -> {client_addr}")
+            except Exception as e:
+                print(f"Error sending command to {client_addr}: {e}")
+        else:
+            # Broadcast to all clients
+            with self.clients_lock:
+                for addr in self.clients:
+                    if addr != (self.ip, self.port):  # Don't send to self
+                        try:
+                            self.server_socket.sendto(command_msg.encode(), addr)
+                        except Exception as e:
+                            print(f"Error sending command to {addr}: {e}")
+            print(f"Command '{command}' broadcast to all clients")
+
+
 
     def shutdown(self):
         print("Shutting down server...")

@@ -1,12 +1,16 @@
 import arcade
-from Tank import Tank
+from client.Tank import Tank
 
 
-class Game(arcade.Window):
-    def __init__(self):
-        # Create a resizable window
-        super().__init__(800, 600, "Tank Game", resizable=True)
-        self.maximize()
+class GameView(arcade.View):
+    def __init__(self, window, client_or_server, is_client):
+        super().__init__()
+        self.window = window
+        # self.window.maximize()
+
+        self.client_or_server = client_or_server
+        self.is_client = is_client
+
         arcade.set_background_color(arcade.color.DARK_GRAY)
 
         # Create tank list
@@ -89,9 +93,3 @@ class Game(arcade.Window):
             hit_tank = tank.check_bullet_collisions([t for t in self.tanks if t != tank])
             if hit_tank and hit_tank == self.player_tank and hit_tank.destroyed:
                 self.game_over = True
-
-
-
-if __name__ == "__main__":
-    game = Game()
-    arcade.run()

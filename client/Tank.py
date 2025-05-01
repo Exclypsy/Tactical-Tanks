@@ -1,7 +1,7 @@
 import math
 import arcade
 import time
-from Bullet import Bullet
+from client.Bullet import Bullet
 
 
 class Tank(arcade.Sprite):

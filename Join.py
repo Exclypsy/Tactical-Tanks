@@ -77,7 +77,7 @@ class JoinGameView(UIView):
         ip = server_ip.split(":")[0]
         port = server_ip.split(":")[1]
 
-        client = Client.Client(ip, port)
+        client = Client.Client(ip, port, self.window)
         client.connect()  # Just connect
 
         if client.connected:
