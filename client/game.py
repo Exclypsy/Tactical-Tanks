@@ -1,6 +1,11 @@
+from pathlib import Path
+
 import arcade
 from client.Tank import Tank
 
+project_root = Path(__file__).resolve().parent.parent
+path = project_root / "client" / "assets"
+arcade.resources.add_resource_handle("assets", str(path.resolve()))
 
 class GameView(arcade.View):
     def __init__(self, window, client_or_server, is_client):
@@ -18,8 +23,8 @@ class GameView(arcade.View):
 
         # Create the player tank
         self.player_tank = Tank(
-            "assets/images/tank.png",
-            "assets/images/bullet.png",
+            ":assets:images/tank.png",
+    ":assets:images/bullet.png",
             0.5,
             player_id="player1"
         )

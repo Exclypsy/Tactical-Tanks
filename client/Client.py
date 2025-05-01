@@ -14,22 +14,72 @@ class Client:
         self.client_id = 0
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.connected = False
+        self.running = False
 
     def connect(self):
-        # ... existing connection code ...
-        self.connected = True
-        # Start a background thread to listen for server messages
-        self.listener_thread = threading.Thread(target=self.listen_for_commands, daemon=True)
-        self.listener_thread.start()
+        try:
+            # Create a new socket for each connection
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            # Set socket option to reuse address
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            # Now send the connection message
+            self.socket.sendto(b"connection", self.server_address)
+            print(f"Trying connection -> {self.server_ip}:{self.server_port}")
+        except Exception as e:
+            print(e)
+            return False
+        else:
+            self.connected = True
+            self.running = True
+            print(f"Connected -> {self.server_ip}:{self.server_port}")
+
+            # Start a background thread to listen for server messages
+            self.listener_thread = threading.Thread(target=self.listen_for_commands, daemon=True)
+            self.listener_thread.start()
+            return True
 
     def listen_for_commands(self):
-        while self.connected:
+        """Continuously listen for server commands in the background"""
+        print("Starting listener thread")
+        self.socket.settimeout(0.5)  # Short timeout to check running flag
+
+        while self.running and self.connected:
             try:
-                data = self.receive_data()
-                # receive_data already processes commands, so nothing else needed here
+                data, addr = self.socket.recvfrom(1024)
+
+                if not data:
+                    print("Server closed the connection")
+                    self.disconnect()
+                    break
+
+                # Process the data
+                try:
+                    decoded = data.decode()
+                    # Process JSON messages
+                    try:
+                        message = json.loads(decoded)
+                        # Handle command messages
+                        if message.get("type") == "command":
+                            print(f"Received command: {message.get('command')}")
+                            self.handle_command(message.get("command"))
+                    except json.JSONDecodeError:
+                        # Not JSON, treat as regular message
+                        print(f"Received non-JSON message: {decoded}")
+                except UnicodeDecodeError:
+                    print("Received binary data")
+
+            except socket.timeout:
+                # Just loop and check running flag
+                continue
             except Exception as e:
                 print(f"Listener error: {e}")
-                break
+                if self.running and self.connected:
+                    # Only try to recover if still running
+                    print("Error in listener thread, will continue...")
+                else:
+                    break
+
+        print("Listener thread exiting")
 
     def get_server_ip(self):
         return str(self.server_ip + ":" + str(self.server_port))
@@ -53,27 +103,41 @@ class Client:
         except OSError:
             self.connected = False
             return False
-    def command_send_receive(self,command):
+
+    def command_send_receive(self, command):
         """ Sends a command to the server
             Returns server response: String format
         """
-        self.socket.sendto(command, self.server_address)
+        if not self.connected:
+            print("Not connected")
+            return None
 
-        # Set a timeout to avoid hanging indefinitely
-        self.socket.settimeout(1.0)
+        try:
+            # Save current timeout
+            current_timeout = self.socket.gettimeout()
 
-        # Get response
-        data = self.receive_data()
-        print(f"Received data: {data}")
+            self.socket.sendto(command, self.server_address)
 
-        # Only reset timeout if socket is still valid
-        if self.connected:
-            self.socket.settimeout(None)
+            # Set a timeout to avoid hanging indefinitely
+            self.socket.settimeout(1.0)
 
-        if data is None:
-            return []
+            # Get response directly (don't use receive_data which is now used by listener)
+            try:
+                data, addr = self.socket.recvfrom(1024)
+                decoded = data.decode()
+                print(f"Received data: {decoded}")
+            except socket.timeout:
+                print("Response timeout")
+                decoded = None
 
-        return data
+            # Restore original timeout
+            if self.connected:
+                self.socket.settimeout(current_timeout)
+
+            return decoded
+        except Exception as e:
+            print(f"Error in command_send_receive: {e}")
+            return None
 
     def get_players_list(self):
         try:
@@ -86,6 +150,10 @@ class Client:
                 self.connect()
 
             data = self.command_send_receive(b"get_players")
+
+            # Handle no data case
+            if not data:
+                return []
 
             # Check if data is already a list (when return was empty)
             if isinstance(data, list):
@@ -110,6 +178,10 @@ class Client:
 
     def send_data(self, data):
         try:
+            if not self.connected:
+                print("Not connected, can't send data")
+                return
+
             if isinstance(data, (dict, list)):
                 data = json.dumps(data)
             self.socket.sendto(data.encode(), self.server_address)
@@ -118,63 +190,51 @@ class Client:
             print(f"Error sending data: {e}")
             self.disconnect()
 
-    def receive_data(self):
-        try:
-            data, addr = self.socket.recvfrom(1024)
-
-            if not data:
-                print("Server closed the connection")
-                self.disconnect()
-                return None
-
-            decoded = data.decode()
-
-            # Process JSON messages
-            try:
-                message = json.loads(decoded)
-
-                # Handle command messages
-                if message.get("type") == "command":
-                    self.handle_command(message.get("command"))
-                    return None  # Commands are handled internally
-            except json.JSONDecodeError:
-                # Not JSON, treat as regular message
-                pass
-
-            return decoded
-        except socket.timeout:
-            print("Socket timed out waiting for data")
-            return None
-        except Exception as e:
-            print(f"Error receiving data: {e}")
-            self.disconnect()
-            return None
-
     def handle_command(self, command):
         """Process commands from the server"""
-        print(f"Received command: {command}")
+        print(f"Processing command: {command}")
 
         # Implement command handlers here
         if command == "game_start":
             print("Game is starting!")
-            from Lobby import LobbyView
-            arcade.unschedule(LobbyView.update_player_list(self,None))
-            # change to GameView
-            from client.game import GameView
-            self.window.show_view(GameView(self.window, self, True))
+            # Use arcade.schedule_once to safely transition to GameView from the main thread
+            arcade.schedule_once(lambda dt: self._start_game(), 0)
 
         elif command == "player_update":
             # Handle player update
             pass
         # Add more command handlers as needed
 
+    def _start_game(self):
+        """Transition to GameView (called from main thread)"""
+        from client.game import GameView
+        # Safely unschedule update_player_list if necessary
+        try:
+            if hasattr(self.window.current_view, "update_player_list"):
+                arcade.unschedule(self.window.current_view.update_player_list)
+        except Exception as e:
+            print(f"Error unscheduling player list updates: {e}")
+        # Show game view
+        self.window.show_view(GameView(self.window, self, True))
+
     def disconnect(self):
         try:
+            self.running = False  # Signal listener thread to stop
+
             if self.connected:
-                self.socket.sendto(b"disconnect", self.server_address)
+                try:
+                    self.socket.sendto(b"disconnect", self.server_address)
+                except Exception:
+                    pass  # Ignore errors when trying to send disconnect
+
                 self.socket.close()
                 self.socket = None  # Set to None after closing
                 self.connected = False
                 print("Disconnected from server")
+
+            # Wait for listener thread to exit (with timeout)
+            if self.listener_thread and self.listener_thread.is_alive():
+                self.listener_thread.join(timeout=2.0)
+
         except Exception as e:
             print(f"Error disconnecting: {e}")
