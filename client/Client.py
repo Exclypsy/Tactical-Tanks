@@ -82,7 +82,8 @@ class Client:
         print("Listener thread exiting")
 
     def get_server_ip(self):
-        return str(self.server_ip + ":" + str(self.server_port))
+        """Return server IP address as Tuple"""
+        return self.server_ip, self.server_port
 
     def check_socket_connection(self):
         if not self.connected or self.socket is None:

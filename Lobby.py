@@ -26,7 +26,8 @@ class LobbyView(UIView):
         self.background = arcade.load_texture(":assets:images/background.png")
 
         # Server IP display
-        server_ip = UILabel(text="Server IP: " + client_or_server.get_server_ip(), font_size=20,
+        server_ip = client_or_server.get_server_ip()
+        server_ip = UILabel(text="Server IP: " + server_ip[0]+":"+str(server_ip[1]), font_size=20,
                             text_color=arcade.color.WHITE)
         anchor = UIAnchorLayout()
         anchor.add(child=server_ip, anchor_x="left", anchor_y="top", align_x=10, align_y=-10)
@@ -81,6 +82,8 @@ class LobbyView(UIView):
                 print(f"Error getting players: {e}")
                 players = []
 
+            #add hosting player (server)
+            players.append(self.client_or_server.get_server_ip())
             # Add player buttons to layout
             for i, player in enumerate(players):
                 player_text = f"{player[0]}:{player[1]}"

@@ -14,8 +14,7 @@ class Server:
         self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         print(f"Server socket created at {self.ip}:{self.port}")
 
-        # Don't add self to client list
-        self.clients = [(self.ip,self.port)]
+        self.clients = []
         print(f"Initial client list: {self.clients}")
 
         self.clients_lock = threading.Lock()
@@ -41,7 +40,7 @@ class Server:
             self.server_socket.close()
 
     def get_server_ip(self):
-        return f"{self.ip}:{self.port}"
+        return self.ip, self.port
 
     def get_players_list(self):
         """Return a list of connected players"""
