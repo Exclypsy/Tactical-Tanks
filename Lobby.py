@@ -52,9 +52,16 @@ class LobbyView(UIView):
 
         # Initial player list update
         self.update_player_list()
-
         # Schedule periodic updates (every 2 seconds)
         arcade.schedule(self.update_player_list, 2.0)
+
+        if not self.is_client:
+            play_button = GameButton(text="PLAY")
+            play_button.on_click = self.on_play_click()
+            anchor = UIAnchorLayout()
+            anchor.add(child=play_button, anchor_x="center", anchor_y="bottom", align_y=30)
+            self.ui.add(anchor)
+
 
     def update_player_list(self, delta_time=None):
         """Update the player list display to reflect current connected players"""
@@ -102,3 +109,6 @@ class LobbyView(UIView):
             self.background,
             arcade.LBWH(0, 0, self.width, self.height),
         )
+
+    def on_play_click(self):
+        pass

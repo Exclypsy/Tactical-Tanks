@@ -34,7 +34,7 @@ class GameButton(UITextureButton):
             self,
             x=0,
             y=0,
-            width=100,
+            width=190,
             height=50,
             text="",
             font_size=14,
