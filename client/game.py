@@ -12,22 +12,41 @@ class GameView(arcade.View):
         super().__init__()
         self.window = window
         # self.window.maximize()
+        arcade.set_background_color(arcade.color.DARK_GRAY)
 
         self.client_or_server = client_or_server
         self.is_client = is_client
 
-        arcade.set_background_color(arcade.color.DARK_GRAY)
+        # Set up the game data
+        self.game_data = {
+            "players": {
+                "player1": {
+                    "tank_color": "blue",
+                    "bullet_type": "normal",
+                    "scale": 0.5,
+                    "player_id": "1",
+                    "position": {
+                        "x": self.width // 2,
+                        "y": self.height // 2,
+                    },
+                    "angle": 0,
+                    "health": 100,
+                },
+            }
+        }
+
+        if self.is_client:
+            self.client_or_server.game_listening()
+            arcade.schedule(self.client_or_server.se, 0.1)
+
+
+
 
         # Create tank list
         self.tanks = arcade.SpriteList()
 
         # Create the player tank
-        self.player_tank = Tank(
-            ":assets:images/tank.png",
-    ":assets:images/bullet.png",
-            0.5,
-            player_id="player1"
-        )
+        self.player_tank = Tank(player_id="player1")
         self.player_tank.center_x = self.width // 2
         self.player_tank.center_y = self.height // 2
         self.player_tank.is_rotating = True

@@ -5,10 +5,16 @@ from client.Bullet import Bullet
 
 
 class Tank(arcade.Sprite):
-    """Tank sprite that rotates around its center and can fire bullets."""
 
-    def __init__(self, image_file, bullet_image, scale=1.0, player_id=None):
-        super().__init__(image_file, scale)
+    def __init__(self, tank_color="blue", bullet_type="normal", scale=0.5, player_id=None):
+        self.tank_color = tank_color
+        self.bullet_type = bullet_type
+
+        if self.tank_color == "blue":
+            self.tank_texture= ":assets:images/tank.png"
+
+        super().__init__(self.tank_texture, scale)
+
 
         # Movement properties
         self.rotation_speed = 90  # degrees per second
@@ -24,10 +30,13 @@ class Tank(arcade.Sprite):
         self.destroyed = False
 
         # Bullet management
-        self.bullet_image = bullet_image
+        self.bullet_type = bullet_type
         self.bullet_list = arcade.SpriteList()
         self.last_fire_time = 0
         self.fire_cooldown = 0.5  # SHOOTING COOLDOWN
+
+        if self.bullet_type == "normal":
+            self.bullet_image = ":assets:images/bullet.png"
 
     def update(self, delta_time: float, window_width=None, window_height=None):
         if self.destroyed:

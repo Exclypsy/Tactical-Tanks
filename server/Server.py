@@ -136,3 +136,15 @@ class Server:
         if self.server_socket:
             self.server_socket.close()
         print("Server shutdown complete")
+
+    def game_broadcast_data(self, game_data, except_ip):
+        """Broadcast game data to clients except the one specified"""
+        while self.running:
+            # Example game data to broadcast
+            game_data = {
+                "type": "game_update",
+                "data": {
+                    "message": "Game is running",
+                }
+            }
+            self.send_command(json.dumps(game_data))
