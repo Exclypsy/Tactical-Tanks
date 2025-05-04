@@ -36,8 +36,7 @@ class GameView(arcade.View):
         }
 
         if self.is_client:
-            self.client_or_server.game_listening()
-            arcade.schedule(self.client_or_server.se, 0.1)
+            arcade.schedule(self.client_or_server.game_send_my_state(), 0.1)
 
 
 

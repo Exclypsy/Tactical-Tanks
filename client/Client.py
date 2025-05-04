@@ -240,27 +240,13 @@ class Client:
         except Exception as e:
             print(f"Error disconnecting: {e}")
 
-    def game_listening(self):
-        """Start listening for incoming data on a separate thread"""
-        self.listener_thread = threading.Thread(target=self.listen_for_commands, daemon=True)
-        self.listener_thread.start()
-        print("Started listening for incoming game data")
-    def game_send_my_state(self):
+    def game_send_my_state(self, data):
         """Send the player's state to the server"""
         if not self.connected:
             print("Not connected, can't send game state")
             return
 
-        # Construct player state data
-        player_state = {
-            # "player_id": self.client_id,
-            # "position": {
-            #     "x": self.window.player_tank.center_x,
-            #     "y": self.window.player_tank.center_y,
-            # },
-            # "angle": self.window.player_tank.angle,
-            # "health": self.window.player_tank.health,
-        }
+        print(f"Sending player state: {data}")
 
         # Send the player state to the server
-        self.send_data(json.dumps(player_state))
+        self.send_data(data)
