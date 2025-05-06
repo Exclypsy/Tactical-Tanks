@@ -1,7 +1,9 @@
 from pathlib import Path
+import random
 
 import arcade
 from client.Tank import Tank
+from client.tree import Tree
 
 project_root = Path(__file__).resolve().parent.parent
 path = project_root / "client" / "assets"
@@ -27,7 +29,7 @@ class GameView(arcade.View):
         # Create the player tank
         self.player_tank = Tank(
             ":assets:images/tank.png",
-    ":assets:images/bullet.png",
+            ":assets:images/bullet.png",
             0.3,
             player_id="player1"
         )
@@ -36,7 +38,12 @@ class GameView(arcade.View):
         self.player_tank.is_rotating = True
         self.tanks.append(self.player_tank)
 
-
+        # Create random trees
+        self.trees = arcade.SpriteList()
+        tree_count = random.randint(3, 7)  # Generate between 3 and 7 trees
+        for _ in range(tree_count):
+            tree = Tree(":assets:images/tree1.png", scale=0.5)
+            self.trees.append(tree)
 
         # Debug flags
         self.show_hitboxes = False
@@ -58,6 +65,9 @@ class GameView(arcade.View):
 
         # Draw background using sprite
         arcade.draw_sprite(self.background)
+
+        # Draw all trees
+        self.trees.draw()
 
         # Draw all bullets from all tanks
         for tank in self.tanks:
