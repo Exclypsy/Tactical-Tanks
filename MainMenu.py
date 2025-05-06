@@ -139,7 +139,7 @@ def main():
 
     # Create a window with user-defined settings
     window = arcade.Window(
-        title="Tactical Tank Game",
+        title="Tactical Tank's",
         fullscreen=settings["fullscreen"],
         width=settings["window_width"],
         height=settings["window_height"],
