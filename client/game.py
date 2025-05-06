@@ -11,6 +11,7 @@ class GameView(arcade.View):
     def __init__(self, window, client_or_server, is_client):
         super().__init__()
         self.window = window
+        self.background = arcade.load_texture(":assets:images/forestBG.jpg")
         # self.window.maximize()
 
         self.client_or_server = client_or_server
@@ -25,7 +26,7 @@ class GameView(arcade.View):
         self.player_tank = Tank(
             ":assets:images/tank.png",
     ":assets:images/bullet.png",
-            0.5,
+            0.3,
             player_id="player1"
         )
         self.player_tank.center_x = self.width // 2
