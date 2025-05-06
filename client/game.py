@@ -11,7 +11,9 @@ class GameView(arcade.View):
     def __init__(self, window, client_or_server, is_client):
         super().__init__()
         self.window = window
-        self.background = arcade.load_texture(":assets:images/forestBG.jpg")
+        self.background = arcade.Sprite(":assets:images/forestBG.jpg")
+        self.background.center_x = self.window.width // 2
+        self.background.center_y = self.window.height // 2
         # self.window.maximize()
 
         self.client_or_server = client_or_server
@@ -48,8 +50,14 @@ class GameView(arcade.View):
         self.player_tank.center_x = width // 2
         self.player_tank.center_y = height // 2
 
+        self.background.center_x = width // 2
+        self.background.center_y = height // 2
+
     def on_draw(self):
         self.clear()
+
+        # Draw background using sprite
+        arcade.draw_sprite(self.background)
 
         # Draw all bullets from all tanks
         for tank in self.tanks:
