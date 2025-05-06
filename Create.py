@@ -17,8 +17,9 @@ project_root = Path(__file__).resolve().parent
 path = project_root / "client" / "assets"
 arcade.resources.add_resource_handle("assets", str(path.resolve()))
 
+# Load textures and custom font
 TEX_EXIT_BUTTON = arcade.load_texture(":assets:images/exit.png")
-
+arcade.load_font(":assets:fonts/ARCO.ttf")  # <-- Load the ARCO font here
 
 class CreateGameView(UIView):
     def __init__(self, window):
@@ -35,8 +36,13 @@ class CreateGameView(UIView):
         layout = UIBoxLayout(vertical=True, space_between=20)
         self.ui.add(UIAnchorLayout(children=[layout], anchor_x="center", anchor_y="center"))
 
-        # Title
-        layout.add(UILabel(text="Create Game", font_size=30, text_color=arcade.color.WHITE))
+        # Title using ARCO font
+        layout.add(UILabel(
+            text="Create Game",
+            font_size=30,
+            font_name="ARCO",  # <-- Use ARCO font here
+            text_color=arcade.color.WHITE,
+        ))
 
         # Get LAN IP
         lan_ip = self.get_lan_ip()
@@ -48,6 +54,7 @@ class CreateGameView(UIView):
             text_color=arcade.color.WHITE
         )
         layout.add(ip_label)
+
         # Create buttons for different server options
         btn_localhost = GameButton(text="Localhost", width=200, height=50)
         btn_localhost.on_click = self.on_localhost_click
@@ -86,7 +93,6 @@ class CreateGameView(UIView):
     def on_localhost_click(self, event):
         """Start server on localhost"""
         self.start_server("127.0.0.1", 5000)
-        # go to lobby
         from Lobby import LobbyView
         self.window.show_view(LobbyView(self.window, self.server, False))
 
@@ -94,7 +100,6 @@ class CreateGameView(UIView):
         """Start server on LAN IP"""
         lan_ip = self.get_lan_ip()
         self.start_server(lan_ip, 5000)
-        # go to lobby
         from Lobby import LobbyView
         self.window.show_view(LobbyView(self.window, self.server, False))
 
@@ -103,10 +108,8 @@ class CreateGameView(UIView):
         if self.server_thread and self.server_thread.is_alive():
             return
 
-        # Create server in the main thread
         self.server = Server(ip=ip, port=port)
 
-        # Start server in a separate thread
         def run_server():
             try:
                 self.server.start()
@@ -116,8 +119,8 @@ class CreateGameView(UIView):
         self.server_thread = threading.Thread(target=run_server)
         self.server_thread.daemon = True
         self.server_thread.start()
+
     def on_back_click(self, event):
-        # No need to stop the server when going back, it runs in a daemon thread
         from MainMenu import Mainview
         self.window.show_view(Mainview(self.window))
 
@@ -128,7 +131,6 @@ class CreateGameView(UIView):
         )
 
 if __name__ == "__main__":
-    # Create a window
     window = arcade.Window(title="Create Game", width=800, height=600)
     create_game_view = CreateGameView(window)
     window.show_view(create_game_view)
