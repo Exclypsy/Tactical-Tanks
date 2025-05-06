@@ -42,7 +42,7 @@ class GameView(arcade.View):
         self.trees = arcade.SpriteList()
         tree_count = random.randint(3, 7)  # Generate between 3 and 7 trees
         for _ in range(tree_count):
-            tree = Tree(":assets:images/tree1.png", scale=0.5)
+            tree = Tree()
             self.trees.append(tree)
 
         # Debug flags

@@ -2,7 +2,8 @@ import arcade
 import random
 
 class Tree(arcade.Sprite):
-    def __init__(self, image_path, scale=0.3):
-        super().__init__(image_path, scale)
-        self.center_x = random.randint(50, 750)  # Random x position
-        self.center_y = random.randint(50, 550)  # Random y position
+    def __init__(self):
+        super().__init__(":assets:images/tree1.png")
+        self.scale = 0.15
+        self.center_x = random.randint(50, 750)
+        self.center_y = random.randint(50, 550)
