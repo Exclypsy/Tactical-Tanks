@@ -113,6 +113,10 @@ class GameView(arcade.View):
         for tank in self.tanks:
             tank.update(delta_time, self.width, self.height)
 
+            # Update trees with bullets from this tank
+            for tree in self.trees:
+                tree.update(tank.bullet_list)
+
             # Check for bullet collisions with other tanks
             hit_tank = tank.check_bullet_collisions([t for t in self.tanks if t != tank])
             if hit_tank and hit_tank == self.player_tank and hit_tank.destroyed:
