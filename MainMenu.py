@@ -146,7 +146,7 @@ def main():
         resizable=True
     )
 
-    # Set minimum size for the window
+    # Set minimum size for the windo
     window.set_minimum_size(800, 500)
 
     # Show the main view
