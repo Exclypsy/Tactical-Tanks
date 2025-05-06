@@ -8,6 +8,7 @@ from arcade.gui import (
 )
 from pathlib import Path
 from GameButton import GameButton
+import json
 
 project_root = Path(__file__).resolve().parent
 path = project_root / "client" / "assets"
@@ -15,6 +16,19 @@ arcade.resources.add_resource_handle("assets", str(path.resolve()))
 
 TEX_EXIT_BUTTON = arcade.load_texture(":assets:images/exit.png")
 
+# Load settings
+SETTINGS_FILE = project_root / ".config" / "settings.json"
+settings = {}
+try:
+    if SETTINGS_FILE.exists():
+        with open(SETTINGS_FILE, "r") as file:
+            settings = json.load(file)
+except json.JSONDecodeError:
+    print("⚠️ Nastal problém pri načítaní settings.json – používa sa prázdne nastavenie.")
+    settings = {}
+
+# Default player name if not set
+player_name = settings.get("player_name", "Player")
 
 class LobbyView(UIView):
     def __init__(self, window, client_or_server, is_client):
@@ -24,6 +38,16 @@ class LobbyView(UIView):
         self.is_client = is_client
         self.background_color = arcade.color.DARK_BLUE
         self.background = arcade.load_texture(":assets:images/background.png")
+
+        # Player name display
+        player_name_label = UILabel(
+            text=f"Player: {player_name}",
+            font_size=20,
+            text_color=arcade.color.WHITE
+        )
+        anchor = UIAnchorLayout()
+        anchor.add(child=player_name_label, anchor_x="left", anchor_y="top", align_x=10, align_y=-30)
+        self.ui.add(anchor)
 
         # Server IP display
         server_ip = client_or_server.get_server_ip()
@@ -63,7 +87,6 @@ class LobbyView(UIView):
             anchor.add(child=play_button, anchor_x="center", anchor_y="bottom", align_y=30)
             self.ui.add(anchor)
 
-
     def update_player_list(self, delta_time=None):
         """Update the player list display to reflect current connected players"""
         try:
@@ -82,7 +105,7 @@ class LobbyView(UIView):
                 print(f"Error getting players: {e}")
                 players = []
 
-            #add hosting player (server)
+            # Add hosting player (server)
             players.append(self.client_or_server.get_server_ip())
             # Add player buttons to layout
             for i, player in enumerate(players):
@@ -97,7 +120,7 @@ class LobbyView(UIView):
         # Unschedule the update function to prevent errors after view change
         arcade.unschedule(self.update_player_list)
 
-        # disconnect from server
+        # Disconnect from server
         if self.is_client:
             self.client_or_server.disconnect()
         else:
@@ -113,15 +136,13 @@ class LobbyView(UIView):
             arcade.LBWH(0, 0, self.width, self.height),
         )
 
-    def on_play_click(self,event):
+    def on_play_click(self, event):
         if not self.is_client:
             self.client_or_server.send_command("game_start")
 
-            #stop getting players
+            # Stop getting players
             arcade.unschedule(self.update_player_list)
 
-            # go to game
+            # Go to game
             from client.game import GameView
-            self.window.show_view(GameView(self.window,self.client_or_server, False))
-
-
+            self.window.show_view(GameView(self.window, self.client_or_server, False))

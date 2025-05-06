@@ -4,12 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="943984de-205b-4b9b-a54d-0d0f9a3a3d64" name="Changes" comment="IDE TO (bude treba poriesit vynimky a optimalizovat kod)">
-      <change beforePath="$PROJECT_DIR$/.idea/Tactical-Tanks.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Tactical-Tanks.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Create.py" beforeDir="false" afterPath="$PROJECT_DIR$/Create.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Join.py" beforeDir="false" afterPath="$PROJECT_DIR$/Join.py" afterDir="false" />
+    <list default="true" id="943984de-205b-4b9b-a54d-0d0f9a3a3d64" name="Changes" comment="#54 oprava fontov">
+      <change beforePath="$PROJECT_DIR$/.config/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/.config/settings.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -279,7 +275,7 @@
       <workItem from="1746090969252" duration="598000" />
       <workItem from="1746100148645" duration="6786000" />
       <workItem from="1746124826113" duration="1113000" />
-      <workItem from="1746529952240" duration="335000" />
+      <workItem from="1746529952240" duration="675000" />
     </task>
     <task id="LOCAL-00001" summary="Push 1 test">
       <option name="closed" value="true" />
@@ -513,7 +509,15 @@
       <option name="project" value="LOCAL" />
       <updated>1746104630557</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="#54 oprava fontov">
+      <option name="closed" value="true" />
+      <created>1746530414780</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1746530414780</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -532,7 +536,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="Push 3 test, delete Test_folder" />
     <MESSAGE value="Push 4 test, pridanie suboru" />
     <MESSAGE value="Push 5 test, odsranenie suboru" />
     <MESSAGE value="Push, &#10;Pridanie Assets (Images, Sounds), server.py a main.py" />
@@ -557,7 +560,8 @@
     <MESSAGE value="Improvements" />
     <MESSAGE value="vela errorov" />
     <MESSAGE value="IDE TO (bude treba poriesit vynimky a optimalizovat kod)" />
-    <option name="LAST_COMMIT_MESSAGE" value="IDE TO (bude treba poriesit vynimky a optimalizovat kod)" />
+    <MESSAGE value="#54 oprava fontov" />
+    <option name="LAST_COMMIT_MESSAGE" value="#54 oprava fontov" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Tactical_Tanks$Join.coverage" NAME="Join Coverage Results" MODIFIED="1745782509170" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -578,7 +582,7 @@
     <SUITE FILE_PATH="coverage/Tactical_Tanks$Client__1_.coverage" NAME="Client (1) Coverage Results" MODIFIED="1745831787444" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
     <SUITE FILE_PATH="coverage/Tactical_Tanks$Lobby.coverage" NAME="Lobby Coverage Results" MODIFIED="1745831418325" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Tactical_Tanks$Server__1_.coverage" NAME="Server (1) Coverage Results" MODIFIED="1745953993700" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/server" />
-    <SUITE FILE_PATH="coverage/Tactical_Tanks$MainMenu.coverage" NAME="MainMenu Coverage Results" MODIFIED="1746530255567" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
+    <SUITE FILE_PATH="coverage/Tactical_Tanks$MainMenu.coverage" NAME="MainMenu Coverage Results" MODIFIED="1746530454481" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
     <SUITE FILE_PATH="coverage/Tactical_Tanks$Create.coverage" NAME="Create Coverage Results" MODIFIED="1745961449812" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$ButtonRed.coverage" NAME="ButtonRed Coverage Results" MODIFIED="1744493543268" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$settings.coverage" NAME="settings Coverage Results" MODIFIED="1744220937438" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
