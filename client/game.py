@@ -1,7 +1,9 @@
 from pathlib import Path
+import random
 
 import arcade
 from client.Tank import Tank
+from client.tree import Tree
 
 project_root = Path(__file__).resolve().parent.parent
 path = project_root / "client" / "assets"
@@ -11,47 +13,38 @@ class GameView(arcade.View):
     def __init__(self, window, client_or_server, is_client):
         super().__init__()
         self.window = window
+        self.background = arcade.Sprite(":assets:images/forestBG.jpg")
+        self.background.center_x = self.window.width // 2
+        self.background.center_y = self.window.height // 2
         # self.window.maximize()
-        arcade.set_background_color(arcade.color.DARK_GRAY)
 
         self.client_or_server = client_or_server
         self.is_client = is_client
 
-        # Set up the game data
-        self.game_data = {
-            "players": {
-                "player1": {
-                    "tank_color": "blue",
-                    "bullet_type": "normal",
-                    "scale": 0.5,
-                    "player_id": "1",
-                    "position": {
-                        "x": self.width // 2,
-                        "y": self.height // 2,
-                    },
-                    "angle": 0,
-                    "health": 100,
-                },
-            }
-        }
-
-        if self.is_client:
-            arcade.schedule(self.client_or_server.game_send_my_state(), 0.1)
-
-
-
+        arcade.set_background_color(arcade.color.DARK_GRAY)
 
         # Create tank list
         self.tanks = arcade.SpriteList()
 
         # Create the player tank
+        self.player_tank = Tank(
+            ":assets:images/tank.png",
+            ":assets:images/bullet.png",
+            0.3,
+            player_id="player1"
+        )
         self.player_tank = Tank(player_id="player1")
         self.player_tank.center_x = self.width // 2
         self.player_tank.center_y = self.height // 2
         self.player_tank.is_rotating = True
         self.tanks.append(self.player_tank)
 
-
+        # Create random trees
+        self.trees = arcade.SpriteList()
+        tree_count = random.randint(3, 7)  # Generate between 3 and 7 trees
+        for _ in range(tree_count):
+            tree = Tree()
+            self.trees.append(tree)
 
         # Debug flags
         self.show_hitboxes = False
@@ -65,8 +58,17 @@ class GameView(arcade.View):
         self.player_tank.center_x = width // 2
         self.player_tank.center_y = height // 2
 
+        self.background.center_x = width // 2
+        self.background.center_y = height // 2
+
     def on_draw(self):
         self.clear()
+
+        # Draw background using sprite
+        arcade.draw_sprite(self.background)
+
+        # Draw all trees
+        self.trees.draw()
 
         # Draw all bullets from all tanks
         for tank in self.tanks:
@@ -111,6 +113,10 @@ class GameView(arcade.View):
         # Update all tanks
         for tank in self.tanks:
             tank.update(delta_time, self.width, self.height)
+
+            # Update trees with bullets from this tank
+            for tree in self.trees:
+                tree.update(tank.bullet_list)
 
             # Check for bullet collisions with other tanks
             hit_tank = tank.check_bullet_collisions([t for t in self.tanks if t != tank])

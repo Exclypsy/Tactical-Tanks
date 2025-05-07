@@ -7,7 +7,7 @@ from arcade.gui import (
     UIBoxLayout,
     UILabel,
     UITextureButton,
-    UIInputText,  # Import UIInputText
+    UIInputText,
 )
 from pathlib import Path
 from GameButton import GameButton
@@ -16,8 +16,9 @@ project_root = Path(__file__).resolve().parent
 path = project_root / "client" / "assets"
 arcade.resources.add_resource_handle("assets", str(path.resolve()))
 
+# Load textures and custom font
 TEX_EXIT_BUTTON = arcade.load_texture(":assets:images/exit.png")
-
+arcade.load_font(":assets:fonts/ARCO.ttf")  # <-- Load the ARCO font
 
 class JoinGameView(UIView):
     def __init__(self, window):
@@ -31,8 +32,13 @@ class JoinGameView(UIView):
         layout = UIBoxLayout(vertical=True, space_between=20)
         self.ui.add(UIAnchorLayout(children=[layout], anchor_x="center", anchor_y="center"))
 
-        # Title
-        layout.add(UILabel(text="Join Game", font_size=45, text_color=arcade.color.WHITE))
+        # Title using ARCO font
+        layout.add(UILabel(
+            text="Join Game",
+            font_size=45,
+            font_name="ARCO",  # <-- Use ARCO font
+            text_color=arcade.color.WHITE
+        ))
 
         layout.add(UILabel(text="IP servera:", font_size=30, text_color=arcade.color.WHITE))
 
@@ -73,12 +79,12 @@ class JoinGameView(UIView):
         server_ip = self.server_ip_input.text
         if not server_ip:
             print("Defaulting to localhost")
-            server_ip="127.0.0.1:5000"
+            server_ip = "127.0.0.1:5000"
         ip = server_ip.split(":")[0]
         port = server_ip.split(":")[1]
 
         client = Client.Client(ip, port, self.window)
-        client.connect()  # Just connect
+        client.connect()
 
         if client.connected:
             self.window.show_view(LobbyView(self.window, client, True))

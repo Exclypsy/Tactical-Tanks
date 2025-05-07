@@ -139,14 +139,14 @@ def main():
 
     # Create a window with user-defined settings
     window = arcade.Window(
-        title="Tactical Tank Game",
+        title="Tactical Tank's",
         fullscreen=settings["fullscreen"],
         width=settings["window_width"],
         height=settings["window_height"],
         resizable=True
     )
 
-    # Set minimum size for the window
+    # Set minimum size for the windo
     window.set_minimum_size(800, 500)
 
     # Show the main view
