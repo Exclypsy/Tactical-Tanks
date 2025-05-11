@@ -10,8 +10,8 @@ class Tank(arcade.Sprite):
         self.tank_color = tank_color
         self.bullet_type = bullet_type
 
-        if self.tank_color == "blue":
-            self.tank_texture= ":assets:images/tank.png"
+        # if self.tank_color == "blue":
+        self.tank_texture= ":assets:images/tank.png"
 
         super().__init__(self.tank_texture, scale)
 

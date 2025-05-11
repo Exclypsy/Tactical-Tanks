@@ -1,13 +1,32 @@
+import json
 from pathlib import Path
 import random
 
 import arcade
+from arcade.gui import UITextureButton, UIAnchorLayout
+
 from client.Tank import Tank
 from client.tree import Tree
 
 project_root = Path(__file__).resolve().parent.parent
 path = project_root / "client" / "assets"
 arcade.resources.add_resource_handle("assets", str(path.resolve()))
+
+TEX_EXIT_BUTTON = arcade.load_texture(":assets:images/exit.png")
+
+# Load settings
+SETTINGS_FILE = project_root / ".config" / "settings.json"
+settings = {}
+try:
+    if SETTINGS_FILE.exists():
+        with open(SETTINGS_FILE, "r") as file:
+            settings = json.load(file)
+except json.JSONDecodeError:
+    print("⚠️ Nastal problém pri načítaní settings.json – používa sa prázdne nastavenie.")
+    settings = {}
+
+# Default player name if not set
+player_name = settings.get("player_name", "Player")
 
 class GameView(arcade.View):
     def __init__(self, window, client_or_server, is_client):
@@ -49,6 +68,23 @@ class GameView(arcade.View):
         # Debug flags
         self.show_hitboxes = False
         self.game_over = False
+
+        # Initialize UI manager
+        self.manager = arcade.gui.UIManager()
+        self.manager.enable()
+
+        # Exit button in top-right corner
+        exit_button = UITextureButton(
+            texture=TEX_EXIT_BUTTON,
+            texture_hovered=TEX_EXIT_BUTTON,
+            texture_pressed=TEX_EXIT_BUTTON,
+            width=40,
+            height=40
+        )
+        exit_button.on_click = self.on_back_click
+        anchor = UIAnchorLayout()
+        anchor.add(child=exit_button, anchor_x="right", anchor_y="top", align_x=-10, align_y=-10)
+        self.manager.add(anchor)
 
     def on_resize(self, width, height):
         """Handle window resizing events"""
@@ -92,6 +128,9 @@ class GameView(arcade.View):
                              self.width / 2, self.height / 2,
                              arcade.color.RED, 24, anchor_x="center")
 
+        # Draw the UI elements (back button)
+        self.manager.draw()
+
     def on_key_press(self, key, modifiers):
         if self.game_over:
             return
@@ -122,3 +161,14 @@ class GameView(arcade.View):
             hit_tank = tank.check_bullet_collisions([t for t in self.tanks if t != tank])
             if hit_tank and hit_tank == self.player_tank and hit_tank.destroyed:
                 self.game_over = True
+
+    def on_back_click(self, event):
+        self.manager.disable()
+        from MainMenu import Mainview
+        self.window.show_view(Mainview(self.window))
+        # Disconnect from server
+        if self.is_client:
+            self.client_or_server.disconnect()
+        else:
+            self.client_or_server.shutdown()
+        self.client_or_server = None

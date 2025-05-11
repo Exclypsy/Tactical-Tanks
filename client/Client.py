@@ -1,6 +1,8 @@
 import socket
 import json
 import threading
+from pathlib import Path
+
 import arcade
 
 
@@ -11,19 +13,32 @@ class Client:
         self.server_ip = ip
         self.server_port = port
         self.server_address = (self.server_ip, int(self.server_port))
-        self.client_id = 0
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.connected = False
         self.running = False
+
+        # Load settings
+        project_root = Path(__file__).resolve().parent.parent
+        SETTINGS_FILE = project_root / ".config" / "settings.json"
+        settings = {}
+        try:
+            if SETTINGS_FILE.exists():
+                with open(SETTINGS_FILE, "r") as file:
+                    settings = json.load(file)
+        except json.JSONDecodeError:
+            print("️Nastal problém pri načítaní settings.json – používa sa prázdne nastavenie.")
+            settings = {}
+
+        self.player_name = settings.get("player_name")
 
     def connect(self):
         try:
             # Create a new socket for each connection
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            # Set socket option to reuse address
             self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             # Now send the connection message
-            self.socket.sendto(b"connection", self.server_address)
+            message = f"connection,{self.player_name}"
+            self.socket.sendto(message.encode('utf-8'), self.server_address)
             print(f"Trying connection -> {self.server_ip}:{self.server_port}")
         except Exception as e:
             print(e)
@@ -61,7 +76,7 @@ class Client:
                         # Handle command messages
                         if message.get("type") == "command":
                             print(f"Received command: {message.get('command')}")
-                            self.handle_command(message.get("command"))
+                            self.handle_command(message)
                     except json.JSONDecodeError:
                         # Not JSON, treat as regular message
                         print(f"Received non-JSON message: {decoded}")
@@ -167,8 +182,9 @@ class Client:
                 # Convert strings like "127.0.0.1:5000" back to tuples
                 client_tuples = []
                 for client_str in data["clients"]:
-                    ip, port_str = client_str.split(":")
-                    client_tuples.append((ip, int(port_str)))
+                    ipPort, player_name = client_str.split(",")
+                    ip, port_str = ipPort.split(":")
+                    client_tuples.append(((ip, int(port_str)), player_name))
                 return client_tuples
             else:
                 print(f"Unexpected response type: {data.get('type', 'unknown')}")
@@ -191,20 +207,22 @@ class Client:
             print(f"Error sending data: {e}")
             self.disconnect()
 
-    def handle_command(self, command):
+    def handle_command(self, command_data):
         """Process commands from the server"""
-        print(f"Processing command: {command}")
+        if isinstance(command_data, dict):
+            command = command_data.get("command")
+            cmd_id = command_data.get("id")
+            require_ack = command_data.get("require_ack", False)
 
-        # Implement command handlers here
-        if command == "game_start":
-            print("Game is starting!")
-            # Use arcade.schedule_once to safely transition to GameView from the main thread
-            arcade.schedule_once(lambda dt: self._start_game(), 0)
+            # Send acknowledgment if required
+            if require_ack and cmd_id:
+                ack_msg = json.dumps({"type": "ack", "id": cmd_id})
+                self.socket.sendto(ack_msg.encode(), self.server_address)
 
-        elif command == "player_update":
-            # Handle player update
-            pass
-        # Add more command handlers as needed
+            # Process the command as before
+            if command == "game_start":
+                print("Game is starting!")
+                arcade.schedule_once(lambda dt: self._start_game(), 0)
 
     def _start_game(self):
         """Transition to GameView (called from main thread)"""

@@ -24,7 +24,7 @@ try:
         with open(SETTINGS_FILE, "r") as file:
             settings = json.load(file)
 except json.JSONDecodeError:
-    print("⚠️ Nastal problém pri načítaní settings.json – používa sa prázdne nastavenie.")
+    print("️Nastal problém pri načítaní settings.json – používa sa prázdne nastavenie.")
     settings = {}
 
 # Default player name if not set
@@ -33,21 +33,22 @@ player_name = settings.get("player_name", "Player")
 class LobbyView(UIView):
     def __init__(self, window, client_or_server, is_client):
         super().__init__()
+        self.retry_timer = 0
         self.window = window
         self.client_or_server = client_or_server
         self.is_client = is_client
         self.background_color = arcade.color.DARK_BLUE
         self.background = arcade.load_texture(":assets:images/background.png")
 
-        # Player name display
-        player_name_label = UILabel(
-            text=f"Player: {player_name}",
-            font_size=20,
-            text_color=arcade.color.WHITE
-        )
-        anchor = UIAnchorLayout()
-        anchor.add(child=player_name_label, anchor_x="left", anchor_y="top", align_x=10, align_y=-30)
-        self.ui.add(anchor)
+        # # Player name display
+        # player_name_label = UILabel(
+        #     text=f"Player: {player_name}",
+        #     font_size=20,
+        #     text_color=arcade.color.WHITE
+        # )
+        # anchor = UIAnchorLayout()
+        # anchor.add(child=player_name_label, anchor_x="left", anchor_y="top", align_x=10, align_y=-30)
+        # self.ui.add(anchor)
 
         # Server IP display
         server_ip = client_or_server.get_server_ip()
@@ -98,18 +99,32 @@ class LobbyView(UIView):
             # Clear existing player buttons
             self.player_layout.clear()
 
-            # Get current players with timeout protection
+            # Get current players
             try:
                 players = self.client_or_server.get_players_list()
             except Exception as e:
                 print(f"Error getting players: {e}")
                 players = []
 
-            # Add hosting player (server)
-            players.append(self.client_or_server.get_server_ip())
+            # Check if server is already in the list
+            server_ip = self.client_or_server.get_server_ip()
+            server_found = False
+
+            for player in players:
+                # Check if this player entry matches the server IP
+                if isinstance(player[0], tuple) and player[0][0] == server_ip[0] and player[0][1] == server_ip[1]:
+                    server_found = True
+                    break
+
+            # Only add server player if not already in list
+            if not server_found:
+                players.append(((server_ip), player_name + " (Host)"))
+
             # Add player buttons to layout
+            print(f"Lobby -> 111: {players}")
             for i, player in enumerate(players):
-                player_text = f"{player[0]}:{player[1]}"
+                print(f"Lobby -> 113: {i, player}")
+                player_text = f"{player[1]}"
                 player_button = GameButton(text=player_text, width=200, height=50)
                 self.player_layout.add(player_button)
 
@@ -136,13 +151,38 @@ class LobbyView(UIView):
             arcade.LBWH(0, 0, self.width, self.height),
         )
 
+    # In Lobby.py, modify on_play_click
     def on_play_click(self, event):
         if not self.is_client:
-            self.client_or_server.send_command("game_start")
+            # Send with acknowledgment requirement
+            self.client_or_server.send_command("game_start", require_ack=True)
 
-            # Stop getting players
-            arcade.unschedule(self.update_player_list)
+            # Schedule the server to transition to game view after a short delay
+            # This ensures the command is sent before transitioning
+            arcade.schedule_once(self.start_game_for_server, 0.5)
 
-            # Go to game
-            from client.game import GameView
-            self.window.show_view(GameView(self.window, self.client_or_server, False))
+    def check_game_start(self, delta_time):
+        """Check if game has started, resend command if needed"""
+        if self.client_or_server is None:
+            # Stop this scheduled function since client_or_server is no longer valid
+            arcade.unschedule(self.check_game_start)
+            return
+
+        self.retry_timer += delta_time
+
+        # If we've waited more than 5 seconds and game hasn't started
+        if self.retry_timer > 5.0:
+            print("Game start timeout, resending command")
+            self.client_or_server.send_command("game_start", require_ack=True)
+            self.retry_timer = 0
+
+    def start_game_for_server(self, delta_time):
+        # Unschedule all periodic functions
+        arcade.unschedule(self.update_player_list)
+        arcade.unschedule(self.check_game_start)
+
+        # Import needs to be here to avoid circular imports
+        from client.game import GameView
+
+        # Transition to the game view
+        self.window.show_view(GameView(self.window, self.client_or_server, False))
