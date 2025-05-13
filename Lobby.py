@@ -6,6 +6,7 @@ from arcade.gui import (
     UILabel,
     UITextureButton,
 )
+from arcade.types import Color
 from pathlib import Path
 from GameButton import GameButton
 import json
@@ -39,6 +40,8 @@ class LobbyView(UIView):
         self.is_client = is_client
         self.background_color = arcade.color.DARK_BLUE
         self.background = arcade.load_texture(":assets:images/background.png")
+
+        self.show_loading = False
 
         # # Player name display
         # player_name_label = UILabel(
@@ -151,14 +154,18 @@ class LobbyView(UIView):
             arcade.LBWH(0, 0, self.width, self.height),
         )
 
-    # In Lobby.py, modify on_play_click
+    def on_draw_after_ui(self):
+        if self.show_loading:
+            arcade.draw_lbwh_rectangle_filled(0, 0, self.width, self.height, Color(0, 0, 0, 170))
+
     def on_play_click(self, event):
         if not self.is_client:
+            self.show_loading = True
+
             # Send with acknowledgment requirement
             self.client_or_server.send_command("game_start", require_ack=True)
 
             # Schedule the server to transition to game view after a short delay
-            # This ensures the command is sent before transitioning
             arcade.schedule_once(self.start_game_for_server, 0.5)
 
     def check_game_start(self, delta_time):
@@ -177,12 +184,13 @@ class LobbyView(UIView):
             self.retry_timer = 0
 
     def start_game_for_server(self, delta_time):
+        if not self.is_client:
+            self.show_loading = False
+
         # Unschedule all periodic functions
         arcade.unschedule(self.update_player_list)
         arcade.unschedule(self.check_game_start)
 
-        # Import needs to be here to avoid circular imports
         from client.game import GameView
-
-        # Transition to the game view
         self.window.show_view(GameView(self.window, self.client_or_server, False))
+
