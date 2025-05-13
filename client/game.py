@@ -85,33 +85,42 @@ class GameView(arcade.View):
         self.popup_box = None
         self.volume_slider = None
 
-    def toggle_pause_menu(self, event=None):  # Accept the event argument
+    def toggle_pause_menu(self, event=None):
         if self.popup_active:
             self.manager.remove(self.popup_box)
             self.popup_active = False
         else:
-            # Make the layout of the pause menu 2 times bigger
-            layout = UIBoxLayout(vertical=True, space_between=50)  # Increased space between elements
-            layout.with_background(color=(0, 0, 0, 200))  # translucent background
+            layout = UIBoxLayout(vertical=True, space_between=50)
+            layout.with_background(color=(0, 0, 0, 200))
 
-            # Resume button (size doubled)
-            resume_btn = UIFlatButton(text="Resume", width=500)  # Bigger button
-            @resume_btn.event("on_click")
-            def resume_click(event):
-                self.toggle_pause_menu()
+            def create_textured_button(text, click_handler):
+                normal_texture = arcade.load_texture(":assets:buttons/green_normal.png")
+                hover_texture = arcade.load_texture(":assets:buttons/green_hover.png")
 
-            # Exit button (size doubled)
-            exit_btn = UIFlatButton(text="Exit to Menu", width=500)  # Bigger button
-            @exit_btn.event("on_click")
-            def exit_click(event):
-                self.on_back_click(None)
+                button = UITextureButton(
+                    texture=normal_texture,
+                    texture_hovered=hover_texture,
+                    texture_pressed=normal_texture,
+                    width=300,
+                    height=75
+                )
 
-            # Volume slider
-            volume_label = UILabel(text="Volume", width=500)  # Increased width of label
-            self.volume_slider = UISlider(min=0, max=1, value=0.5, width=500)  # Larger slider
+                label = UILabel(text=text, text_color=arcade.color.WHITE, font_size=18, bold=True)
+                box = UIBoxLayout(vertical=True, align="center")
+                box.add(label)
+                button.add(box)
+
+                button.on_click = click_handler
+                return button
+
+            resume_btn = create_textured_button("Resume", lambda e: self.toggle_pause_menu())
+            exit_btn = create_textured_button("Exit to Menu", lambda e: self.on_back_click(None))
+
+            volume_label = UILabel(text="Volume", width=500)
+            self.volume_slider = UISlider(min=0, max=1, value=0.5, width=500)
+
             layout.add(volume_label)
             layout.add(self.volume_slider)
-
             layout.add(resume_btn)
             layout.add(exit_btn)
 
