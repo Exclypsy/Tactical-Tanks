@@ -2,7 +2,7 @@
     "fullscreen": false,
     "window_width": 944,
     "window_height": 584,
-    "music_on": false,
+    "music_on": true,
     "music_volume": 1.0,
-    "player_name": "Oliver"
+    "player_name": "Sonicka"
 }
