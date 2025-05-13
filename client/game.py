@@ -91,7 +91,6 @@ class GameView(arcade.View):
             self.popup_active = False
         else:
             layout = UIBoxLayout(vertical=True, space_between=50)
-            layout.with_background(color=(0, 0, 0, 200))
 
             def create_textured_button(text, click_handler):
                 normal_texture = arcade.load_texture(":assets:buttons/green_normal.png")
@@ -117,16 +116,20 @@ class GameView(arcade.View):
             exit_btn = create_textured_button("Exit to Menu", lambda e: self.on_back_click(None))
 
             volume_label = UILabel(text="Volume", width=500)
-            self.volume_slider = UISlider(min=0, max=1, value=0.5, width=500)
+            self.volume_slider = UISlider(min=0, max=1, value=0.5, width=400)
 
             layout.add(volume_label)
             layout.add(self.volume_slider)
             layout.add(resume_btn)
             layout.add(exit_btn)
 
-            self.popup_box = UIAnchorLayout()
-            self.popup_box.add(child=layout, anchor_x="center", anchor_y="center")
+            background_box = UIAnchorLayout()
+            background_box.with_background(color=(0, 0, 0, 200))
+            background_box.add(child=layout, anchor_x="center", anchor_y="center")
+
+            self.popup_box = background_box
             self.manager.add(self.popup_box)
+
             self.popup_active = True
 
     def on_resize(self, width, height):
