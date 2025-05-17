@@ -192,6 +192,8 @@ class LobbyView(UIView):
             # Send with acknowledgment requirement
             self.client_or_server.send_command("game_start", require_ack=True)
 
+            arcade.unschedule(self.update_player_list)
+
             # Schedule the server to transition to game view after a short delay
             arcade.schedule_once(self.start_game_for_server, 0.5)
 

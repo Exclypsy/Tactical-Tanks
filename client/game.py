@@ -9,7 +9,7 @@ from arcade.gui import (
 )
 
 from client.Tank import Tank
-from client.tree import Tree
+from client.Tree import Tree
 
 project_root = Path(__file__).resolve().parent.parent
 path = project_root / "client" / "assets"
@@ -27,9 +27,6 @@ try:
 except json.JSONDecodeError:
     print("⚠️ Nastal problém pri načítaní settings.json – používa sa prázdne nastavenie.")
     settings = {}
-
-# Default player name if not set
-player_name = settings.get("player_name", "Player")
 
 
 class GameView(arcade.View):
@@ -53,11 +50,21 @@ class GameView(arcade.View):
         self.player_tank.is_rotating = True
         self.tanks.append(self.player_tank)
 
-        # Trees
-        self.trees = arcade.SpriteList()
-        for _ in range(random.randint(3, 7)):
-            tree = Tree()
-            self.trees.append(tree)
+        self.other_player_tanks = {}
+
+        if is_client:
+            self.player_tank.player_id = self.client_or_server.player_name
+        else:
+            self.player_tank.player_id = "host"
+
+        arcade.schedule(self.send_tank_update, 1 / 60) # 30FPS
+        arcade.schedule(self.process_queued_tank_updates, 1 / 60)
+
+        # # Trees
+        # self.trees = arcade.SpriteList()
+        # for _ in range(random.randint(3, 7)):
+        #     tree = Tree()
+        #     self.trees.append(tree)
 
         # UI
         self.manager = UIManager()
@@ -84,6 +91,9 @@ class GameView(arcade.View):
         self.popup_active = False
         self.popup_box = None
         self.volume_slider = None
+
+
+
 
     def toggle_pause_menu(self, event=None):
         if self.popup_active:
@@ -142,11 +152,10 @@ class GameView(arcade.View):
     def on_draw(self):
         self.clear()
         arcade.draw_sprite(self.background)
-        self.trees.draw()
+        # self.trees.draw()
         for tank in self.tanks:
             tank.bullet_list.draw()
         self.tanks.draw()
-        self.player_tank.draw_debug_direction_line(self.width, self.height)
 
         if self.show_hitboxes:
             for tank in self.tanks:
@@ -180,13 +189,17 @@ class GameView(arcade.View):
 
         for tank in self.tanks:
             tank.update(delta_time, self.width, self.height)
-            for tree in self.trees:
-                tree.update(tank.bullet_list)
+            # for tree in self.trees:
+            #     tree.update(tank.bullet_list)
             hit_tank = tank.check_bullet_collisions([t for t in self.tanks if t != tank])
             if hit_tank and hit_tank == self.player_tank and hit_tank.destroyed:
                 self.game_over = True
 
     def on_back_click(self, event):
+
+        arcade.unschedule(self.send_tank_update)
+        arcade.unschedule(self.process_queued_tank_updates)
+
         self.manager.disable()
         from MainMenu import Mainview
         self.window.show_view(Mainview(self.window))
@@ -195,3 +208,66 @@ class GameView(arcade.View):
         else:
             self.client_or_server.shutdown()
         self.client_or_server = None
+
+    def process_queued_tank_updates(self, delta_time=None):
+        """Process any queued tank updates from the networking thread"""
+        if not self.client_or_server:
+            return
+
+        updates_to_process = []
+
+        # Safely get pending updates
+        if hasattr(self.client_or_server, 'pending_tank_updates'):
+            with self.client_or_server.tank_updates_lock:
+                updates_to_process = self.client_or_server.pending_tank_updates.copy()
+                self.client_or_server.pending_tank_updates.clear()
+
+        # Process each update in the main thread
+        for update in updates_to_process:
+            self.process_tank_update(update)
+
+    def send_tank_update(self, delta_time=None):
+        """Send player tank state to server/clients"""
+        if self.game_over or self.popup_active or not self.client_or_server:
+            return
+
+        tank_data = {
+            "type": "tank_state",
+            "player_id": self.player_tank.player_id,
+            "x": self.player_tank.center_x,
+            "y": self.player_tank.center_y,
+            "angle": self.player_tank.angle,
+            "is_rotating": self.player_tank.is_rotating,
+            "is_moving": self.player_tank.is_moving
+        }
+
+        if self.is_client:
+            self.client_or_server.game_send_my_state(tank_data)
+        else:
+            self.client_or_server.game_broadcast_data(tank_data)
+
+    def process_tank_update(self, data):
+        """Handle received tank state update"""
+        player_id = data.get("player_id")
+
+        # Skip our own tank - make sure this comparison is correct
+        if player_id == self.player_tank.player_id:
+            return
+
+        # Print player IDs for debugging
+        print(f"Game -> 258: Processing tank update: {player_id} (our ID: {self.player_tank.player_id})")
+
+        # Create or update the tank for this player
+        if player_id not in self.other_player_tanks:
+            print(f"Creating new tank for player: {player_id}")
+            new_tank = Tank(player_id=player_id)
+            self.other_player_tanks[player_id] = new_tank
+            self.tanks.append(new_tank)
+
+        # Update tank state
+        tank = self.other_player_tanks[player_id]
+        tank.center_x = data.get("x", tank.center_x)
+        tank.center_y = data.get("y", tank.center_y)
+        tank.angle = data.get("angle", tank.angle)
+        tank.is_rotating = data.get("is_rotating", tank.is_rotating)
+        tank.is_moving = data.get("is_moving", tank.is_moving)

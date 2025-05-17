@@ -60,20 +60,6 @@ class Tank(arcade.Sprite):
         if window_width and window_height:
             self.cleanup_bullets(window_width, window_height)
 
-    def draw_debug_direction_line(self, window_width, window_height):
-        # Calculate the angle in radians
-        angle_rad = math.radians(self.angle)
-
-        # Calculate a far point in the direction the self is facing
-        # We use a large multiplier to simulate an infinite line
-        line_length = max(window_width, window_height) * 2
-
-        end_x = self.center_x + math.sin(angle_rad) * line_length
-        end_y = self.center_y + math.cos(angle_rad) * line_length
-
-        # Draw the line from self center to the far point
-        arcade.draw_line(self.center_x, self.center_y, end_x, end_y, arcade.color.RED, 2)
-
     def get_barrel_position(self):
         """Returns the position at the end of the barrel"""
         angle_rad = math.radians(self.angle)

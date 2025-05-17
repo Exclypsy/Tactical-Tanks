@@ -19,6 +19,9 @@ class Client:
 
         self.server_name = None
 
+        self.pending_tank_updates = []
+        self.tank_updates_lock = threading.Lock()
+
         # Load settings
         project_root = Path(__file__).resolve().parent.parent
         SETTINGS_FILE = project_root / ".config" / "settings.json"
@@ -79,12 +82,20 @@ class Client:
                         if message.get("type") == "command":
                             print(f"Received command: {message.get('command')}")
                             self.handle_command(message)
+
                         elif message.get("type") == "data":
                             print(f"Received data: {message.get('data')}")
                             try:
                                 self.server_name = message.get("server_name")
                             except Exception as e:
                                 print("Error getting server name:", e)
+
+                        elif message.get("type") == "tank_state":
+                            with self.tank_updates_lock:
+                                print(f"Client -> 95: Client received tank state: {message}")
+                                self.pending_tank_updates.append(message)
+                            continue
+
 
                     except json.JSONDecodeError:
                         # Not JSON, treat as regular message
@@ -93,7 +104,6 @@ class Client:
                     print("Received binary data")
 
             except socket.timeout:
-                # Just loop and check running flag
                 continue
             except Exception as e:
                 print(f"Listener error: {e}")

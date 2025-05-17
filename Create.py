@@ -108,7 +108,7 @@ class CreateGameView(UIView):
         if self.server_thread and self.server_thread.is_alive():
             return
 
-        self.server = Server(ip=ip, port=port)
+        self.server = Server(ip=ip, port=port, window=self.window)
 
         def run_server():
             try:

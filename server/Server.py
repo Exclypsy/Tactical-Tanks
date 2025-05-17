@@ -4,11 +4,14 @@ import json
 import time
 from pathlib import Path
 
+import arcade
+
 
 class Server:
-    def __init__(self, ip='127.0.0.1', port=5000):
+    def __init__(self, ip='127.0.0.1', port=5000, window=None):
         self.ip = str(ip)
         self.port = int(port)
+        self.window = window
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.running = True
 
@@ -101,7 +104,6 @@ class Server:
                     print(f"Received non-text data from {addr}")
                     continue
 
-                # In Server.py's handle_clients method, add processing for ACKs
                 try:
                     data_dict = json.loads(decoded)
                     if data_dict.get("type") == "ack" and data_dict.get("id"):
@@ -110,6 +112,16 @@ class Server:
                         if cmd_id in self.pending_acks:
                             self.pending_acks.pop(cmd_id)
                             print(f"Received ACK for command {cmd_id}")
+                        continue
+
+                    if data_dict.get("type") == "tank_state":
+                        # Broadcast this tank state to all other clients
+                        self.game_broadcast_data(data_dict, except_ip=addr)
+
+                        if hasattr(self, 'window') and self.window:
+                            view = self.window.current_view
+                            if hasattr(view, 'process_tank_update'):
+                                arcade.schedule_once(lambda dt, data=data_dict: view.process_tank_update(data), 0)
                         continue
                 except json.JSONDecodeError:
                     # Not JSON, handle as before
@@ -245,14 +257,28 @@ class Server:
         for cmd_id in to_remove:
             self.pending_acks.pop(cmd_id)
 
-    def game_broadcast_data(self, game_data, except_ip):
-        """Broadcast game data to clients except the one specified"""
-        while self.running:
-            # Example game data to broadcast
-            game_data = {
-                "type": "game_update",
-                "data": {
-                    "message": "Game is running",
-                }
-            }
-            self.send_command(json.dumps(game_data))
+    def game_broadcast_data(self, game_data, except_ip=None):
+        """Broadcast game data to all clients except the one specified"""
+        if not self.running:
+            return
+
+        # Convert to string if it's a dict or list
+        if isinstance(game_data, (dict, list)):
+            data_json = json.dumps(game_data)
+        else:
+            data_json = game_data
+
+        print(f"Broadcasting game data: {data_json} (except: {except_ip})")
+
+        with self.clients_lock:
+            for client in self.clients:
+                try:
+                    client_addr = client[0]  # The first element is the address tuple
+                    # Skip the client that sent this data if specified
+                    if except_ip and client_addr == except_ip:
+                        continue
+
+                    self.server_socket.sendto(data_json.encode(), client_addr)
+                    print(f"Sent game data to {client[1]} at {client_addr}")
+                except Exception as e:
+                    print(f"Error broadcasting game data to {client}: {e}")
