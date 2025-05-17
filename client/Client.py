@@ -17,6 +17,8 @@ class Client:
         self.connected = False
         self.running = False
 
+        self.server_name = None
+
         # Load settings
         project_root = Path(__file__).resolve().parent.parent
         SETTINGS_FILE = project_root / ".config" / "settings.json"
@@ -77,6 +79,13 @@ class Client:
                         if message.get("type") == "command":
                             print(f"Received command: {message.get('command')}")
                             self.handle_command(message)
+                        elif message.get("type") == "data":
+                            print(f"Received data: {message.get('data')}")
+                            try:
+                                self.server_name = message.get("server_name")
+                            except Exception as e:
+                                print("Error getting server name:", e)
+
                     except json.JSONDecodeError:
                         # Not JSON, treat as regular message
                         print(f"Received non-JSON message: {decoded}")
@@ -131,9 +140,7 @@ class Client:
         try:
             # Save current timeout
             current_timeout = self.socket.gettimeout()
-
             self.socket.sendto(command, self.server_address)
-
             # Set a timeout to avoid hanging indefinitely
             self.socket.settimeout(1.0)
 
@@ -208,7 +215,7 @@ class Client:
             self.disconnect()
 
     def handle_command(self, command_data):
-        """Process commands from the server"""
+        """Process json commands from the server"""
         if isinstance(command_data, dict):
             command = command_data.get("command")
             cmd_id = command_data.get("id")
@@ -219,7 +226,6 @@ class Client:
                 ack_msg = json.dumps({"type": "ack", "id": cmd_id})
                 self.socket.sendto(ack_msg.encode(), self.server_address)
 
-            # Process the command as before
             if command == "game_start":
                 print("Game is starting!")
                 arcade.schedule_once(lambda dt: self._start_game(), 0)

@@ -136,6 +136,13 @@ class Server:
                         self.server_socket.sendto(response.encode(), addr)
 
 
+                elif decoded == "get_server_name":
+                    print(f"Sending server name to {addr}")
+                    response = json.dumps({"type": "data", "server_name": self.player_name})
+                    print(f"Server -> 142: get_server_name: {response}")
+                    self.server_socket.sendto(response.encode(), addr)
+
+
                 # Handle disconnect message
                 if decoded == "disconnect":
                     print(f"{addr} is disconnecting")

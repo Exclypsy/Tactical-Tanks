@@ -9,7 +9,7 @@ class Tree(arcade.Sprite):
         self.center_y = random.randint(50, 550)
         self.health = random.randint(2, 5)  # Each tree gets 2–5 health points
 
-        self.destroy_sound = arcade.load_sound("assets/sounds/hush.mp3")
+        self.destroy_sound = arcade.load_sound("client/assets/sounds/hush.mp3")
 
     def update(self, bullet_list):
         hit_list = arcade.check_for_collision_with_list(self, bullet_list)

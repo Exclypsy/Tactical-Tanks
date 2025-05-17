@@ -43,15 +43,8 @@ class LobbyView(UIView):
 
         self.show_loading = False
 
-        # # Player name display
-        # player_name_label = UILabel(
-        #     text=f"Player: {player_name}",
-        #     font_size=20,
-        #     text_color=arcade.color.WHITE
-        # )
-        # anchor = UIAnchorLayout()
-        # anchor.add(child=player_name_label, anchor_x="left", anchor_y="top", align_x=10, align_y=-30)
-        # self.ui.add(anchor)
+        self.temp_player_list = []
+        self.last_known_server_name = "Server"
 
         # Server IP display
         server_ip = client_or_server.get_server_ip()
@@ -99,35 +92,69 @@ class LobbyView(UIView):
                 arcade.unschedule(self.update_player_list)
                 return
 
+            # Try to get current players without immediately updating the UI
+            try:
+                new_players = self.client_or_server.get_players_list()
+
+                # Check if server is already in the list
+                server_ip = self.client_or_server.get_server_ip()
+                server_found = False
+
+                for player in new_players:
+                    # Check if this player entry matches the server IP
+                    if isinstance(player[0], tuple) and player[0][0] == server_ip[0] and player[0][1] == server_ip[1]:
+                        server_found = True
+                        # Update last known server name if we find it in the list
+                        self.last_known_server_name = player[1].replace(" (Host)", "")
+                        break
+
+                # Only add server player if not already in list
+                if not server_found:
+                    if self.is_client:
+                        try:
+                            server_name = str(self.client_or_server.command_send_receive(b"get_server_name"))
+                            server_data = json.loads(server_name)
+                            if "server_name" in server_data:
+                                self.last_known_server_name = server_data["server_name"]
+                                print(f"Lobby -> 127: Updated server name: {self.last_known_server_name}")
+                        except Exception as e:
+                            print(f"Error getting server name: {e}")
+                            # Keep using the last known server name - don't reset it
+                    else:
+                        if self.client_or_server.player_name:
+                            self.last_known_server_name = self.client_or_server.player_name
+                            print(f"Lobby -> 130: Using local server name: {self.last_known_server_name}")
+
+                    # Always use the cached server name to prevent UI flickering
+                    new_players.append((server_ip, self.last_known_server_name + " (Host)"))
+
+                # Only update temp list if we successfully got new data and it's not empty
+                if new_players:
+                    self.temp_player_list = new_players
+                    print(f"Lobby -> Updated temporary player list: {self.temp_player_list}")
+
+            except Exception as e:
+                print(f"Error getting players: {e}")
+                print(f"Keeping existing player list for UI consistency")
+                # Don't update temp_player_list - keep using the existing one
+
             # Clear existing player buttons
             self.player_layout.clear()
 
-            # Get current players
-            try:
-                players = self.client_or_server.get_players_list()
-            except Exception as e:
-                print(f"Error getting players: {e}")
-                players = []
-
-            # Check if server is already in the list
-            server_ip = self.client_or_server.get_server_ip()
-            server_found = False
-
-            for player in players:
-                # Check if this player entry matches the server IP
-                if isinstance(player[0], tuple) and player[0][0] == server_ip[0] and player[0][1] == server_ip[1]:
-                    server_found = True
-                    break
-
-            # Only add server player if not already in list
-            if not server_found:
-                players.append(((server_ip), player_name + " (Host)"))
-
-            # Add player buttons to layout
-            print(f"Lobby -> 111: {players}")
-            for i, player in enumerate(players):
-                print(f"Lobby -> 113: {i, player}")
-                player_text = f"{player[1]}"
+            # Add player buttons to layout using the temporary list for consistency
+            if self.temp_player_list:
+                print(f"Lobby -> Displaying player list: {self.temp_player_list}")
+                for i, player in enumerate(self.temp_player_list):
+                    print(f"Lobby -> 113: {i, player}")
+                    player_text = f"{player[1]}"
+                    player_button = GameButton(text=player_text, width=200, height=50)
+                    self.player_layout.add(player_button)
+            else:
+                # If temp list is still empty, show at least the server
+                if self.is_client:
+                    player_text = f"{self.last_known_server_name} (Host)"
+                else:
+                    player_text = f"{self.client_or_server.player_name or 'Server'} (Host)"
                 player_button = GameButton(text=player_text, width=200, height=50)
                 self.player_layout.add(player_button)
 

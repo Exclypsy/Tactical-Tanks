@@ -89,7 +89,7 @@ class Tank(arcade.Sprite):
 
         self.last_fire_time = current_time
 
-        shot_sound = arcade.load_sound("assets/sounds/shot.mp3")
+        shot_sound = arcade.load_sound("client/assets/sounds/shot.mp3")
         arcade.play_sound(shot_sound)
 
         barrel_x, barrel_y = self.get_barrel_position()
