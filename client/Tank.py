@@ -2,6 +2,7 @@ import math
 import arcade
 import time
 from client.Bullet import Bullet
+from client.assets.effects.FireEffect import FireEffect
 
 
 class Tank(arcade.Sprite):
@@ -52,9 +53,14 @@ class Tank(arcade.Sprite):
 
         self.shot_sound = arcade.load_sound(":assets:sounds/shot.mp3")
 
+        self.effects_list = arcade.SpriteList()
+
     def update(self, delta_time: float, window_width=None, window_height=None):
         if self.destroyed:
             return
+
+        for effect in self.effects_list:
+            effect.update()
 
         # Handle recoil if active
         if hasattr(self, 'is_recoiling') and self.is_recoiling:
@@ -119,7 +125,19 @@ class Tank(arcade.Sprite):
         self.recoil_duration = 0.2  # seconds
         self.recoil_distance = 170
 
+        # Get barrel position
         barrel_x, barrel_y = self.get_barrel_position()
+
+        # Create fire effect at barrel end but slightly farther out
+        angle_rad = math.radians(self.angle)
+        fire_distance = 40  # pixels beyond barrel end
+        fire_x = barrel_x + math.sin(angle_rad) * fire_distance
+        fire_y = barrel_y + math.cos(angle_rad) * fire_distance
+
+        fire_effect = FireEffect(":assets:images/fire.png", 0.5, fire_x, fire_y, self.angle)
+        self.effects_list.append(fire_effect)
+
+        # Create and return the bullet
         bullet = Bullet(
             self.bullet_image,
             0.4,

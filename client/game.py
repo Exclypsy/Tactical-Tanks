@@ -156,6 +156,7 @@ class GameView(arcade.View):
         # self.trees.draw()
         for tank in self.tanks:
             tank.bullet_list.draw()
+            tank.effects_list.draw()
         self.tanks.draw()
 
         if self.show_hitboxes:
