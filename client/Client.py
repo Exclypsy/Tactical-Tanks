@@ -203,6 +203,8 @@ class Client:
                     ip, port_str = ipPort.split(":")
                     client_tuples.append(((ip, int(port_str)), player_name))
                 return client_tuples
+            elif data["type"] == "command":
+                self.handle_command(data)
             else:
                 print(f"Unexpected response type: {data.get('type', 'unknown')}")
                 return []

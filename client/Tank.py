@@ -46,7 +46,7 @@ class Tank(arcade.Sprite):
         self.is_recoiling = False
         self.recoil_start_time = 0
         self.recoil_duration = 0.2
-        self.recoil_distance = 1500
+        self.recoil_distance = 170
 
         if self.bullet_type == "normal":
             self.bullet_image = ":assets:images/bullet.png"
@@ -122,8 +122,7 @@ class Tank(arcade.Sprite):
         # Initialize recoil effect
         self.is_recoiling = True
         self.recoil_start_time = current_time
-        self.recoil_duration = 0.2  # seconds
-        self.recoil_distance = 170
+
 
         # Get barrel position
         barrel_x, barrel_y = self.get_barrel_position()
@@ -140,7 +139,7 @@ class Tank(arcade.Sprite):
         # Create and return the bullet
         bullet = Bullet(
             self.bullet_image,
-            0.4,
+            0.55,
             barrel_x,
             barrel_y,
             self.angle,

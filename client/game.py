@@ -33,6 +33,7 @@ class GameView(arcade.View):
     def __init__(self, window, client_or_server, is_client):
         super().__init__()
         self.window = window
+        # self.window.maximize()
         self.background = arcade.Sprite(":assets:images/forestBG.jpg")
         self.background.center_x = self.window.width // 2
         self.background.center_y = self.window.height // 2

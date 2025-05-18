@@ -48,6 +48,14 @@ class Server:
         client_thread = threading.Thread(target=self.handle_clients, daemon=True)
         client_thread.start()
 
+        # Schedule regular checks for unacknowledged commands
+        check_interval = 0.5  # Check every half second
+        self.check_commands_thread = threading.Thread(
+            target=self.run_command_checks,
+            daemon=True
+        )
+        self.check_commands_thread.start()
+
         try:
             # Keep main thread alive until shutdown
             while self.running:
@@ -59,6 +67,12 @@ class Server:
                     self.shutdown()
         finally:
             self.server_socket.close()
+
+    def run_command_checks(self):
+        """Run periodic checks for unacknowledged commands"""
+        while self.running:
+            self.check_unacknowledged_commands()
+            time.sleep(0.5)  # Check every half second
 
     def get_server_ip(self):
         return self.ip, self.port
@@ -172,8 +186,7 @@ class Server:
 
         print("Client handler loop exited")
 
-    def send_command(self, command, client_addr=None, require_ack=False):
-        """Send a command to a specific client or broadcast to all"""
+    def send_command(self, command, client_addr=None, require_ack=False, max_retries=10, retry_interval=1.0):
         command_id = str(time.time())  # Use timestamp as unique ID
 
         command_msg = json.dumps({
@@ -184,12 +197,13 @@ class Server:
         })
 
         if require_ack:
-            # Store in pending acknowledgments dict with timestamp
             self.pending_acks[command_id] = {
                 "time_sent": time.time(),
                 "retries": 0,
                 "command": command_msg,
-                "addr": client_addr
+                "addr": client_addr,
+                "max_retries": max_retries if command != "game_start" else 20,  # More retries for game_start
+                "retry_interval": retry_interval if command != "game_start" else 0.5  # Faster retries for game_start
             }
 
         if client_addr:
@@ -227,29 +241,33 @@ class Server:
         print("Server shutdown complete")
 
     def check_unacknowledged_commands(self):
-        """Periodically check for unacknowledged commands"""
+        """Run periodic checks for unacknowledged commands with improved reliability"""
         current_time = time.time()
         to_remove = []
 
         for cmd_id, data in self.pending_acks.items():
-            # If command was sent more than 1 second ago
-            if current_time - data["time_sent"] > 1.0:
-                # Max 5 retries
-                if data["retries"] < 5:
+            # Use the command-specific retry interval
+            retry_interval = data.get("retry_interval", 1.0)
+            max_retries = data.get("max_retries", 5)
+
+            # If command was sent more than retry_interval seconds ago
+            if current_time - data["time_sent"] > retry_interval:
+                # Check against max_retries
+                if data["retries"] < max_retries:
                     # Resend the command
                     if data["addr"]:
                         self.server_socket.sendto(data["command"].encode(), data["addr"])
                     else:
                         with self.clients_lock:
-                            for addr in self.clients:
-                                self.server_socket.sendto(data["command"].encode(), addr)
+                            for client in self.clients:
+                                self.server_socket.sendto(data["command"].encode(), client[0])
 
                     # Update retries and time sent
                     data["retries"] += 1
                     data["time_sent"] = current_time
                     print(f"Resending command {cmd_id}, retry #{data['retries']}")
                 else:
-                    # Max retries reached, consider client disconnected
+                    # Max retries reached
                     print(f"Max retries reached for command {cmd_id}")
                     to_remove.append(cmd_id)
 
