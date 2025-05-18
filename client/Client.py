@@ -1,6 +1,7 @@
 import socket
 import json
 import threading
+import time
 from pathlib import Path
 
 import arcade
@@ -21,6 +22,10 @@ class Client:
 
         self.pending_tank_updates = []
         self.tank_updates_lock = threading.Lock()
+
+        # Heartbeat
+        self.last_heartbeat_sent = 0
+        self.heartbeat_interval = 3.0  # Send heartbeat every 3 seconds
 
         # Load settings
         project_root = Path(__file__).resolve().parent.parent
@@ -82,9 +87,11 @@ class Client:
                         if message.get("type") == "command":
                             print(f"Received command: {message.get('command')}")
                             self.handle_command(message)
-
-                        elif message.get("type") == "data":
-                            print(f"Received data: {message.get('data')}")
+                        elif message.get("type") == "heartbeat_ack":
+                            # Connection is alive, nothing to do
+                            continue
+                        elif message.get("type") == "server_name":
+                            print(f"Received data: {message.get('server_name')}")
                             try:
                                 self.server_name = message.get("server_name")
                             except Exception as e:
@@ -97,6 +104,7 @@ class Client:
                             continue
 
 
+
                     except json.JSONDecodeError:
                         # Not JSON, treat as regular message
                         print(f"Received non-JSON message: {decoded}")
@@ -104,6 +112,8 @@ class Client:
                     print("Received binary data")
 
             except socket.timeout:
+                if time.time() - self.last_heartbeat_sent > self.heartbeat_interval:
+                    self.send_heartbeat()
                 continue
             except Exception as e:
                 print(f"Listener error: {e}")
@@ -114,6 +124,20 @@ class Client:
                     break
 
         print("Listener thread exiting")
+
+    def send_heartbeat(self):
+        """Send periodic heartbeat to maintain connection"""
+        current_time = time.time()
+        if not self.connected or self.socket is None:
+            return
+
+        if current_time - self.last_heartbeat_sent > self.heartbeat_interval:
+            try:
+                heartbeat_msg = json.dumps({"type": "heartbeat", "timestamp": current_time})
+                self.socket.sendto(heartbeat_msg.encode(), self.server_address)
+                self.last_heartbeat_sent = current_time
+            except Exception as e:
+                print(f"Error sending heartbeat: {e}")
 
     def get_server_ip(self):
         """Return server IP address as Tuple"""

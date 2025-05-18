@@ -22,7 +22,8 @@ class Server:
         print(f"Server socket created at {self.ip}:{self.port}")
 
         self.clients = []
-        print(f"Initial client list: {self.clients}")
+        self.client_last_seen = {}  # Track when each client was last seen
+        self.client_timeout = 15.0  # Seconds before considering a client disconnected
 
         self.clients_lock = threading.Lock()
 
@@ -89,7 +90,23 @@ class Server:
             try:
                 try:
                     data, addr = self.server_socket.recvfrom(1024)
+
+                    # Update last seen timestamp for this client
+                    self.client_last_seen[addr] = time.time()
                 except socket.timeout:
+                    current_time = time.time()
+                    with self.clients_lock:
+                        to_remove = []
+                        for client in self.clients:
+                            client_addr = client[0]
+                            if client_addr not in self.client_last_seen or current_time - self.client_last_seen[client_addr] > self.client_timeout:
+                                to_remove.append(client)
+
+                        # Only remove truly timed-out clients
+                        for client in to_remove:
+                            self.clients.remove(client)
+                            print(f"Client {client[0]} timed out after {self.client_timeout} seconds")
+
                     continue
                 except OSError as e:
                     if not self.running:
@@ -164,7 +181,7 @@ class Server:
 
                 elif decoded == "get_server_name":
                     print(f"Sending server name to {addr}")
-                    response = json.dumps({"type": "data", "server_name": self.player_name})
+                    response = json.dumps({"type": "server_name", "server_name": self.player_name})
                     print(f"Server -> 142: get_server_name: {response}")
                     self.server_socket.sendto(response.encode(), addr)
 
@@ -173,10 +190,15 @@ class Server:
                 if decoded == "disconnect":
                     print(f"{addr} is disconnecting")
                     with self.clients_lock:
-                        if addr in self.clients:
-                            self.clients.remove(addr)
-                            print(f"Client {addr} disconnected")
-                            print(f"Clients: {[f'{client[0][0]}:{client[0][1]},{self.player_name}' for client in self.clients]}")
+                        # Find the client by address
+                        for client in self.clients:
+                            if client[0] == addr:
+                                self.clients.remove(client)
+                                # Also remove from last_seen
+                                if addr in self.client_last_seen:
+                                    del self.client_last_seen[addr]
+                                print(f"Client {addr} disconnected")
+                                break
                     continue
 
             except Exception as e:
@@ -246,17 +268,22 @@ class Server:
         to_remove = []
 
         for cmd_id, data in self.pending_acks.items():
-            # Use the command-specific retry interval
             retry_interval = data.get("retry_interval", 1.0)
             max_retries = data.get("max_retries", 5)
+
+            # For game_start commands, use more aggressive retries and longer timeout
+            if "game_start" in data.get("command", ""):
+                max_retries = 30  # Much more retries for game_start
+                retry_interval = 0.3  # Quicker retries for critical commands
 
             # If command was sent more than retry_interval seconds ago
             if current_time - data["time_sent"] > retry_interval:
                 # Check against max_retries
                 if data["retries"] < max_retries:
-                    # Resend the command
+                    # For targeted commands, send only to the target
                     if data["addr"]:
                         self.server_socket.sendto(data["command"].encode(), data["addr"])
+                    # For broadcast commands like game_start, send to all clients
                     else:
                         with self.clients_lock:
                             for client in self.clients:
