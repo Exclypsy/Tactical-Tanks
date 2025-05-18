@@ -44,20 +44,21 @@ class GameView(arcade.View):
 
         # Tanks
         self.tanks = arcade.SpriteList()
-        self.player_tank = Tank(player_id="player1")
+        self.other_player_tanks = {}
+        self.available_colors = ["blue", "red", "yellow", "green"]
+
+        player_id = "host" if not is_client else self.client_or_server.player_name
+        tank_color = random.choice(self.available_colors)
+        self.available_colors.remove(tank_color)
+
+        self.player_tank = Tank(tank_color=tank_color, player_id=player_id)
         self.player_tank.center_x = self.width // 2
         self.player_tank.center_y = self.height // 2
         self.player_tank.is_rotating = True
         self.tanks.append(self.player_tank)
 
-        self.other_player_tanks = {}
 
-        if is_client:
-            self.player_tank.player_id = self.client_or_server.player_name
-        else:
-            self.player_tank.player_id = "host"
-
-        arcade.schedule(self.send_tank_update, 1 / 60) # 30FPS
+        arcade.schedule(self.send_tank_update, 1 / 60)
         arcade.schedule(self.process_queued_tank_updates, 1 / 60)
 
         # # Trees
@@ -238,7 +239,8 @@ class GameView(arcade.View):
             "y": self.player_tank.center_y,
             "angle": self.player_tank.angle,
             "is_rotating": self.player_tank.is_rotating,
-            "is_moving": self.player_tank.is_moving
+            "is_moving": self.player_tank.is_moving,
+            "tank_color": self.player_tank.tank_color
         }
 
         if self.is_client:
@@ -250,7 +252,7 @@ class GameView(arcade.View):
         """Handle received tank state update"""
         player_id = data.get("player_id")
 
-        # Skip our own tank - make sure this comparison is correct
+        # Skip our own tank
         if player_id == self.player_tank.player_id:
             return
 
@@ -260,7 +262,9 @@ class GameView(arcade.View):
         # Create or update the tank for this player
         if player_id not in self.other_player_tanks:
             print(f"Creating new tank for player: {player_id}")
-            new_tank = Tank(player_id=player_id)
+            tank_color = data.get("tank_color", "blue")
+
+            new_tank = Tank(tank_color=tank_color, player_id=player_id)
             self.other_player_tanks[player_id] = new_tank
             self.tanks.append(new_tank)
 

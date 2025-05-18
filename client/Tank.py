@@ -10,8 +10,14 @@ class Tank(arcade.Sprite):
         self.tank_color = tank_color
         self.bullet_type = bullet_type
 
-        # if self.tank_color == "blue":
-        self.tank_texture= ":assets:images/tank.png"
+        if self.tank_color == "blue":
+            self.tank_texture= ":assets:images/tanks/blue_tank.png"
+        elif self.tank_color == "green":
+            self.tank_texture = ":assets:images/tanks/green_tank.png"
+        elif self.tank_color == "red":
+            self.tank_texture = ":assets:images/tanks/red_tank.png"
+        elif self.tank_color == "yellow":
+            self.tank_texture = ":assets:images/tanks/yellow_tank.png"
 
         super().__init__(self.tank_texture, scale)
 
@@ -35,23 +41,53 @@ class Tank(arcade.Sprite):
         self.last_fire_time = 0
         self.fire_cooldown = 0.5  # SHOOTING COOLDOWN
 
+        # Recoil properties
+        self.is_recoiling = False
+        self.recoil_start_time = 0
+        self.recoil_duration = 0.2
+        self.recoil_distance = 1500
+
         if self.bullet_type == "normal":
             self.bullet_image = ":assets:images/bullet.png"
+
+        self.shot_sound = arcade.load_sound(":assets:sounds/shot.mp3")
 
     def update(self, delta_time: float, window_width=None, window_height=None):
         if self.destroyed:
             return
 
+        # Handle recoil if active
+        if hasattr(self, 'is_recoiling') and self.is_recoiling:
+            current_time = time.time()
+            elapsed = current_time - self.recoil_start_time
+
+            if elapsed < self.recoil_duration:
+                # Move in the opposite direction of the barrel
+                angle_rad = math.radians(self.angle + 180)  # Opposite direction
+
+                # Calculate smooth ease-out effect
+                progress = elapsed / self.recoil_duration
+                ease_factor = 1 - (1 - progress) * (1 - progress)  # Quadratic ease-out
+
+                # Apply recoil movement
+                recoil_speed = (self.recoil_distance / self.recoil_duration) * (1 - ease_factor)
+                self.center_x += recoil_speed * math.sin(angle_rad) * delta_time
+                self.center_y += recoil_speed * math.cos(angle_rad) * delta_time
+            else:
+                # End recoil
+                self.is_recoiling = False
+
+        # Regular movement code continues below...
         if self.is_rotating:
             if self.clockwise:
                 self.angle += self.rotation_speed * delta_time
             else:
                 self.angle -= self.rotation_speed * delta_time
+
         if self.is_moving:
             angle_rad = math.radians(self.angle)
             self.center_x += self.speed * math.sin(angle_rad) * delta_time
             self.center_y += self.speed * math.cos(angle_rad) * delta_time
-
 
         # Update bullets
         self.bullet_list.update(delta_time)
@@ -75,8 +111,13 @@ class Tank(arcade.Sprite):
 
         self.last_fire_time = current_time
 
-        shot_sound = arcade.load_sound("client/assets/sounds/shot.mp3")
-        arcade.play_sound(shot_sound)
+        arcade.play_sound(self.shot_sound)
+
+        # Initialize recoil effect
+        self.is_recoiling = True
+        self.recoil_start_time = current_time
+        self.recoil_duration = 0.2  # seconds
+        self.recoil_distance = 170
 
         barrel_x, barrel_y = self.get_barrel_position()
         bullet = Bullet(
