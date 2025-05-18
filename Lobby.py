@@ -92,6 +92,8 @@ class LobbyView(UIView):
         print(f"Host name: {self.host_name}")
         self.add_server()
 
+        self.update_counter = 0
+
 
     def add_server(self):
         if self.host_name is None:
@@ -105,28 +107,114 @@ class LobbyView(UIView):
         player_button = GameButton(text=str(self.host_name)+" (host)", width=200, height=50)
         self.player_layout.add(player_button)
 
-
-
     def update_player_list(self, delta_time=None):
-        """Update the player list display to reflect current connected players"""
+        """Update the player list with 3-timeout threshold to reduce flickering"""
         try:
             # Check if client_or_server is still valid
             if self.client_or_server is None:
                 arcade.unschedule(self.update_player_list)
                 return
 
-            # Get new players but don't update UI immediately if there's no change
-            try:
-                new_players = self.client_or_server.get_players_list()
+            # Throttle updates to reduce flickering
+            self.update_counter += 1
+            if self.update_counter % 2 != 0:  # Only update every other frame
+                return
 
-                # Only update UI if the player list actually changed
-                if self._has_player_list_changed(self.temp_player_list, new_players):
-                    self.temp_player_list = new_players
-                    self._refresh_player_ui()
+            try:
+                # Get current network players
+                network_players = self.client_or_server.get_players_list() or []
+
+                # Initialize timeout tracking if needed
+                if not hasattr(self, 'player_timeout_counts'):
+                    self.player_timeout_counts = {}
+                    self.max_timeout_count = 3  # Require 3 timeouts before removing a player
+
+                # Create dict of players from network
+                network_player_dict = {player[1]: player for player in network_players}
+
+                # Start with empty updated list
+                updated_player_list = []
+
+                # First ensure host is present
+                host_name = self.host_name if hasattr(self, 'host_name') else "Server"
+                host_text = f"{host_name} (Host)"
+                server_ip = self.client_or_server.get_server_ip()
+                host_entry = (server_ip, host_text)
+                updated_player_list.append(host_entry)
+
+                # Process all network players first - they're definitely active
+                for player_name, player in network_player_dict.items():
+                    # Skip if this is a host entry
+                    if "(Host)" in player_name:
+                        continue
+
+                    # Add player from network and reset timeout
+                    updated_player_list.append(player)
+                    self.player_timeout_counts[player_name] = 0
+
+                # Now check for players in current display but not in network
+                for player in self.temp_player_list:
+                    player_name = player[1]
+
+                    # Skip host or players already added from network
+                    if "(Host)" in player_name or player_name in network_player_dict:
+                        continue
+
+                    # Player from UI not in network - apply timeout logic
+                    timeout_count = self.player_timeout_counts.get(player_name, 0) + 1
+                    self.player_timeout_counts[player_name] = timeout_count
+
+                    # Keep player if below max timeout
+                    if timeout_count < self.max_timeout_count:
+                        updated_player_list.append(player)
+                    else:
+                        print(f"Removing player {player_name} after {self.max_timeout_count} timeouts")
+
+                # Update UI if needed
+                if self._has_player_list_changed(self.temp_player_list, updated_player_list):
+                    self.temp_player_list = updated_player_list
+                    self._update_player_buttons()
+
             except Exception as e:
                 print(f"Error getting players: {e}")
         except Exception as e:
             print(f"Error updating player list: {e}")
+
+    def _update_player_buttons(self):
+        """Smart update of player buttons to minimize flickering"""
+        # Get existing buttons and their names
+        existing_buttons = {}
+        for i, child in enumerate(self.player_layout.children):
+            if isinstance(child, GameButton):
+                existing_buttons[child.text] = (child, i)
+
+        # Create a list of button operations to perform
+        buttons_to_add = []
+
+        # Figure out which buttons to keep and which to add
+        for player in self.temp_player_list:
+            player_text = player[1]
+            if player_text in existing_buttons:
+                # Button already exists, keep track of it
+                existing_buttons[player_text] = (existing_buttons[player_text][0], -1)  # Mark as used
+            else:
+                # Need to create a new button
+                buttons_to_add.append(player_text)
+
+        # Remove unused buttons (ones still with positive indices)
+        buttons_to_remove = []
+        for text, (button, idx) in existing_buttons.items():
+            if idx >= 0:
+                buttons_to_remove.append(button)
+
+        # Actually remove the buttons
+        for button in buttons_to_remove:
+            self.player_layout.remove(button)
+
+        # Add new buttons
+        for text in buttons_to_add:
+            new_button = GameButton(text=text, width=200, height=50)
+            self.player_layout.add(new_button)
 
     def _has_player_list_changed(self, old_list, new_list):
         """Helper to detect actual changes in the player list"""
@@ -149,7 +237,7 @@ class LobbyView(UIView):
             player_text = f"{player[1]}"
             player_button = GameButton(text=player_text, width=200, height=50)
             self.player_layout.add(player_button)
-        self.add_server()
+        # self.add_server()
 
     def on_back_click(self, event):
         # Unschedule the update function to prevent errors after view change

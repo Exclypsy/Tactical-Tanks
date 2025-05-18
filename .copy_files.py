@@ -1,5 +1,3 @@
-
-
 # Skript na kopirvanie viacerych suborov do schranky (PO JEDNOM, lebo inak to neide)
 # ------------ PROSIM NECOMMITUJTE ZMENY CIEST Z TOHTO SUBORU!!! -----------------
 # xoxo <3
@@ -8,10 +6,14 @@ import platform
 import subprocess
 
 file_paths = [
-    "C:\\Users\\Admin\PycharmProjects\\OPGP-Projekt-MOS-\\server\\Server.py",
-    "C:\\Users\\Admin\PycharmProjects\\OPGP-Projekt-MOS-\\client\\Client.py",
+    # "C:\\Users\\Admin\PycharmProjects\\OPGP-Projekt-MOS-\\server\\Server.py",
+    # "C:\\Users\\Admin\PycharmProjects\\OPGP-Projekt-MOS-\\client\\Client.py",
     "C:\\Users\\Admin\PycharmProjects\\OPGP-Projekt-MOS-\\Lobby.py"
+    "C:\\Users\\Admin\PycharmProjects\\OPGP-Projekt-MOS-\\Lobby_copy.py",
     # "C:\\Users\\Admin\PycharmProjects\\OPGP-Projekt-MOS-\\client\\game.py",
+    # "C:\\Users\\Admin\PycharmProjects\\OPGP-Projekt-MOS-\\client\\Tank.py",
+    # "C:\\Users\\Admin\PycharmProjects\\OPGP-Projekt-MOS-\\client\\Bullet.py",
+    # "C:\\Users\\Admin\PycharmProjects\\OPGP-Projekt-MOS-\\client\\Tree.py",
 ]
 
 
