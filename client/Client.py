@@ -40,6 +40,7 @@ class Client:
             settings = {}
 
         self.player_name = settings.get("player_name")
+        self.color_assignments = {}
 
     def connect(self):
         try:
@@ -264,20 +265,23 @@ class Client:
 
             if command == "game_start":
                 print("Game is starting!")
+                # Store the color assignments for use in GameView
+                self.color_assignments = command_data.get("color_assignments", {})
                 arcade.schedule_once(lambda dt: self._start_game(), 0)
 
     def _start_game(self):
         """Transition to GameView (called from main thread)"""
         from client.game import GameView
+
         # Safely unschedule update_player_list if necessary
         try:
             if hasattr(self.window.current_view, "update_player_list"):
                 arcade.unschedule(self.window.current_view.update_player_list)
         except Exception as e:
             print(f"Error unscheduling player list updates: {e}")
-        # Show game view
-        self.window.show_view(GameView(self.window, self, True))
 
+        # Show game view with color assignments
+        self.window.show_view(GameView(self.window, self, True, self.color_assignments))
     def disconnect(self):
         try:
             self.running = False  # Signal listener thread to stop

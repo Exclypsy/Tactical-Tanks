@@ -30,7 +30,7 @@ except json.JSONDecodeError:
 
 
 class GameView(arcade.View):
-    def __init__(self, window, client_or_server, is_client):
+    def __init__(self, window, client_or_server, is_client, color_assignments=None):
         super().__init__()
         self.window = window
         # self.window.maximize()
@@ -41,6 +41,8 @@ class GameView(arcade.View):
         self.client_or_server = client_or_server
         self.is_client = is_client
 
+        self.color_assignments = color_assignments or {}
+
         arcade.set_background_color(arcade.color.DARK_GRAY)
 
         # Tanks
@@ -49,8 +51,13 @@ class GameView(arcade.View):
         self.available_colors = ["blue", "red", "yellow", "green"]
 
         player_id = "host" if not is_client else self.client_or_server.player_name
-        tank_color = random.choice(self.available_colors)
-        self.available_colors.remove(tank_color)
+
+        if is_client and player_id in self.color_assignments:
+            tank_color = self.color_assignments[player_id]
+        else:
+            # Fallback if no assignment (shouldn't happen)
+            self.available_colors = ["blue", "red", "yellow", "green"]
+            tank_color = random.choice(self.available_colors)
 
         self.player_tank = Tank(tank_color=tank_color, player_id=player_id)
         self.player_tank.center_x = self.width // 2

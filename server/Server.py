@@ -41,6 +41,9 @@ class Server:
 
         self.player_name = settings.get("player_name")
 
+        self.available_colors = ["blue", "red", "yellow", "green"]
+        self.player_colors = {}
+
     def start(self):
         self.server_socket.bind((self.ip, self.port))
         print(f"Server started at {self.ip}:{self.port}")
@@ -68,6 +71,26 @@ class Server:
                     self.shutdown()
         finally:
             self.server_socket.close()
+
+    def assign_color_to_player(self, player_id):
+        """Assign a unique color to a player"""
+        if player_id in self.player_colors:
+            return self.player_colors[player_id]
+
+        if not self.available_colors:
+            # If we run out of colors, reuse one (shouldn't happen with 4 player limit)
+            return "blue"
+
+        color = self.available_colors.pop(0)  # Take first available color
+        self.player_colors[player_id] = color
+        return color
+
+    def release_player_color(self, player_id):
+        """Return a player's color to the available pool when they disconnect"""
+        if player_id in self.player_colors:
+            color = self.player_colors[player_id]
+            self.available_colors.append(color)
+            del self.player_colors[player_id]
 
     def run_command_checks(self):
         """Run periodic checks for unacknowledged commands"""
@@ -211,12 +234,31 @@ class Server:
     def send_command(self, command, client_addr=None, require_ack=False, max_retries=10, retry_interval=1.0):
         command_id = str(time.time())  # Use timestamp as unique ID
 
-        command_msg = json.dumps({
-            "type": "command",
-            "command": command,
-            "id": command_id,
-            "require_ack": require_ack
-        })
+        # Convert string commands to JSON format
+        if command == "game_start":
+            # Create a color assignment for all connected players
+            color_assignments = {}
+            with self.clients_lock:
+                for client in self.clients:
+                    client_id = client[1]  # The player name/ID
+                    color = self.assign_color_to_player(client_id)
+                    color_assignments[client_id] = color
+
+            command_data = {
+                "type": "command",
+                "command": "game_start",
+                "color_assignments": color_assignments,
+                "id": command_id,
+                "require_ack": require_ack
+            }
+            command_msg = json.dumps(command_data)
+        else:
+            command_msg = json.dumps({
+                "type": "command",
+                "command": command,
+                "id": command_id,
+                "require_ack": require_ack
+            })
 
         if require_ack:
             self.pending_acks[command_id] = {

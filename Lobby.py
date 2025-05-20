@@ -94,6 +94,9 @@ class LobbyView(UIView):
 
         self.update_counter = 0
 
+        self.player_timeout_counts = {}
+        self.max_timeout_count = 4  # Require 4 timeouts before removing a player
+
 
     def add_server(self):
         if self.host_name is None:
@@ -127,7 +130,7 @@ class LobbyView(UIView):
                 # Initialize timeout tracking if needed
                 if not hasattr(self, 'player_timeout_counts'):
                     self.player_timeout_counts = {}
-                    self.max_timeout_count = 3  # Require 3 timeouts before removing a player
+                    self.max_timeout_count = 4  # Require 4 timeouts before removing a player
 
                 # Create dict of players from network
                 network_player_dict = {player[1]: player for player in network_players}
