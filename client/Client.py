@@ -41,6 +41,7 @@ class Client:
 
         self.player_name = settings.get("player_name")
         self.color_assignments = {}
+        self.client_id = None
 
     def connect(self):
         try:
@@ -84,21 +85,29 @@ class Client:
                     # Process JSON messages
                     try:
                         message = json.loads(decoded)
+                        message_get = message.get("type")
                         # Handle command messages
-                        if message.get("type") == "command":
+                        if message_get == "command":
                             print(f"Received command: {message.get('command')}")
                             self.handle_command(message)
-                        elif message.get("type") == "heartbeat_ack":
+                        elif message_get == "heartbeat_ack":
                             # Connection is alive, nothing to do
                             continue
-                        elif message.get("type") == "server_name":
+                        elif message_get == "name_assignment":
+                            assigned_name = message.get("assigned_name")
+                            if assigned_name:
+                                print(f"Server assigned name: {assigned_name}")
+                                self.player_name = assigned_name  # Update local player name
+                        elif message_get == "connection_accepted":
+                            self.client_id = message.get("client_id")
+                        elif message_get == "server_name":
                             print(f"Received data: {message.get('server_name')}")
                             try:
                                 self.server_name = message.get("server_name")
                             except Exception as e:
                                 print("Error getting server name:", e)
 
-                        elif message.get("type") == "tank_state":
+                        elif message_get == "tank_state":
                             with self.tank_updates_lock:
                                 print(f"Client -> 95: Client received tank state: {message}")
                                 self.pending_tank_updates.append(message)

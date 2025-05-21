@@ -1,15 +1,19 @@
 import json
+import math
 from pathlib import Path
 import random
 
 import arcade
 from arcade.gui import (
-    UIManager, UITextureButton, UIAnchorLayout,
-    UIFlatButton, UIBoxLayout, UILabel, UISlider
+    UIManager, UITextureButton, UIAnchorLayout, UIBoxLayout, UILabel, UISlider
 )
+from arcade.types import Color
 
+from client.Bullet import Bullet
 from client.Tank import Tank
-from client.Tree import Tree
+from client.assets.effects.FireEffect import FireEffect
+
+# from client.Tree import Tree
 
 project_root = Path(__file__).resolve().parent.parent
 path = project_root / "client" / "assets"
@@ -45,12 +49,29 @@ class GameView(arcade.View):
 
         arcade.set_background_color(arcade.color.DARK_GRAY)
 
+        self.spawn_positions = [
+            (100, 100),  # Bottom-left corner
+            (self.window.width - 100, 100),  # Bottom-right corner
+            (100, self.window.height - 100),  # Top-left corner
+            (self.window.width - 100, self.window.height - 100)  # Top-right corner
+        ]
+
         # Tanks
         self.tanks = arcade.SpriteList()
         self.other_player_tanks = {}
-        self.available_colors = ["blue", "red", "yellow", "green"]
 
         player_id = "host" if not is_client else self.client_or_server.player_name
+
+        spawn_index = 0
+        if is_client:
+            # Clients get positions 1-3
+            if self.client_or_server.client_id is not None:
+                spawn_index = (self.client_or_server.client_id % 3) + 1
+            # Fallback to random position if client_id not available
+            else:
+                spawn_index = random.randint(1, 3)
+            # Host gets position 0 (bottom-left)
+        spawn_position = self.spawn_positions[spawn_index]
 
         if is_client and player_id in self.color_assignments:
             tank_color = self.color_assignments[player_id]
@@ -60,14 +81,15 @@ class GameView(arcade.View):
             tank_color = random.choice(self.available_colors)
 
         self.player_tank = Tank(tank_color=tank_color, player_id=player_id)
-        self.player_tank.center_x = self.width // 2
-        self.player_tank.center_y = self.height // 2
+        self.player_tank.center_x = spawn_position[0]
+        self.player_tank.center_y = spawn_position[1]
         self.player_tank.is_rotating = True
         self.tanks.append(self.player_tank)
 
+        self.initial_position_sent = False
 
-        arcade.schedule(self.send_tank_update, 1 / 60)
-        arcade.schedule(self.process_queued_tank_updates, 1 / 60)
+        arcade.schedule(self.send_tank_update, 1 / 64)
+        arcade.schedule(self.process_queued_tank_updates, 1 / 64)
 
         # # Trees
         # self.trees = arcade.SpriteList()
@@ -100,6 +122,7 @@ class GameView(arcade.View):
         self.popup_active = False
         self.popup_box = None
         self.volume_slider = None
+
 
 
 
@@ -143,7 +166,7 @@ class GameView(arcade.View):
             layout.add(exit_btn)
 
             background_box = UIAnchorLayout()
-            background_box.with_background(color=(0, 0, 0, 200))
+            background_box.with_background(color=Color(0, 0, 0, 200))
             background_box.add(child=layout, anchor_x="center", anchor_y="center")
 
             self.popup_box = background_box
@@ -184,6 +207,7 @@ class GameView(arcade.View):
             return
         if key == arcade.key.SPACE:
             self.player_tank.handle_key_press(key)
+
         elif key == arcade.key.H:
             self.show_hitboxes = not self.show_hitboxes
         elif key == arcade.key.ESCAPE:
@@ -249,8 +273,24 @@ class GameView(arcade.View):
             "angle": self.player_tank.angle,
             "is_rotating": self.player_tank.is_rotating,
             "is_moving": self.player_tank.is_moving,
-            "tank_color": self.player_tank.tank_color
+            "tank_color": self.player_tank.tank_color,
         }
+
+        if not self.initial_position_sent:
+            tank_data["initial_spawn"] = True
+            self.initial_position_sent = True
+
+        if hasattr(self.player_tank, 'new_bullets') and self.player_tank.new_bullets:
+            bullet_data = []
+            for bullet in self.player_tank.new_bullets:
+                bullet_data.append({
+                    "x": bullet.center_x,
+                    "y": bullet.center_y,
+                    "angle": bullet.angle,
+                    "speed": bullet.speed
+                })
+            tank_data["new_bullets"] = bullet_data
+            self.player_tank.new_bullets = []
 
         if self.is_client:
             self.client_or_server.game_send_my_state(tank_data)
@@ -274,6 +314,19 @@ class GameView(arcade.View):
             tank_color = data.get("tank_color", "blue")
 
             new_tank = Tank(tank_color=tank_color, player_id=player_id)
+
+            if data.get("initial_spawn", False):
+                new_tank.center_x = data.get("x")
+                new_tank.center_y = data.get("y")
+            else:
+                # For non-initial packets for new tanks, use a corner position
+                # to avoid spawning at the center
+                spawn_index = len(self.other_player_tanks) + 1
+                if spawn_index >= len(self.spawn_positions):
+                    spawn_index = random.randrange(len(self.spawn_positions))
+                new_tank.center_x = self.spawn_positions[spawn_index][0]
+                new_tank.center_y = self.spawn_positions[spawn_index][1]
+
             self.other_player_tanks[player_id] = new_tank
             self.tanks.append(new_tank)
 
@@ -284,3 +337,28 @@ class GameView(arcade.View):
         tank.angle = data.get("angle", tank.angle)
         tank.is_rotating = data.get("is_rotating", tank.is_rotating)
         tank.is_moving = data.get("is_moving", tank.is_moving)
+
+        if "new_bullets" in data:
+            for bullet_info in data["new_bullets"]:
+                # Create bullet at the specified position
+                bullet = Bullet(
+                    ":assets:images/bullet.png",  # Use the appropriate bullet image
+                    0.55,
+                    bullet_info["x"],
+                    bullet_info["y"],
+                    bullet_info["angle"],
+                    tank  # Associate bullet with this tank
+                )
+
+                # Set bullet speed and update direction
+                bullet.speed = bullet_info.get("speed", 800)
+                bullet.direction_radians = math.radians(bullet.angle)
+
+                # Add to tank's bullet list, so it will be updated and drawn
+                tank.bullet_list.append(bullet)
+
+                # Add fire effect for visual feedback
+                angle_rad = math.radians(bullet.angle)
+                fire_effect = FireEffect(":assets:images/fire.png", 0.5,
+                                         bullet.center_x, bullet.center_y, bullet.angle)
+                tank.effects_list.append(fire_effect)

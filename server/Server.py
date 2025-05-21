@@ -184,12 +184,24 @@ class Server:
                 if decoded.startswith("connection,"):
                     parts = decoded.split(",", 1)  # Split only at first comma
                     if len(parts) == 2:
-                        new_name = parts[1]
-                        print(f"New connection: {new_name} from {addr}")
+                        base_name = parts[1]
+                        # Check if name exists and generate a unique name
+                        unique_name = self.get_unique_player_name(base_name)
+                        print(f"New connection: {base_name} (assigned: {unique_name}) from {addr}")
+
                         with self.clients_lock:
                             # Store address and name together as a tuple
-                            self.clients.append((addr, new_name))
+                            self.clients.append((addr, unique_name))
+
                         print(f"Clients: {self.clients}")
+
+                        # Notify client of their assigned name if it was changed
+                        if base_name != unique_name:
+                            name_assignment = json.dumps({
+                                "type": "name_assignment",
+                                "assigned_name": unique_name
+                            })
+                            self.server_socket.sendto(name_assignment.encode(), addr)
 
                 # Handle get_players command
                 if decoded == "get_players":
@@ -230,6 +242,24 @@ class Server:
                     break
 
         print("Client handler loop exited")
+
+    def get_unique_player_name(self, base_name):
+        """Generate a unique player name by appending numbers if necessary"""
+        # Check if the name is already in use
+        with self.clients_lock:
+            existing_names = [client[1] for client in self.clients]
+
+        # If the base name is not in use, we can use it
+        if base_name not in existing_names:
+            return base_name
+
+        # If the name is in use, try appending numbers
+        counter = 1
+        while True:
+            new_name = f"{base_name}{counter}"
+            if new_name not in existing_names:
+                return new_name
+            counter += 1
 
     def send_command(self, command, client_addr=None, require_ack=False, max_retries=10, retry_interval=1.0):
         command_id = str(time.time())  # Use timestamp as unique ID

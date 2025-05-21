@@ -42,6 +42,9 @@ class Tank(arcade.Sprite):
         self.last_fire_time = 0
         self.fire_cooldown = 0.5  # SHOOTING COOLDOWN
 
+        self.new_bullets = []
+        self.last_fire_time = 0
+
         # Recoil properties
         self.is_recoiling = False
         self.recoil_start_time = 0
@@ -147,6 +150,7 @@ class Tank(arcade.Sprite):
         )
 
         self.bullet_list.append(bullet)
+        self.new_bullets.append(bullet)
         return bullet
 
     def cleanup_bullets(self, window_width, window_height):
