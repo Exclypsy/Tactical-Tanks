@@ -18,8 +18,6 @@ class Client:
         self.connected = False
         self.running = False
 
-        self.server_name = None
-
         self.pending_tank_updates = []
         self.tank_updates_lock = threading.Lock()
 
@@ -40,7 +38,9 @@ class Client:
             settings = {}
 
         self.player_name = settings.get("player_name")
-        self.color_assignments = {}
+
+        self.server_name = None
+        self.server_color = "blue"  # Default server color
         self.assigned_color = None
         self.client_id = None
 
@@ -107,9 +107,11 @@ class Client:
                                 self.player_name = assigned_name
                             print(f"Connection accepted. Name: {self.player_name}, Color: {self.assigned_color}, ID: {self.client_id}")
                         elif message_get == "server_name":
-                            print(f"Received data: {message.get('server_name')}")
+                            print(f"Received server data: {message}")
                             try:
                                 self.server_name = message.get("server_name")
+                                self.server_color = message.get("server_color", "blue")
+                                print(f"Server name: {self.server_name}, Server color: {self.server_color}")
                             except Exception as e:
                                 print("Error getting server name:", e)
 
@@ -181,7 +183,7 @@ class Client:
 
     def command_send_receive(self, command):
         """ Sends a command to the server
-            Returns server response: String format
+        Returns server response: String format
         """
         if not self.connected:
             print("Not connected")
@@ -191,23 +193,27 @@ class Client:
             # Save current timeout
             current_timeout = self.socket.gettimeout()
             self.socket.sendto(command, self.server_address)
-            # Set a timeout to avoid hanging indefinitely
-            self.socket.settimeout(1.0)
 
-            # Get response directly (don't use receive_data which is now used by listener)
+            # Set a timeout to avoid hanging indefinitely
+            self.socket.settimeout(2.0)  # Increased timeout
+
+            # Get response directly
             try:
                 data, addr = self.socket.recvfrom(1024)
                 decoded = data.decode()
-                print(f"Received data: {decoded}")
+                print(f"Received response for command: {decoded}")
+                return decoded
             except socket.timeout:
-                print("Response timeout")
-                decoded = None
+                print("Response timeout for command")
+                return None
+            except Exception as recv_error:
+                print(f"Error receiving response: {recv_error}")
+                return None
+            finally:
+                # Restore original timeout
+                if self.connected:
+                    self.socket.settimeout(current_timeout)
 
-            # Restore original timeout
-            if self.connected:
-                self.socket.settimeout(current_timeout)
-
-            return decoded
         except Exception as e:
             print(f"Error in command_send_receive: {e}")
             return None
@@ -233,23 +239,54 @@ class Client:
                 return data
 
             # Try to parse JSON data
-            data = json.loads(data)
+            try:
+                data = json.loads(data)
+            except json.JSONDecodeError as e:
+                print(f"JSON decode error in get_players_list: {e}")
+                print(f"Raw data received: {data}")
+                return []
 
-            if data["type"] == "clients":
-                # Convert strings like "127.0.0.1:5000" back to tuples
+            if data.get("type") == "clients":
+                # Convert strings with new format that includes colors
                 client_tuples = []
                 for client_str in data["clients"]:
-                    ipPort, player_name = client_str.split(",")
-                    ip, port_str = ipPort.split(":")
-                    client_tuples.append(((ip, int(port_str)), player_name))
+                    try:
+                        # Handle format: "IP:PORT,PlayerName (color)" or "IP:PORT,PlayerName (color) (host)"
+                        if "," in client_str:
+                            ipPort, player_name_with_info = client_str.split(",", 1)  # Split only on first comma
+
+                            # Parse IP and port
+                            if ":" in ipPort:
+                                ip, port_str = ipPort.split(":")
+                                port = int(port_str)
+                            else:
+                                print(f"Invalid IP:PORT format: {ipPort}")
+                                continue
+
+                            # Keep the full player name with color and host info for display
+                            client_tuples.append(((ip, port), player_name_with_info))
+                        else:
+                            print(f"Invalid client string format: {client_str}")
+                            continue
+
+                    except Exception as parse_error:
+                        print(f"Error parsing client string '{client_str}': {parse_error}")
+                        continue
+
                 return client_tuples
-            elif data["type"] == "command":
+
+            elif data.get("type") == "command":
                 self.handle_command(data)
+                return []
+
             else:
                 print(f"Unexpected response type: {data.get('type', 'unknown')}")
                 return []
+
         except Exception as e:
             print(f"Error getting player list: {e}")
+            import traceback
+            traceback.print_exc()  # Print full stack trace for debugging
             return []
 
     def send_data(self, data):

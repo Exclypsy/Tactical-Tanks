@@ -2,6 +2,7 @@ import socket
 import threading
 import json
 import time
+import random
 from pathlib import Path
 
 import arcade
@@ -47,10 +48,16 @@ class Server:
         self.player_colors = {}
         self.clients_lock = threading.Lock()
         self.color_assignment_lock = threading.Lock()
-
         self.next_client_id = 0
 
+        self.server_color = self.assign_server_color()
+        print(f"Server assigned itself color: {self.server_color}")
+
     def start(self):
+        if not hasattr(self, 'server_color') or not self.server_color:
+            self.server_color = self.assign_server_color()
+            print(f"Server assigned itself color: {self.server_color}")
+
         self.server_socket.bind((self.ip, self.port))
         print(f"Server started at {self.ip}:{self.port}")
 
@@ -77,20 +84,40 @@ class Server:
         finally:
             self.server_socket.close()
 
+    def assign_server_color(self):
+        """Assign a random color to the server itself"""
+        with self.color_assignment_lock:
+            print(f"Available colors before server assignment: {self.available_colors}")
+            if not self.available_colors:
+                return "blue"  # Fallback
+
+            # Server picks a random color
+            server_color = random.choice(self.available_colors)
+            self.available_colors.remove(server_color)
+            print(f"Server took color {server_color}, remaining: {self.available_colors}")
+
+            # Store server's color
+            server_name = getattr(self, 'player_name', 'host')
+            self.player_colors[server_name] = server_color
+
+            return server_color
+
     def assign_color_to_player(self, player_id):
-        """Assign a unique color to a player - thread safe"""
+        """Assign a random unique color to a client player - thread safe"""
         with self.color_assignment_lock:
             if player_id in self.player_colors:
                 return self.player_colors[player_id]
 
+            print(f"Available colors for client {player_id}: {self.available_colors}")
             if not self.available_colors:
-                # If we run out of colors, shouldn't happen with 4 player limit
                 print(f"Warning: No colors available for player {player_id}")
-                return "blue"
+                return "blue"  # Fallback
 
-            color = self.available_colors.pop(0)
+            # Client gets a random color from remaining colors
+            color = random.choice(self.available_colors)
+            self.available_colors.remove(color)
             self.player_colors[player_id] = color
-            print(f"Assigned color {color} to player {player_id}")
+            print(f"Assigned random color {color} to player {player_id}, remaining: {self.available_colors}")
             return color
 
     def release_player_color(self, player_id):
@@ -98,10 +125,14 @@ class Server:
         with self.color_assignment_lock:
             if player_id in self.player_colors:
                 color = self.player_colors[player_id]
-                self.available_colors.append(color)
-                del self.player_colors[player_id]
-                print(f"Released color {color} from player {player_id}")
 
+                # Don't release server's own color
+                server_name = getattr(self, 'player_name', 'host')
+                if player_id != server_name:
+                    self.available_colors.append(color)
+                    print(f"Released color {color} from player {player_id}")
+
+                del self.player_colors[player_id]
     def run_command_checks(self):
         """Run periodic checks for unacknowledged commands"""
         while self.running:
@@ -112,9 +143,26 @@ class Server:
         return self.ip, self.port
 
     def get_players_list(self):
-        """Return a list of connected players"""
+        """Return a list of connected players in the same format as clients expect"""
         with self.clients_lock:
-            return list(self.clients)
+            client_tuples = []
+
+            # First add server/host entry
+            server_name = getattr(self, 'player_name', 'host')
+            server_color = getattr(self, 'server_color', 'blue')
+            server_ip = f"{self.ip}:{self.port}"
+            client_tuples.append(((self.ip, self.port), f"{server_name} ({server_color}) (host)"))
+
+            # Then add connected clients
+            for client in self.clients:
+                client_addr = client['addr']
+                client_name = client['name']
+                client_color = client['color']
+                client_display = f"{client_name} ({client_color})"
+                client_tuples.append((client_addr, client_display))
+
+            print(f"Server returning player list: {client_tuples}")  # Debug output
+            return client_tuples
 
     def handle_clients(self):
         # Set a timeout, so we can check the running flag periodically
@@ -239,6 +287,15 @@ class Server:
                     print(f"Sending player list to {addr}")
                     with self.clients_lock:
                         client_info = []
+
+                        # First add server/host with color
+                        server_name = getattr(self, 'player_name', 'host')
+                        server_color = getattr(self, 'server_color', 'blue')
+                        server_ip = f"{self.ip}:{self.port}"
+                        server_entry = f"{server_ip},{server_name} ({server_color}) (host)"
+                        client_info.append(server_entry)
+
+                        # Then add connected clients
                         for client in self.clients:
                             client_str = f"{client['addr'][0]}:{client['addr'][1]},{client['name']} ({client['color']})"
                             client_info.append(client_str)
@@ -246,11 +303,16 @@ class Server:
                         response = json.dumps({"type": "clients", "clients": client_info})
                         self.server_socket.sendto(response.encode(), addr)
 
-
                 elif decoded == "get_server_name":
                     print(f"Sending server name to {addr}")
-                    response = json.dumps({"type": "server_name", "server_name": self.player_name})
-                    print(f"Server -> 142: get_server_name: {response}")
+                    server_name = getattr(self, 'player_name', 'host')
+                    server_color = getattr(self, 'server_color', 'blue')
+                    response = json.dumps({
+                        "type": "server_name",
+                        "server_name": server_name,
+                        "server_color": server_color
+                    })
+                    print(f"Server -> get_server_name: {response}")
                     self.server_socket.sendto(response.encode(), addr)
 
 
@@ -301,25 +363,32 @@ class Server:
         command_id = str(time.time())
 
         if command == "game_start":
-            # Use already assigned colors instead of assigning new ones
+            # Use already assigned colors including server color
             color_assignments = {}
             spawn_assignments = {}
 
+            # First add server's color assignment
+            server_name = getattr(self, 'player_name', 'host')
+            color_assignments[server_name] = self.server_color
+            spawn_assignments[server_name] = 0  # Server always gets spawn position 0
+
             with self.clients_lock:
+                # Then add client color assignments
                 for client in self.clients:
                     client_name = client['name']
-                    color_assignments[client_name] = client['color']  # Use pre-assigned color
-                    spawn_assignments[client_name] = client['client_id']  # Use client_id for spawn
+                    color_assignments[client_name] = client['color']
+                    spawn_assignments[client_name] = client['client_id']
 
             command_data = {
                 "type": "command",
                 "command": "game_start",
                 "color_assignments": color_assignments,
-                "spawn_assignments": spawn_assignments,  # Add spawn position info
+                "spawn_assignments": spawn_assignments,
                 "id": command_id,
                 "require_ack": require_ack
             }
             command_msg = json.dumps(command_data)
+            print(f"Game start color assignments: {color_assignments}")  # Debug output
         else:
             command_msg = json.dumps({
                 "type": "command",

@@ -1,3 +1,5 @@
+import time
+
 import arcade
 from arcade.gui import (
     UIView,
@@ -10,6 +12,8 @@ from arcade.types import Color
 from pathlib import Path
 from GameButton import GameButton
 import json
+import re
+from LobbyPlayer import TankButton
 
 project_root = Path(__file__).resolve().parent
 path = project_root / "client" / "assets"
@@ -89,135 +93,167 @@ class LobbyView(UIView):
             self.ui.add(anchor)
 
         if self.is_client:
+            # Request server info and wait a moment
             self.client_or_server.command_send_receive(b"get_server_name")
+            # Give time for response
+            time.sleep(0.1)
             self.host_name = getattr(self.client_or_server, 'server_name', "Server")
+            self.host_color = getattr(self.client_or_server, 'server_color', "blue")
         else:
             self.host_name = getattr(self.client_or_server, 'player_name', player_name)
-        print(f"Host name: {self.host_name}")
+            self.host_color = getattr(self.client_or_server, 'server_color', "blue")
+
+        print(f"Host name: {self.host_name}, Host color: {self.host_color}")
         self.add_server()
 
+    def extract_color_from_player_info(self, player_text):
+        """Extract color and clean name from player info string like 'PlayerName (color)' or 'PlayerName (color) (host)'"""
+        # Handle different formats
+        if "," in player_text:
+            # Format: "IP:PORT,PlayerName (color)" or "IP:PORT,PlayerName (color) (host)"
+            _, name_part = player_text.split(",", 1)
+        else:
+            # Format: "PlayerName (color)" or "PlayerName (color) (host)"
+            name_part = player_text
 
+        # Extract color using regex - look for (color) pattern
+        color_match = re.search(r'\((\w+)\)(?:\s*\([^)]*\))?', name_part)
+        if color_match:
+            color = color_match.group(1).lower()
+            # Remove all parenthetical parts to get clean name
+            clean_name = re.sub(r'\s*\([^)]*\)', '', name_part).strip()
+
+            # Check if it's a host
+            is_host = "(host)" in name_part.lower() or "(Host)" in name_part
+
+            return clean_name, color, is_host
+        else:
+            # Fallback - remove any parentheses and use default color
+            clean_name = re.sub(r'\s*\([^)]*\)', '', name_part).strip()
+            return clean_name, "blue", False
 
     def add_server(self):
-        if self.host_name is None:
-            if self.is_client:
-                self.client_or_server.command_send_receive(b"get_server_name")
-                self.host_name = getattr(self.client_or_server, 'server_name', "Server")
-            else:
-                self.host_name = getattr(self.client_or_server, 'player_name', player_name)
-            print(f"Host name: {self.host_name}")
+        """Add server to the lobby with proper color"""
+        server_color = getattr(self, 'host_color', 'blue')
+        host_name = getattr(self, 'host_name', 'Server')
 
-        player_button = GameButton(text=str(self.host_name)+" (host)", width=200, height=50)
-        self.player_layout.add(player_button)
+        print(f"Adding server: {host_name} ({server_color})")
+
+        # Create tank button for server/host
+        tank_button = TankButton(
+            name_text=f"{host_name}\n(HOST)",
+            color=server_color,
+            button_width=180,
+            button_height=180,
+            font_size=16
+        )
+        self.player_layout.add(tank_button)
 
     def update_player_list(self, delta_time=None):
-        """Update the player list with 3-timeout threshold to reduce flickering"""
+        """Update the player list with better error handling"""
         try:
-            # Check if client_or_server is still valid
             if self.client_or_server is None:
                 arcade.unschedule(self.update_player_list)
                 return
 
-            # Throttle updates to reduce flickering
             self.update_counter += 1
-            if self.update_counter % 2 != 0:  # Only update every other frame
+            if self.update_counter % 2 != 0:
                 return
 
             try:
-                # Get current network players
                 network_players = self.client_or_server.get_players_list() or []
 
-                # Initialize timeout tracking if needed
                 if not hasattr(self, 'player_timeout_counts'):
                     self.player_timeout_counts = {}
-                    self.max_timeout_count = 4  # Require 4 timeouts before removing a player
+                    self.max_timeout_count = 4
 
-                # Create dict of players from network
-                network_player_dict = {player[1]: player for player in network_players}
-
-                # Start with empty updated list
+                # Process the network players properly
                 updated_player_list = []
 
-                # First ensure host is present
-                host_name = self.host_name if hasattr(self, 'host_name') else "Server"
-                host_text = f"{host_name} (Host)"
-                server_ip = self.client_or_server.get_server_ip()
-                host_entry = (server_ip, host_text)
-                updated_player_list.append(host_entry)
-
-                # Process all network players first - they're definitely active
-                for player_name, player in network_player_dict.items():
-                    # Skip if this is a host entry
-                    if "(Host)" in player_name:
-                        continue
-
-                    # Add player from network and reset timeout
+                # Add all network players (including server if it's in the list)
+                for player in network_players:
                     updated_player_list.append(player)
+                    player_name = player[1]
                     self.player_timeout_counts[player_name] = 0
 
-                # Now check for players in current display but not in network
+                # Handle timeout logic for missing players
                 for player in self.temp_player_list:
                     player_name = player[1]
+                    if any(p[1] == player_name for p in network_players):
+                        continue  # Already added
 
-                    # Skip host or players already added from network
-                    if "(Host)" in player_name or player_name in network_player_dict:
-                        continue
-
-                    # Player from UI not in network - apply timeout logic
                     timeout_count = self.player_timeout_counts.get(player_name, 0) + 1
                     self.player_timeout_counts[player_name] = timeout_count
 
-                    # Keep player if below max timeout
                     if timeout_count < self.max_timeout_count:
                         updated_player_list.append(player)
                     else:
                         print(f"Removing player {player_name} after {self.max_timeout_count} timeouts")
 
-                # Update UI if needed
                 if self._has_player_list_changed(self.temp_player_list, updated_player_list):
                     self.temp_player_list = updated_player_list
                     self._update_player_buttons()
 
             except Exception as e:
                 print(f"Error getting players: {e}")
+
         except Exception as e:
             print(f"Error updating player list: {e}")
-
     def _update_player_buttons(self):
-        """Smart update of player buttons to minimize flickering"""
-        # Get existing buttons and their names
-        existing_buttons = {}
-        for i, child in enumerate(self.player_layout.children):
-            if isinstance(child, GameButton):
-                existing_buttons[child.text] = (child, i)
+        """Update player buttons using TankButton with correct colors"""
+        # Clear existing buttons
+        self.player_layout.clear()
 
-        # Create a list of button operations to perform
-        buttons_to_add = []
+        # Track if we've added the server
+        server_added = False
 
-        # Figure out which buttons to keep and which to add
+        # Add buttons for each player
         for player in self.temp_player_list:
             player_text = player[1]
-            if player_text in existing_buttons:
-                # Button already exists, keep track of it
-                existing_buttons[player_text] = (existing_buttons[player_text][0], -1)  # Mark as used
+            clean_name, color, is_host = self.extract_color_from_player_info(player_text)
+
+            # Handle host display
+            if is_host:
+                display_name = f"{clean_name}\n(HOST)"
+                server_added = True
             else:
-                # Need to create a new button
-                buttons_to_add.append(player_text)
+                display_name = clean_name
 
-        # Remove unused buttons (ones still with positive indices)
-        buttons_to_remove = []
-        for text, (button, idx) in existing_buttons.items():
-            if idx >= 0:
-                buttons_to_remove.append(button)
+            print(f"Creating button for: {display_name} with color: {color}")
 
-        # Actually remove the buttons
-        for button in buttons_to_remove:
-            self.player_layout.remove(button)
+            # Create tank button with appropriate color
+            tank_button = TankButton(
+                name_text=display_name,
+                color=color,
+                button_width=180,
+                button_height=180,
+                font_size=16
+            )
+            self.player_layout.add(tank_button)
 
-        # Add new buttons
-        for text in buttons_to_add:
-            new_button = GameButton(text=text, width=200, height=50)
-            self.player_layout.add(new_button)
+        # If server wasn't in the list, add it manually
+        if not server_added and hasattr(self, 'host_name'):
+            self.add_server()
+
+    def _get_player_color_from_server(self, player_name):
+        """Get player color from server assignments"""
+        # Remove host indicators for matching
+        clean_name = player_name.replace(" (host)", "").replace(" (Host)", "").strip()
+
+        # For clients, check if we have server color info
+        if self.is_client:
+            if hasattr(self.client_or_server, 'server_color') and clean_name == getattr(self.client_or_server,'server_name', ''):
+                return self.client_or_server.server_color
+
+            if hasattr(self.client_or_server, 'color_assignments'):
+                return self.client_or_server.color_assignments.get(clean_name, "blue")
+
+        # For servers, get from server's player_colors
+        if not self.is_client and hasattr(self.client_or_server, 'player_colors'):
+            return self.client_or_server.player_colors.get(clean_name, "blue")
+
+        # Default fallback
+        return "blue"
 
     def _has_player_list_changed(self, old_list, new_list):
         """Helper to detect actual changes in the player list"""
