@@ -41,6 +41,7 @@ class Client:
 
         self.player_name = settings.get("player_name")
         self.color_assignments = {}
+        self.assigned_color = None
         self.client_id = None
 
     def connect(self):
@@ -97,9 +98,14 @@ class Client:
                             assigned_name = message.get("assigned_name")
                             if assigned_name:
                                 print(f"Server assigned name: {assigned_name}")
-                                self.player_name = assigned_name  # Update local player name
+                                self.player_name = assigned_name
                         elif message_get == "connection_accepted":
                             self.client_id = message.get("client_id")
+                            self.assigned_color = message.get("assigned_color")
+                            assigned_name = message.get("assigned_name")
+                            if assigned_name:
+                                self.player_name = assigned_name
+                            print(f"Connection accepted. Name: {self.player_name}, Color: {self.assigned_color}, ID: {self.client_id}")
                         elif message_get == "server_name":
                             print(f"Received data: {message.get('server_name')}")
                             try:
@@ -290,7 +296,14 @@ class Client:
             print(f"Error unscheduling player list updates: {e}")
 
         # Show game view with color assignments
-        self.window.show_view(GameView(self.window, self, True, self.color_assignments))
+        self.window.show_view(GameView(
+            self.window,
+            self,
+            True,
+            self.color_assignments,
+            getattr(self, 'spawn_assignments', {})
+        ))
+
     def disconnect(self):
         try:
             self.running = False  # Signal listener thread to stop

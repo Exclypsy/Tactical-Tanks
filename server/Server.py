@@ -6,6 +6,8 @@ from pathlib import Path
 
 import arcade
 
+import traceback
+
 
 class Server:
     def __init__(self, ip='127.0.0.1', port=5000, window=None):
@@ -43,12 +45,15 @@ class Server:
 
         self.available_colors = ["blue", "red", "yellow", "green"]
         self.player_colors = {}
+        self.clients_lock = threading.Lock()
+        self.color_assignment_lock = threading.Lock()
+
+        self.next_client_id = 0
 
     def start(self):
         self.server_socket.bind((self.ip, self.port))
         print(f"Server started at {self.ip}:{self.port}")
 
-        # Run handle_clients in a separate thread for responsiveness
         client_thread = threading.Thread(target=self.handle_clients, daemon=True)
         client_thread.start()
 
@@ -73,24 +78,29 @@ class Server:
             self.server_socket.close()
 
     def assign_color_to_player(self, player_id):
-        """Assign a unique color to a player"""
-        if player_id in self.player_colors:
-            return self.player_colors[player_id]
+        """Assign a unique color to a player - thread safe"""
+        with self.color_assignment_lock:
+            if player_id in self.player_colors:
+                return self.player_colors[player_id]
 
-        if not self.available_colors:
-            # If we run out of colors, reuse one (shouldn't happen with 4 player limit)
-            return "blue"
+            if not self.available_colors:
+                # If we run out of colors, shouldn't happen with 4 player limit
+                print(f"Warning: No colors available for player {player_id}")
+                return "blue"
 
-        color = self.available_colors.pop(0)  # Take first available color
-        self.player_colors[player_id] = color
-        return color
+            color = self.available_colors.pop(0)
+            self.player_colors[player_id] = color
+            print(f"Assigned color {color} to player {player_id}")
+            return color
 
     def release_player_color(self, player_id):
-        """Return a player's color to the available pool when they disconnect"""
-        if player_id in self.player_colors:
-            color = self.player_colors[player_id]
-            self.available_colors.append(color)
-            del self.player_colors[player_id]
+        """Return a player's color to the available pool when they disconnect - thread safe"""
+        with self.color_assignment_lock:
+            if player_id in self.player_colors:
+                color = self.player_colors[player_id]
+                self.available_colors.append(color)
+                del self.player_colors[player_id]
+                print(f"Released color {color} from player {player_id}")
 
     def run_command_checks(self):
         """Run periodic checks for unacknowledged commands"""
@@ -117,18 +127,19 @@ class Server:
                     # Update last seen timestamp for this client
                     self.client_last_seen[addr] = time.time()
                 except socket.timeout:
+                    # Handle timeouts - check for disconnected clients
                     current_time = time.time()
                     with self.clients_lock:
                         to_remove = []
                         for client in self.clients:
-                            client_addr = client[0]
+                            client_addr = client['addr']
                             if client_addr not in self.client_last_seen or current_time - self.client_last_seen[client_addr] > self.client_timeout:
                                 to_remove.append(client)
 
-                        # Only remove truly timed-out clients
                         for client in to_remove:
+                            self.release_player_color(client['name'])
                             self.clients.remove(client)
-                            print(f"Client {client[0]} timed out after {self.client_timeout} seconds")
+                            print(f"Client {client['addr']} ({client['name']}) timed out")
 
                     continue
                 except OSError as e:
@@ -143,11 +154,12 @@ class Server:
                 with self.clients_lock:
                     client_found = False
                     for client in self.clients:
-                        if client[0] == addr:
+                        if client['addr'] == addr:
                             client_found = True
                             break
-                    if not client_found:
-                        print(f"New connection from {addr}")
+
+                if not client_found:
+                    print(f"New connection from {addr}")
 
 
                 # Process the received data
@@ -182,20 +194,39 @@ class Server:
                     pass
 
                 if decoded.startswith("connection,"):
-                    parts = decoded.split(",", 1)  # Split only at first comma
+                    parts = decoded.split(",", 1)
                     if len(parts) == 2:
                         base_name = parts[1]
-                        # Check if name exists and generate a unique name
                         unique_name = self.get_unique_player_name(base_name)
-                        print(f"New connection: {base_name} (assigned: {unique_name}) from {addr}")
 
+                        # Assign color immediately upon connection
+                        assigned_color = self.assign_color_to_player(unique_name)
+
+                        # Assign client ID for spawn positioning
                         with self.clients_lock:
-                            # Store address and name together as a tuple
-                            self.clients.append((addr, unique_name))
+                            client_id = self.next_client_id
+                            self.next_client_id += 1
 
-                        print(f"Clients: {self.clients}")
+                            # Store address, name, color, and client_id together
+                            client_data = {
+                                'addr': addr,
+                                'name': unique_name,
+                                'color': assigned_color,
+                                'client_id': client_id
+                            }
+                            self.clients.append(client_data)
+                            print(f"New connection: {base_name} -> {unique_name} ({assigned_color}) ID:{client_id}")
 
-                        # Notify client of their assigned name if it was changed
+                        # Send connection confirmation with color and client_id
+                        connection_response = json.dumps({
+                            "type": "connection_accepted",
+                            "assigned_name": unique_name,
+                            "assigned_color": assigned_color,
+                            "client_id": client_id
+                        })
+                        self.server_socket.sendto(connection_response.encode(), addr)
+
+                        # Notify if name was changed
                         if base_name != unique_name:
                             name_assignment = json.dumps({
                                 "type": "name_assignment",
@@ -204,13 +235,15 @@ class Server:
                             self.server_socket.sendto(name_assignment.encode(), addr)
 
                 # Handle get_players command
-                if decoded == "get_players":
+                elif decoded == "get_players":
                     print(f"Sending player list to {addr}")
                     with self.clients_lock:
-                        # Use each client's own name instead of server's name
-                        client_addresses = [f"{client[0][0]}:{client[0][1]},{client[1]}" for client in self.clients]
-                        print(f"Server>120: {client_addresses}")
-                        response = json.dumps({"type": "clients", "clients": client_addresses})
+                        client_info = []
+                        for client in self.clients:
+                            client_str = f"{client['addr'][0]}:{client['addr'][1]},{client['name']} ({client['color']})"
+                            client_info.append(client_str)
+
+                        response = json.dumps({"type": "clients", "clients": client_info})
                         self.server_socket.sendto(response.encode(), addr)
 
 
@@ -222,22 +255,25 @@ class Server:
 
 
                 # Handle disconnect message
-                if decoded == "disconnect":
+                elif decoded == "disconnect":
                     print(f"{addr} is disconnecting")
                     with self.clients_lock:
-                        # Find the client by address
-                        for client in self.clients:
-                            if client[0] == addr:
+                        for client in self.clients[:]:
+                            if client['addr'] == addr:
+                                # Release the player's color
+                                self.release_player_color(client['name'])
                                 self.clients.remove(client)
-                                # Also remove from last_seen
-                                if addr in self.client_last_seen:
-                                    del self.client_last_seen[addr]
-                                print(f"Client {addr} disconnected")
+                                print(f"Client {addr} ({client['name']}) disconnected")
                                 break
-                    continue
+
+                    # Also remove from last_seen
+                    if addr in self.client_last_seen:
+                        del self.client_last_seen[addr]
+
 
             except Exception as e:
-                print(f"Error: {e}")
+                print(f"Error in handle_clients: {e}")
+                traceback.print_exc()
                 if not self.running:
                     break
 
@@ -247,7 +283,7 @@ class Server:
         """Generate a unique player name by appending numbers if necessary"""
         # Check if the name is already in use
         with self.clients_lock:
-            existing_names = [client[1] for client in self.clients]
+            existing_names = [client['name'] for client in self.clients]
 
         # If the base name is not in use, we can use it
         if base_name not in existing_names:
@@ -262,22 +298,24 @@ class Server:
             counter += 1
 
     def send_command(self, command, client_addr=None, require_ack=False, max_retries=10, retry_interval=1.0):
-        command_id = str(time.time())  # Use timestamp as unique ID
+        command_id = str(time.time())
 
-        # Convert string commands to JSON format
         if command == "game_start":
-            # Create a color assignment for all connected players
+            # Use already assigned colors instead of assigning new ones
             color_assignments = {}
+            spawn_assignments = {}
+
             with self.clients_lock:
                 for client in self.clients:
-                    client_id = client[1]  # The player name/ID
-                    color = self.assign_color_to_player(client_id)
-                    color_assignments[client_id] = color
+                    client_name = client['name']
+                    color_assignments[client_name] = client['color']  # Use pre-assigned color
+                    spawn_assignments[client_name] = client['client_id']  # Use client_id for spawn
 
             command_data = {
                 "type": "command",
                 "command": "game_start",
                 "color_assignments": color_assignments,
+                "spawn_assignments": spawn_assignments,  # Add spawn position info
                 "id": command_id,
                 "require_ack": require_ack
             }
@@ -302,22 +340,23 @@ class Server:
 
         if client_addr:
             try:
-                # Extract the actual socket address (the first element of the tuple)
-                actual_addr = client_addr[0] if isinstance(client_addr, tuple) and isinstance(client_addr[0],
-                                                                                              tuple) else client_addr
+                if isinstance(client_addr, dict):
+                    actual_addr = client_addr['addr']
+                else:
+                    actual_addr = client_addr[0] if isinstance(client_addr, tuple) and isinstance(client_addr[0], tuple) else client_addr
+
                 self.server_socket.sendto(command_msg.encode(), actual_addr)
                 print(f"Command '{command}' -> {client_addr}")
             except Exception as e:
                 print(f"Error sending command to {client_addr}: {e}")
         else:
             with self.clients_lock:
-                for addr in self.clients:
+                for client in self.clients:
                     try:
-                        # Extract the socket address from the client tuple
-                        actual_addr = addr[0]  # This should be the (ip, port) tuple
+                        actual_addr = client['addr']
                         self.server_socket.sendto(command_msg.encode(), actual_addr)
                     except Exception as e:
-                        print(f"Error sending command to {addr}: {e}")
+                        print(f"Error sending command to {client}: {e}")
             print(f"Command '{command}' broadcast to all clients")
 
     def shutdown(self):
@@ -343,34 +382,30 @@ class Server:
             retry_interval = data.get("retry_interval", 1.0)
             max_retries = data.get("max_retries", 5)
 
-            # For game_start commands, use more aggressive retries and longer timeout
             if "game_start" in data.get("command", ""):
-                max_retries = 30  # Much more retries for game_start
-                retry_interval = 0.3  # Quicker retries for critical commands
+                max_retries = 30
+                retry_interval = 0.3
 
-            # If command was sent more than retry_interval seconds ago
             if current_time - data["time_sent"] > retry_interval:
-                # Check against max_retries
                 if data["retries"] < max_retries:
-                    # For targeted commands, send only to the target
                     if data["addr"]:
                         self.server_socket.sendto(data["command"].encode(), data["addr"])
-                    # For broadcast commands like game_start, send to all clients
                     else:
+                        # Fix: Use dictionary keys instead of indices
                         with self.clients_lock:
                             for client in self.clients:
-                                self.server_socket.sendto(data["command"].encode(), client[0])
+                                try:
+                                    self.server_socket.sendto(data["command"].encode(), client['addr'])
+                                except Exception as e:
+                                    print(f"Error resending command to {client['name']}: {e}")
 
-                    # Update retries and time sent
                     data["retries"] += 1
                     data["time_sent"] = current_time
                     print(f"Resending command {cmd_id}, retry #{data['retries']}")
                 else:
-                    # Max retries reached
                     print(f"Max retries reached for command {cmd_id}")
                     to_remove.append(cmd_id)
 
-        # Remove expired entries
         for cmd_id in to_remove:
             self.pending_acks.pop(cmd_id)
 
@@ -379,23 +414,19 @@ class Server:
         if not self.running:
             return
 
-        # Convert to string if it's a dict or list
         if isinstance(game_data, (dict, list)):
             data_json = json.dumps(game_data)
         else:
             data_json = game_data
 
-        print(f"Broadcasting game data: {data_json} (except: {except_ip})")
-
         with self.clients_lock:
             for client in self.clients:
                 try:
-                    client_addr = client[0]  # The first element is the address tuple
-                    # Skip the client that sent this data if specified
+                    client_addr = client['addr']
                     if except_ip and client_addr == except_ip:
                         continue
 
                     self.server_socket.sendto(data_json.encode(), client_addr)
-                    print(f"Sent game data to {client[1]} at {client_addr}")
+                    print(f"Sent game data to {client['name']} at {client_addr}")
                 except Exception as e:
                     print(f"Error broadcasting game data to {client}: {e}")

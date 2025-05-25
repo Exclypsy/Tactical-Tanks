@@ -46,6 +46,10 @@ class LobbyView(UIView):
         self.temp_player_list = []
         self.last_known_server_name = "Server"
 
+        self.update_counter = 0
+        self.player_timeout_counts = {}
+        self.max_timeout_count = 4
+
         # Server IP display
         server_ip = client_or_server.get_server_ip()
         server_ip = UILabel(text="Server IP: " + server_ip[0]+":"+str(server_ip[1]), font_size=20,
@@ -92,10 +96,6 @@ class LobbyView(UIView):
         print(f"Host name: {self.host_name}")
         self.add_server()
 
-        self.update_counter = 0
-
-        self.player_timeout_counts = {}
-        self.max_timeout_count = 4  # Require 4 timeouts before removing a player
 
 
     def add_server(self):

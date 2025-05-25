@@ -34,7 +34,7 @@ except json.JSONDecodeError:
 
 
 class GameView(arcade.View):
-    def __init__(self, window, client_or_server, is_client, color_assignments=None):
+    def __init__(self, window, client_or_server, is_client, color_assignments=None, spawn_assignments=None):
         super().__init__()
         self.window = window
         # self.window.maximize()
@@ -46,6 +46,7 @@ class GameView(arcade.View):
         self.is_client = is_client
 
         self.color_assignments = color_assignments or {}
+        self.spawn_assignments = spawn_assignments or {}
 
         arcade.set_background_color(arcade.color.DARK_GRAY)
 
@@ -73,12 +74,13 @@ class GameView(arcade.View):
             # Host gets position 0 (bottom-left)
         spawn_position = self.spawn_positions[spawn_index]
 
-        if is_client and player_id in self.color_assignments:
+        if is_client and hasattr(self.client_or_server, 'assigned_color') and self.client_or_server.assigned_color:
+            tank_color = self.client_or_server.assigned_color
+        elif player_id in self.color_assignments:
             tank_color = self.color_assignments[player_id]
         else:
-            # Fallback if no assignment (shouldn't happen)
-            self.available_colors = ["blue", "red", "yellow", "green"]
-            tank_color = random.choice(self.available_colors)
+            # Final fallback
+            tank_color = "blue"
 
         self.player_tank = Tank(tank_color=tank_color, player_id=player_id)
         self.player_tank.center_x = spawn_position[0]
