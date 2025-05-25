@@ -50,11 +50,10 @@ class Server:
         self.color_assignment_lock = threading.Lock()
         self.next_client_id = 0
 
-        self.server_color = self.assign_server_color()
-        print(f"Server assigned itself color: {self.server_color}")
+        self.server_color = None
 
     def start(self):
-        if not hasattr(self, 'server_color') or not self.server_color:
+        if not self.server_color:
             self.server_color = self.assign_server_color()
             print(f"Server assigned itself color: {self.server_color}")
 
@@ -85,18 +84,19 @@ class Server:
             self.server_socket.close()
 
     def assign_server_color(self):
-        """Assign a random color to the server itself"""
+        """Assign a random color to the server itself - called only once"""
         with self.color_assignment_lock:
             print(f"Available colors before server assignment: {self.available_colors}")
             if not self.available_colors:
-                return "blue"  # Fallback
+                print("ERROR: No colors available for server!")
+                return "blue"  # Emergency fallback
 
             # Server picks a random color
             server_color = random.choice(self.available_colors)
             self.available_colors.remove(server_color)
             print(f"Server took color {server_color}, remaining: {self.available_colors}")
 
-            # Store server's color
+            # Store server's color with consistent key
             server_name = getattr(self, 'player_name', 'host')
             self.player_colors[server_name] = server_color
 
@@ -105,13 +105,32 @@ class Server:
     def assign_color_to_player(self, player_id):
         """Assign a random unique color to a client player - thread safe"""
         with self.color_assignment_lock:
+            # Check if player already has a color
             if player_id in self.player_colors:
                 return self.player_colors[player_id]
 
             print(f"Available colors for client {player_id}: {self.available_colors}")
+
+            # Ensure server color is not available for clients
+            server_name = getattr(self, 'player_name', 'host')
+            if self.server_color and self.server_color in self.available_colors:
+                print(f"WARNING: Server color {self.server_color} found in available colors, removing it")
+                self.available_colors.remove(self.server_color)
+
             if not self.available_colors:
-                print(f"Warning: No colors available for player {player_id}")
-                return "blue"  # Fallback
+                print(f"ERROR: No colors available for player {player_id}")
+                # Instead of defaulting to blue (server might have it), assign a unique fallback
+                used_colors = set(self.player_colors.values())
+                all_colors = ["blue", "red", "yellow", "green"]
+                for fallback_color in all_colors:
+                    if fallback_color not in used_colors:
+                        print(f"Using fallback color {fallback_color} for player {player_id}")
+                        self.player_colors[player_id] = fallback_color
+                        return fallback_color
+
+                # Ultimate fallback - this shouldn't happen with 4 colors and max 4 players
+                print(f"CRITICAL: All colors exhausted, assigning 'blue' to {player_id}")
+                return "blue"
 
             # Client gets a random color from remaining colors
             color = random.choice(self.available_colors)
@@ -249,6 +268,7 @@ class Server:
 
                         # Assign color immediately upon connection
                         assigned_color = self.assign_color_to_player(unique_name)
+                        self.debug_color_assignments()
 
                         # Assign client ID for spawn positioning
                         with self.clients_lock:
@@ -343,11 +363,15 @@ class Server:
 
     def get_unique_player_name(self, base_name):
         """Generate a unique player name by appending numbers if necessary"""
-        # Check if the name is already in use
         with self.clients_lock:
+            # Get all existing names including server
             existing_names = [client['name'] for client in self.clients]
 
-        # If the base name is not in use, we can use it
+            # Also check server name to avoid conflicts
+            server_name = getattr(self, 'player_name', 'host')
+            if server_name:
+                existing_names.append(server_name)
+
         if base_name not in existing_names:
             return base_name
 
@@ -358,6 +382,26 @@ class Server:
             if new_name not in existing_names:
                 return new_name
             counter += 1
+
+    def debug_color_assignments(self):
+        """Debug method to check current color assignments"""
+        with self.color_assignment_lock:
+            print(f"=== COLOR ASSIGNMENT DEBUG ===")
+            print(f"Server color: {self.server_color}")
+            print(f"Available colors: {self.available_colors}")
+            print(f"Player colors: {self.player_colors}")
+
+            # Check for duplicates
+            all_assigned_colors = list(self.player_colors.values())
+            if len(all_assigned_colors) != len(set(all_assigned_colors)):
+                print("ERROR: Duplicate colors detected!")
+                for color in set(all_assigned_colors):
+                    players_with_color = [k for k, v in self.player_colors.items() if v == color]
+                    if len(players_with_color) > 1:
+                        print(f"  Color {color} assigned to: {players_with_color}")
+            else:
+                print("✓ No duplicate colors detected")
+            print(f"==============================")
 
     def send_command(self, command, client_addr=None, require_ack=False, max_retries=10, retry_interval=1.0):
         command_id = str(time.time())

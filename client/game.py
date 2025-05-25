@@ -71,21 +71,39 @@ class GameView(arcade.View):
             # Fallback to random position if client_id not available
             else:
                 spawn_index = random.randint(1, 3)
-            # Host gets position 0 (bottom-left)
+
+        # Host gets position 0 (bottom-left)
         spawn_position = self.spawn_positions[spawn_index]
 
-        if is_client and hasattr(self.client_or_server, 'assigned_color') and self.client_or_server.assigned_color:
-            tank_color = self.client_or_server.assigned_color
-        elif player_id in self.color_assignments:
-            tank_color = self.color_assignments[player_id]
+        if not is_client:
+            # Server/host uses its pre-assigned server_color
+            if hasattr(self.client_or_server, 'server_color') and self.client_or_server.server_color:
+                tank_color = self.client_or_server.server_color
+                print(f"Server using server_color: {tank_color}")
+            elif player_id in self.color_assignments:
+                tank_color = self.color_assignments[player_id]
+                print(f"Server using color_assignments: {tank_color}")
+            else:
+                tank_color = "red"  # Changed fallback from blue to red for server
+                print(f"Server using fallback color: {tank_color}")
         else:
-            # Final fallback
-            tank_color = "blue"
+            # Client uses assigned_color or color_assignments
+            if hasattr(self.client_or_server, 'assigned_color') and self.client_or_server.assigned_color:
+                tank_color = self.client_or_server.assigned_color
+                print(f"Client using assigned_color: {tank_color}")
+            elif player_id in self.color_assignments:
+                tank_color = self.color_assignments[player_id]
+                print(f"Client using color_assignments: {tank_color}")
+            else:
+                # Final fallback for clients
+                tank_color = "blue"
+                print(f"Client using fallback color: {tank_color}")
 
         self.player_tank = Tank(tank_color=tank_color, player_id=player_id)
         self.player_tank.center_x = spawn_position[0]
         self.player_tank.center_y = spawn_position[1]
         self.player_tank.is_rotating = True
+
         self.tanks.append(self.player_tank)
 
         self.initial_position_sent = False
