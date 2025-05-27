@@ -42,6 +42,16 @@ def save_setting(key, value):
 
 is_fullscreen = settings.get("fullscreen", False)
 
+
+def toggle_fullscreen(window_self, fullscreen_button=None):
+    global is_fullscreen
+    is_fullscreen = not is_fullscreen
+    window_self.set_fullscreen(is_fullscreen)
+    save_setting("fullscreen", is_fullscreen)
+    if fullscreen_button:
+        fullscreen_button.text = "Fullscreen: ON" if is_fullscreen else "Fullscreen: OFF"
+        fullscreen_button.set_color("green" if is_fullscreen else "red")
+
 class SettingsView(UIView):
     def __init__(self, window):
         super().__init__()
@@ -104,15 +114,8 @@ class SettingsView(UIView):
             color="green" if is_fullscreen else "red"
         )
 
-        def toggle_fullscreen():
-            global is_fullscreen
-            is_fullscreen = not is_fullscreen
-            self.window.set_fullscreen(is_fullscreen)
-            save_setting("fullscreen", is_fullscreen)
-            fullscreen_button.text = "Fullscreen: ON" if is_fullscreen else "Fullscreen: OFF"
-            fullscreen_button.set_color("green" if is_fullscreen else "red")
 
-        fullscreen_button.on_click = lambda event: toggle_fullscreen()
+        fullscreen_button.on_click = lambda event: toggle_fullscreen(self.window, fullscreen_button)
         layout.add(fullscreen_button)
 
         # Music section

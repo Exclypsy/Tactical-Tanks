@@ -122,6 +122,9 @@ class Mainview(UIView):
         super().on_resize(width, height)
 
         # Update and save new window dimensions in the settings file
+        if globals().get("is_fullscreen", False):
+            width = self.window.screen.width
+            height = self.window.screen.height
         save_setting("window_width", width)
         save_setting("window_height", height)
 

@@ -13,6 +13,8 @@ from client.Bullet import Bullet
 from client.Tank import Tank
 from client.assets.effects.FireEffect import FireEffect
 
+from SettingsWindow import toggle_fullscreen
+
 # from client.Tree import Tree
 
 project_root = Path(__file__).resolve().parent.parent
@@ -37,10 +39,15 @@ class GameView(arcade.View):
     def __init__(self, window, client_or_server, is_client, color_assignments=None, spawn_assignments=None):
         super().__init__()
         self.window = window
-        # self.window.maximize()
+        toggle_fullscreen(self.window)
+
+        self.game_width = self.window.width
+        self.game_height = self.window.height
+
         self.background = arcade.Sprite(":assets:images/forestBG.jpg")
-        self.background.center_x = self.window.width // 2
-        self.background.center_y = self.window.height // 2
+
+        self.background.center_x = self.game_width // 2
+        self.background.center_y = self.game_height // 2
 
         self.client_or_server = client_or_server
         self.is_client = is_client
@@ -52,9 +59,9 @@ class GameView(arcade.View):
 
         self.spawn_positions = [
             (100, 100),  # Bottom-left corner
-            (self.window.width - 100, 100),  # Bottom-right corner
-            (100, self.window.height - 100),  # Top-left corner
-            (self.window.width - 100, self.window.height - 100)  # Top-right corner
+            (self.game_width - 100, 100),  # Bottom-right corner
+            (100, self.game_height - 100),  # Top-left corner
+            (self.game_width - 100, self.game_height - 100)  # Top-right corner
         ]
 
         # Tanks
@@ -194,20 +201,17 @@ class GameView(arcade.View):
 
             self.popup_active = True
 
-    def on_resize(self, width, height):
-        super().on_resize(width, height)
-        self.player_tank.center_x = width // 2
-        self.player_tank.center_y = height // 2
-        self.background.center_x = width // 2
-        self.background.center_y = height // 2
-
     def on_draw(self):
         self.clear()
+
+        # Simple drawing without camera
         arcade.draw_sprite(self.background)
-        # self.trees.draw()
+
+        # Draw game elements
         for tank in self.tanks:
             tank.bullet_list.draw()
             tank.effects_list.draw()
+
         self.tanks.draw()
 
         if self.show_hitboxes:
@@ -217,9 +221,10 @@ class GameView(arcade.View):
 
         if self.game_over:
             arcade.draw_text("GAME OVER - TANK DESTROYED!",
-                             self.width / 2, self.height / 2,
+                             self.game_width / 2, self.game_height / 2,
                              arcade.color.RED, 24, anchor_x="center")
 
+        # Draw UI elements
         self.manager.draw()
 
     def on_key_press(self, key, modifiers):
@@ -242,9 +247,9 @@ class GameView(arcade.View):
             return
 
         for tank in self.tanks:
-            tank.update(delta_time, self.width, self.height)
-            # for tree in self.trees:
-            #     tree.update(tank.bullet_list)
+            # Use actual window size for boundary checking
+            tank.update(delta_time, self.game_width, self.game_height)
+
             hit_tank = tank.check_bullet_collisions([t for t in self.tanks if t != tank])
             if hit_tank and hit_tank == self.player_tank and hit_tank.destroyed:
                 self.game_over = True
@@ -256,6 +261,8 @@ class GameView(arcade.View):
 
         self.manager.disable()
         from MainMenu import Mainview
+        toggle_fullscreen(self.window)
+        self.manager.clear()
         self.window.show_view(Mainview(self.window))
         if self.is_client:
             self.client_or_server.disconnect()
