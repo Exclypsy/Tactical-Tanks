@@ -10,12 +10,12 @@ class StaticEntity(arcade.Sprite):
 
     # Class-level asset mapping for different entity types
     ENTITY_ASSETS = {
-        "tree": ":assets:images/tree.png",
-        "bush": ":assets:images/bush.png",
-        "rock": ":assets:images/rock.png",
-        "wall": ":assets:images/wall.png",
-        "stone": ":assets:images/stone.png",
-        "barrel": ":assets:images/barrel.png",
+        "bush_small": ":assets:images/static_entities/bush_small.png",
+        "bush_big": ":assets:images/static_entities/bush_big.png",
+        "rock0": ":assets:images/static_entities/rock0.png",
+        "rock1": ":assets:images/static_entities/rock1.png",
+        "rock2": ":assets:images/static_entities/rock2.png",
+        "rock3": ":assets:images/static_entities/rock3.png",
         # Add more entity types as needed
     }
 

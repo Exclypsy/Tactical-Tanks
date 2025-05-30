@@ -39,8 +39,8 @@
   ],
   "static_entities": [
     {
-      "entity_id": "tree_001",
-      "type": "tree",
+      "entity_id": "bush_001",
+      "type": "bush_small",
       "position": {
         "x": 450,
         "y": 300
@@ -50,8 +50,8 @@
       "hp": 2
     },
     {
-      "entity_id": "tree_002",
-      "type": "tree",
+      "entity_id": "bush_002",
+      "type": "bush_big",
       "position": {
         "x": 1200,
         "y": 650
@@ -61,8 +61,8 @@
       "hp": 3
     },
     {
-      "entity_id": "tree_003",
-      "type": "tree",
+      "entity_id": "bush_003",
+      "type": "bush_small",
       "position": {
         "x": 800,
         "y": 850
@@ -73,7 +73,7 @@
     },
     {
       "entity_id": "bush_001",
-      "type": "bush",
+      "type": "bush_big",
       "position": {
         "x": 350,
         "y": 500
@@ -84,7 +84,7 @@
     },
     {
       "entity_id": "bush_002",
-      "type": "bush",
+      "type": "bush_big",
       "position": {
         "x": 1400,
         "y": 300
@@ -95,7 +95,7 @@
     },
     {
       "entity_id": "bush_003",
-      "type": "bush",
+      "type": "bush_small",
       "position": {
         "x": 600,
         "y": 700
@@ -106,7 +106,7 @@
     },
     {
       "entity_id": "rock_001",
-      "type": "rock",
+      "type": "rock0",
       "position": {
         "x": 950,
         "y": 400
@@ -117,7 +117,7 @@
     },
     {
       "entity_id": "rock_002",
-      "type": "rock",
+      "type": "rock1",
       "position": {
         "x": 250,
         "y": 750
@@ -127,8 +127,8 @@
       "hp": 3
     },
     {
-      "entity_id": "stone_002",
-      "type": "stone",
+      "entity_id": "rock_003",
+      "type": "rock3",
       "position": {
         "x": 1300,
         "y": 500
