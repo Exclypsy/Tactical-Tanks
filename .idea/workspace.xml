@@ -4,12 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="943984de-205b-4b9b-a54d-0d0f9a3a3d64" name="Changes" comment="fixed pridelovanie farieb zase">
+    <list default="true" id="943984de-205b-4b9b-a54d-0d0f9a3a3d64" name="Changes" comment="map selection (bez nacitania mapy) + nove obrazky :)">
       <change beforePath="$PROJECT_DIR$/.config/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/.config/settings.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.copy_files.py" beforeDir="false" afterPath="$PROJECT_DIR$/.copy_files.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SettingsWindow.py" beforeDir="false" afterPath="$PROJECT_DIR$/SettingsWindow.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Lobby.py" beforeDir="false" afterPath="$PROJECT_DIR$/Lobby.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/Client.py" beforeDir="false" afterPath="$PROJECT_DIR$/client/Client.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/assets/images/bush.png" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/client/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/client/game.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/Server.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/Server.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -100,11 +103,11 @@
       <recent name="C:\Users\Admin\PycharmProjects\OPGP-Projekt-MOS-\server" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Admin\PycharmProjects\OPGP-Projekt-MOS-\non-player" />
       <recent name="C:\Users\Admin\PycharmProjects\OPGP-Projekt-MOS-\client\assets\images\vybuch" />
       <recent name="C:\Users\Admin\PycharmProjects\OPGP-Projekt-MOS-\client" />
       <recent name="$PROJECT_DIR$/client/assets/sounds" />
       <recent name="$PROJECT_DIR$/client/assets/images" />
-      <recent name="$PROJECT_DIR$/client/assets/butons" />
     </key>
   </component>
   <component name="RunAnythingCache">
@@ -300,7 +303,8 @@
       <workItem from="1748115052508" duration="607000" />
       <workItem from="1748161337955" duration="11783000" />
       <workItem from="1748329073984" duration="23000" />
-      <workItem from="1748355107906" duration="7102000" />
+      <workItem from="1748355107906" duration="7463000" />
+      <workItem from="1748621059661" duration="9942000" />
     </task>
     <task id="LOCAL-00001" summary="Push 1 test">
       <option name="closed" value="true" />
@@ -654,7 +658,23 @@
       <option name="project" value="LOCAL" />
       <updated>1748175895249</updated>
     </task>
-    <option name="localTasksCounter" value="45" />
+    <task id="LOCAL-00045" summary="v hre iba fullscreen">
+      <option name="closed" value="true" />
+      <created>1748367392683</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1748367392683</updated>
+    </task>
+    <task id="LOCAL-00046" summary="map selection (bez nacitania mapy) + nove obrazky :)">
+      <option name="closed" value="true" />
+      <created>1748637811378</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1748637811378</updated>
+    </task>
+    <option name="localTasksCounter" value="47" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -673,8 +693,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="Ulozenie nastaveni, premenovanie suborov #40" />
-    <MESSAGE value="preklik fix" />
     <MESSAGE value="Settings" />
     <MESSAGE value="basic Client/Server" />
     <MESSAGE value="UDP, lobby (cez AI -&gt; neide), v Join input na server IP" />
@@ -698,11 +716,13 @@
     <MESSAGE value="pridelenie farby tanku uz v lobby (zatial len backend)" />
     <MESSAGE value="lobby - farby tankov" />
     <MESSAGE value="fixed pridelovanie farieb zase" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed pridelovanie farieb zase" />
+    <MESSAGE value="v hre iba fullscreen" />
+    <MESSAGE value="map selection (bez nacitania mapy) + nove obrazky :)" />
+    <option name="LAST_COMMIT_MESSAGE" value="map selection (bez nacitania mapy) + nove obrazky :)" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$ButtonRed.coverage" NAME="ButtonRed Coverage Results" MODIFIED="1744493543268" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Tactical_Tanks$_copy_files.coverage" NAME=".copy_files Coverage Results" MODIFIED="1748364505490" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Tactical_Tanks$_copy_files.coverage" NAME=".copy_files Coverage Results" MODIFIED="1748636904359" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$SettingsWindow.coverage" NAME="SettingsWindow Coverage Results" MODIFIED="1744223591669" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Tactical_Tanks$Lobby.coverage" NAME="Lobby Coverage Results" MODIFIED="1747579212666" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Tactical_Tanks$Server__1_.coverage" NAME="Server (1) Coverage Results" MODIFIED="1745953993700" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/server" />
@@ -715,7 +735,7 @@
     <SUITE FILE_PATH="coverage/Tactical_Tanks$Client__1_.coverage" NAME="Client (1) Coverage Results" MODIFIED="1745831787444" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
     <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$settings.coverage" NAME="settings Coverage Results" MODIFIED="1744220937438" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Tactical_Tanks$client.coverage" NAME="client Coverage Results" MODIFIED="1745783928181" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
-    <SUITE FILE_PATH="coverage/Tactical_Tanks$MainMenu.coverage" NAME="MainMenu Coverage Results" MODIFIED="1748366996865" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
+    <SUITE FILE_PATH="coverage/Tactical_Tanks$MainMenu.coverage" NAME="MainMenu Coverage Results" MODIFIED="1748637715997" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
     <SUITE FILE_PATH="coverage/Tactical_Tanks$Join.coverage" NAME="Join Coverage Results" MODIFIED="1745782509170" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Tactical_Tanks$Server.coverage" NAME="Server Coverage Results" MODIFIED="1745785025628" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/server" />
     <SUITE FILE_PATH="coverage/Tactical_Tanks$Tank.coverage" NAME="Tank Coverage Results" MODIFIED="1745958227516" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />

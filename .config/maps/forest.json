@@ -1,0 +1,141 @@
+{
+  "map_info": {
+    "name": "Forest",
+    "background": ":assets:images/forestBG.jpg"
+  },
+  "tank_spawns": [
+    {
+      "spawn_id": 0,
+      "position": {
+        "x": 100,
+        "y": 100
+      },
+      "rotation": 45
+    },
+    {
+      "spawn_id": 1,
+      "position": {
+        "x": 1820,
+        "y": 100
+      },
+      "rotation": 135
+    },
+    {
+      "spawn_id": 2,
+      "position": {
+        "x": 100,
+        "y": 980
+      },
+      "rotation": 315
+    },
+    {
+      "spawn_id": 3,
+      "position": {
+        "x": 1820,
+        "y": 980
+      },
+      "rotation": 225
+    }
+  ],
+  "static_entities": [
+    {
+      "entity_id": "tree_001",
+      "type": "tree",
+      "position": {
+        "x": 450,
+        "y": 300
+      },
+      "rotation": 0,
+      "scale": 0.8,
+      "hp": 2
+    },
+    {
+      "entity_id": "tree_002",
+      "type": "tree",
+      "position": {
+        "x": 1200,
+        "y": 650
+      },
+      "rotation": 45,
+      "scale": 1.2,
+      "hp": 3
+    },
+    {
+      "entity_id": "tree_003",
+      "type": "tree",
+      "position": {
+        "x": 800,
+        "y": 850
+      },
+      "rotation": 90,
+      "scale": 0.9,
+      "hp": 2
+    },
+    {
+      "entity_id": "bush_001",
+      "type": "bush",
+      "position": {
+        "x": 350,
+        "y": 500
+      },
+      "rotation": 0,
+      "scale": 0.6,
+      "hp": 1
+    },
+    {
+      "entity_id": "bush_002",
+      "type": "bush",
+      "position": {
+        "x": 1400,
+        "y": 300
+      },
+      "rotation": 180,
+      "scale": 0.7,
+      "hp": 1
+    },
+    {
+      "entity_id": "bush_003",
+      "type": "bush",
+      "position": {
+        "x": 600,
+        "y": 700
+      },
+      "rotation": 270,
+      "scale": 0.5,
+      "hp": 1
+    },
+    {
+      "entity_id": "rock_001",
+      "type": "rock",
+      "position": {
+        "x": 950,
+        "y": 400
+      },
+      "rotation": 30,
+      "scale": 1.0,
+      "hp": 4
+    },
+    {
+      "entity_id": "rock_002",
+      "type": "rock",
+      "position": {
+        "x": 250,
+        "y": 750
+      },
+      "rotation": 120,
+      "scale": 0.8,
+      "hp": 3
+    },
+    {
+      "entity_id": "stone_002",
+      "type": "stone",
+      "position": {
+        "x": 1300,
+        "y": 500
+      },
+      "rotation": 150,
+      "scale": 0.9,
+      "hp": 3
+    }
+  ]
+}

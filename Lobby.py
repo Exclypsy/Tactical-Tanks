@@ -306,6 +306,8 @@ class LobbyView(UIView):
         if not self.is_client:
             self.show_loading = True
 
+            self.client_or_server.broadcast_selected_map()
+
             # Send with acknowledgment requirement
             self.client_or_server.send_command("game_start", require_ack=True)
 

@@ -44,6 +44,8 @@ class Client:
         self.assigned_color = None
         self.client_id = None
 
+        self.current_map = None
+
     def connect(self):
         try:
             # Create a new socket for each connection
@@ -314,6 +316,14 @@ class Client:
             if require_ack and cmd_id:
                 ack_msg = json.dumps({"type": "ack", "id": cmd_id})
                 self.socket.sendto(ack_msg.encode(), self.server_address)
+
+            if command == "map_selected":
+                map_name = command_data.get("map_name")
+                if map_name:
+                    self.current_map = map_name
+                    print(f"Received selected map: {self.current_map}")
+                else:
+                    print("ERROR: Received map_selected command without map_name")
 
             if command == "game_start":
                 print("Game is starting!")

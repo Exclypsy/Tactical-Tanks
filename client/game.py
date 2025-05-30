@@ -39,7 +39,7 @@ class GameView(arcade.View):
     def __init__(self, window, client_or_server, is_client, color_assignments=None, spawn_assignments=None):
         super().__init__()
         self.window = window
-        toggle_fullscreen(self.window)
+        # toggle_fullscreen(self.window)
 
         self.game_width = self.window.width
         self.game_height = self.window.height

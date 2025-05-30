@@ -5,6 +5,7 @@ import time
 import random
 from pathlib import Path
 
+
 import arcade
 
 import traceback
@@ -44,6 +45,18 @@ class Server:
 
         self.player_name = settings.get("player_name")
 
+
+        path = project_root / ".config" / "maps"
+        arcade.resources.add_resource_handle("maps", str(path.resolve()))
+
+        self.all_maps = []
+        for map_file in path.glob("*.json"):
+            if map_file.is_file():
+                self.all_maps.append(map_file.stem)
+
+
+
+
         self.available_colors = ["blue", "red", "yellow", "green"]
         self.player_colors = {}
         self.clients_lock = threading.Lock()
@@ -51,6 +64,8 @@ class Server:
         self.next_client_id = 0
 
         self.server_color = None
+
+        self.picked_map = None
 
     def start(self):
         if not self.server_color:
@@ -406,7 +421,23 @@ class Server:
     def send_command(self, command, client_addr=None, require_ack=False, max_retries=10, retry_interval=1.0):
         command_id = str(time.time())
 
-        if command == "game_start":
+        if command == "map_selected":
+            if not self.picked_map:
+                print("ERROR: No map selected to broadcast")
+                return
+
+            command_data = {
+                "type": "command",
+                "command": "map_selected",
+                "map_name": self.picked_map,
+                "id": command_id,
+                "require_ack": require_ack
+            }
+            command_msg = json.dumps(command_data)
+            print(f"Broadcasting selected map: {self.picked_map}")
+
+
+        elif command == "game_start":
             # Use already assigned colors including server color
             color_assignments = {}
             spawn_assignments = {}
@@ -543,3 +574,14 @@ class Server:
                     print(f"Sent game data to {client['name']} at {client_addr}")
                 except Exception as e:
                     print(f"Error broadcasting game data to {client}: {e}")
+
+    def broadcast_selected_map(self):
+        """Pick a random map and broadcast it to all connected clients with ACK requirement"""
+        if not self.all_maps:
+            print("ERROR: No maps available to select")
+            return
+
+        # Pick the map
+        self.picked_map = random.choice(self.all_maps)
+
+        self.send_command("map_selected", require_ack=True)
