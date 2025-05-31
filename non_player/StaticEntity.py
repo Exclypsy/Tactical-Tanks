@@ -22,7 +22,7 @@ class StaticEntity(arcade.Sprite):
     # Class-level sound cache for optimization
     _destroy_sound = None
 
-    def __init__(self, x_pos, y_pos, entity_type="bush", hp=1, scale=1.0, rotation=0):
+    def __init__(self, x_pos, y_pos, entity_type="bush_big", hp=1, scale=1.0, rotation=0):
         """
         Initialize a static entity.
 
@@ -35,7 +35,7 @@ class StaticEntity(arcade.Sprite):
             rotation (float): Rotation angle in degrees
         """
         # Get the appropriate image for the entity type
-        image_path = self.ENTITY_ASSETS.get(entity_type, self.ENTITY_ASSETS["bush"])
+        image_path = self.ENTITY_ASSETS.get(entity_type, self.ENTITY_ASSETS["bush_big"])
 
         super().__init__(image_path, scale)
 
