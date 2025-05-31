@@ -4,7 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="943984de-205b-4b9b-a54d-0d0f9a3a3d64" name="Changes" comment="nacitanie mapy funguje">
+    <list default="true" id="943984de-205b-4b9b-a54d-0d0f9a3a3d64" name="Changes" comment="uz to skoro funguje">
+      <change beforePath="$PROJECT_DIR$/.config/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/.config/settings.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.copy_files.py" beforeDir="false" afterPath="$PROJECT_DIR$/.copy_files.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/client/game.py" afterDir="false" />
@@ -55,42 +56,42 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;Python..copy_files.executor&quot;: &quot;Run&quot;,
-    &quot;Python.Client (1).executor&quot;: &quot;Run&quot;,
-    &quot;Python.Create.executor&quot;: &quot;Run&quot;,
-    &quot;Python.Join.executor&quot;: &quot;Run&quot;,
-    &quot;Python.Lobby.executor&quot;: &quot;Run&quot;,
-    &quot;Python.MainMenu.executor&quot;: &quot;Run&quot;,
-    &quot;Python.Server (1).executor&quot;: &quot;Run&quot;,
-    &quot;Python.Server.executor&quot;: &quot;Run&quot;,
-    &quot;Python.SettingsWindow.executor&quot;: &quot;Run&quot;,
-    &quot;Python.Tank.executor&quot;: &quot;Run&quot;,
-    &quot;Python.a.executor&quot;: &quot;Run&quot;,
-    &quot;Python.client.executor&quot;: &quot;Run&quot;,
-    &quot;Python.client2.executor&quot;: &quot;Run&quot;,
-    &quot;Python.game.executor&quot;: &quot;Run&quot;,
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.server.executor&quot;: &quot;Run&quot;,
-    &quot;Python.settings.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Admin/PycharmProjects/OPGP-Projekt-MOS-&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Python..copy_files.executor": "Run",
+    "Python.Client (1).executor": "Run",
+    "Python.Create.executor": "Run",
+    "Python.Join.executor": "Run",
+    "Python.Lobby.executor": "Run",
+    "Python.MainMenu.executor": "Run",
+    "Python.Server (1).executor": "Run",
+    "Python.Server.executor": "Run",
+    "Python.SettingsWindow.executor": "Run",
+    "Python.Tank.executor": "Run",
+    "Python.a.executor": "Run",
+    "Python.client.executor": "Run",
+    "Python.client2.executor": "Run",
+    "Python.game.executor": "Run",
+    "Python.main.executor": "Run",
+    "Python.server.executor": "Run",
+    "Python.settings.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/Admin/PycharmProjects/OPGP-Projekt-MOS-",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Admin\PycharmProjects\OPGP-Projekt-MOS-" />
@@ -301,23 +302,9 @@
       <workItem from="1748329073984" duration="23000" />
       <workItem from="1748355107906" duration="7463000" />
       <workItem from="1748621059661" duration="14333000" />
-      <workItem from="1748676730461" duration="4022000" />
-    </task>
-    <task id="LOCAL-00001" summary="Push 1 test">
-      <option name="closed" value="true" />
-      <created>1742979708118</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1742979708118</updated>
-    </task>
-    <task id="LOCAL-00002" summary="Push 1 test">
-      <option name="closed" value="true" />
-      <created>1742979776210</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1742979776210</updated>
+      <workItem from="1748676730461" duration="4551000" />
+      <workItem from="1748686206477" duration="5970000" />
+      <workItem from="1748693106955" duration="6080000" />
     </task>
     <task id="LOCAL-00003" summary="Push 3 test, delete Test_folder">
       <option name="closed" value="true" />
@@ -695,7 +682,23 @@
       <option name="project" value="LOCAL" />
       <updated>1748679019965</updated>
     </task>
-    <option name="localTasksCounter" value="50" />
+    <task id="LOCAL-00050" summary="hranice mapy, hitboxy + marny pokus o fixnutie scalovania">
+      <option name="closed" value="true" />
+      <created>1748681141547</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1748681141547</updated>
+    </task>
+    <task id="LOCAL-00051" summary="uz to skoro funguje">
+      <option name="closed" value="true" />
+      <created>1748690459909</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1748690459909</updated>
+    </task>
+    <option name="localTasksCounter" value="52" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -714,8 +717,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="UDP, lobby (cez AI -&gt; neide), v Join input na server IP" />
-    <MESSAGE value="working lobby (todo: fix disconnecting)" />
     <MESSAGE value="Lobby viac menej funkcne #53 #22" />
     <MESSAGE value="Cleanup" />
     <MESSAGE value="Improvements" />
@@ -739,7 +740,9 @@
     <MESSAGE value="map selection (bez nacitania mapy) + nove obrazky :)" />
     <MESSAGE value="premenovanie suborov" />
     <MESSAGE value="nacitanie mapy funguje" />
-    <option name="LAST_COMMIT_MESSAGE" value="nacitanie mapy funguje" />
+    <MESSAGE value="hranice mapy, hitboxy + marny pokus o fixnutie scalovania" />
+    <MESSAGE value="uz to skoro funguje" />
+    <option name="LAST_COMMIT_MESSAGE" value="uz to skoro funguje" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$ButtonRed.coverage" NAME="ButtonRed Coverage Results" MODIFIED="1744493543268" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -756,7 +759,7 @@
     <SUITE FILE_PATH="coverage/Tactical_Tanks$a.coverage" NAME="a Coverage Results" MODIFIED="1748680294957" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$settings.coverage" NAME="settings Coverage Results" MODIFIED="1744220937438" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Tactical_Tanks$client.coverage" NAME="client Coverage Results" MODIFIED="1745783928181" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
-    <SUITE FILE_PATH="coverage/Tactical_Tanks$MainMenu.coverage" NAME="MainMenu Coverage Results" MODIFIED="1748680808920" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
+    <SUITE FILE_PATH="coverage/Tactical_Tanks$MainMenu.coverage" NAME="MainMenu Coverage Results" MODIFIED="1748698980410" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
     <SUITE FILE_PATH="coverage/Tactical_Tanks$Join.coverage" NAME="Join Coverage Results" MODIFIED="1745782509170" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Tactical_Tanks$Server.coverage" NAME="Server Coverage Results" MODIFIED="1745785025628" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/server" />
     <SUITE FILE_PATH="coverage/Tactical_Tanks$Tank.coverage" NAME="Tank Coverage Results" MODIFIED="1745958227516" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />

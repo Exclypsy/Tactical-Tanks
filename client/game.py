@@ -31,7 +31,6 @@ try:
         with open(SETTINGS_FILE, "r") as file:
             settings = json.load(file)
 except json.JSONDecodeError:
-    print("⚠️ Nastal problém pri načítaní settings.json – používa sa prázdne nastavenie.")
     settings = {}
 
 
@@ -98,8 +97,6 @@ class GameView(arcade.View):
         # Load the map first
         self.load_map(self.current_map)
 
-        arcade.set_background_color(arcade.color.ORANGE)
-
         # Tanks
         self.tanks = arcade.SpriteList()
         self.other_player_tanks = {}
@@ -125,32 +122,34 @@ class GameView(arcade.View):
         self.setup_cameras()
 
     def setup_cameras(self):
-        """Set up both game and UI cameras"""
+        """Set up cameras using modern Arcade camera methods"""
         window_width = self.window.width
         window_height = self.window.height
 
-        # Calculate scale to fit game in window while maintaining aspect ratio
+        # Calculate scale maintaining aspect ratio
         scale_x = window_width / self.GAME_WIDTH
         scale_y = window_height / self.GAME_HEIGHT
         scale = min(scale_x, scale_y)
 
-        # Calculate the scaled game size
-        scaled_width = self.GAME_WIDTH * scale
-        scaled_height = self.GAME_HEIGHT * scale
+        # Create game camera
+        self.game_camera = arcade.camera.Camera2D()
 
-        # Calculate offset to center the game
-        offset_x = (window_width - scaled_width) / 2
-        offset_y = (window_height - scaled_height) / 2
+        # Set viewport dimensions
+        self.game_camera.viewport_width = window_width
+        self.game_camera.viewport_height = window_height
 
-        # Set up game camera
-        self.game_camera.viewport = LBWH(offset_x, offset_y, scaled_width, scaled_height)
-        self.game_camera.projection = LBWH(0, 0, self.GAME_WIDTH, self.GAME_HEIGHT)
+        # Position and zoom the camera
+        self.game_camera.position = (self.GAME_WIDTH / 2, self.GAME_HEIGHT / 2)
+        self.game_camera.zoom = scale
 
-        # Set up UI camera to use full window
-        self.ui_camera.viewport = LBWH(0, 0, window_width, window_height)
-        self.ui_camera.projection = LBWH(0, 0, window_width, window_height)
+        # UI camera
+        self.ui_camera = arcade.camera.Camera2D()
+        self.ui_camera.viewport_width = window_width
+        self.ui_camera.viewport_height = window_height
+        self.ui_camera.position = (window_width / 2, window_height / 2)
+
     def on_resize(self, width, height):
-        """Handle window resize"""
+        """Handle window resize with debouncing"""
         super().on_resize(width, height)
         self.setup_cameras()
 
@@ -269,8 +268,7 @@ class GameView(arcade.View):
                         self.boundary_thickness, self.GAME_HEIGHT)
         ]
 
-        print(
-            f"Created {len(self.map_boundaries)} map boundaries for game resolution {self.GAME_WIDTH}x{self.GAME_HEIGHT}")
+        print(f"Created {len(self.map_boundaries)} map boundaries for game resolution {self.GAME_WIDTH}x{self.GAME_HEIGHT}")
 
     def load_spawn_positions(self):
         """Load tank spawn positions from map data"""
@@ -433,6 +431,7 @@ class GameView(arcade.View):
         self.manager.add(anchor)
 
     def on_draw(self):
+        arcade.set_background_color(arcade.color.DARK_GRAY)
         # Clear the screen
         self.clear()
 
@@ -476,6 +475,11 @@ class GameView(arcade.View):
 
         # Draw UI elements
         self.manager.draw()
+
+        if self.show_hitboxes:
+            # Draw viewport bounds
+            vp = self.game_camera.viewport
+            arcade.draw_rect_outline(LBWH(vp[0] + vp[2] / 2, vp[1] + vp[3] / 2, vp[2], vp[3]), arcade.color.RED, 3)
 
     def on_update(self, delta_time):
         if self.game_over or self.popup_active:
