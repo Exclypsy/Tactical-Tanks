@@ -56,7 +56,7 @@ class StaticEntity(arcade.Sprite):
         # The hitbox will be calculated based on the actual image shape
         # For more precise hitboxes, arcade uses the texture's alpha channel
 
-    def update(self, bullet_list):
+    def update(self, bullet_list, effects_manager=None):
         """
         Handle collision detection with bullets.
 
@@ -70,6 +70,12 @@ class StaticEntity(arcade.Sprite):
         # Check for collisions with bullets
         hit_list = arcade.check_for_collision_with_list(self, bullet_list)
         for bullet in hit_list:
+            # Create explosion effect if effects_manager is provided
+            if effects_manager is not None:
+                from client.assets.effects.ExplosionEffect import ExplosionEffect
+                explosion = ExplosionEffect(bullet.center_x, bullet.center_y)
+                effects_manager.add_effect(explosion)
+
             # Remove bullet and deal damage
             bullet.remove_from_sprite_lists()
 
@@ -79,6 +85,7 @@ class StaticEntity(arcade.Sprite):
             # Deal damage and check if entity was destroyed
             if self.take_damage(damage):
                 break  # Entity destroyed, no need to process more bullets
+
 
     def take_damage(self, damage=1):
         """
@@ -167,10 +174,10 @@ class EntityManager:
         self.entity_lists[entity_type].append(entity)
         self.all_entities.append(entity)
 
-    def update(self, bullet_list):
+    def update(self, bullet_list, effects_manager=None):
         """Update all entities with collision detection."""
         for entity in self.all_entities:
-            entity.update(bullet_list)
+            entity.update(bullet_list, effects_manager)
 
     def draw(self):
         """Draw all entities, grouped by type for optimization."""

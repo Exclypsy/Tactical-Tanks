@@ -11,6 +11,8 @@ class Tank(arcade.Sprite):
         self.tank_color = tank_color
         self.bullet_type = bullet_type
 
+        self.effects_list = arcade.SpriteList()
+
         if self.tank_color == "blue":
             self.tank_texture= ":assets:images/tanks/blue_tank.png"
         elif self.tank_color == "green":
@@ -160,12 +162,17 @@ class Tank(arcade.Sprite):
                     bullet.center_y < 0 or bullet.center_y > window_height):
                 bullet.remove_from_sprite_lists()
 
-    def check_bullet_collisions(self, other_tanks):
+    def check_bullet_collisions(self, other_tanks, effects_manager=None):
         """Check for collisions between this tank's bullets and other tanks"""
         hit_tank = None
         for bullet in self.bullet_list:
             for tank in other_tanks:
                 if tank != self and not tank.destroyed and arcade.check_for_collision(bullet, tank):
+                    # Create explosion effect at bullet impact point
+                    if effects_manager:
+                        explosion = ExplosionEffect(bullet.center_x, bullet.center_y, scale=0.8)
+                        effects_manager.add_effect(explosion)
+
                     bullet.remove_from_sprite_lists()
                     tank.take_damage()
                     hit_tank = tank

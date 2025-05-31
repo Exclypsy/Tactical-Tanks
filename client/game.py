@@ -14,6 +14,9 @@ from client.Tank import Tank
 from client.assets.effects.FireEffect import FireEffect
 from non_player.StaticEntity import StaticEntity, EntityManager
 from SettingsWindow import toggle_fullscreen
+from client.assets.effects.EffectsManager import EffectsManager
+from client.assets.effects.ExplosionEffect import ExplosionEffect
+
 
 # Resource paths
 project_root = Path(__file__).resolve().parent.parent
@@ -124,6 +127,8 @@ class GameView(arcade.View):
         self.resize_delay = 0.05
 
         self.setup_cameras()
+
+        self.effects_manager = EffectsManager()
 
     def setup_cameras(self):
         """Set up cameras using modern Arcade camera methods"""
@@ -466,6 +471,8 @@ class GameView(arcade.View):
             tank.effects_list.draw()
         self.tanks.draw()
 
+        self.effects_manager.draw()
+
         # Draw debug information
         if self.show_hitboxes:
             for tank in self.tanks:
@@ -500,8 +507,15 @@ class GameView(arcade.View):
         if self.game_over or self.popup_active:
             return
 
+
+        self.effects_manager.update(delta_time)
+
+        all_bullets = arcade.SpriteList()
+
         # Update tanks with boundary collision
         for tank in self.tanks:
+            all_bullets.extend(tank.bullet_list)
+
             # Store old position for collision checking
             old_x, old_y = tank.center_x, tank.center_y
 
@@ -513,23 +527,24 @@ class GameView(arcade.View):
                 # Revert to old position if collision detected
                 tank.center_x, tank.center_y = old_x, old_y
 
-            # Check bullet collisions with other tanks
-            hit_tank = tank.check_bullet_collisions([t for t in self.tanks if t != tank])
+            # Check bullet collisions with other tanks - PASS EFFECTS MANAGER
+            hit_tank = tank.check_bullet_collisions(
+                [t for t in self.tanks if t != tank],
+                self.effects_manager
+            )
             if hit_tank and hit_tank == self.player_tank and hit_tank.destroyed:
                 self.game_over = True
 
             # Check bullet collisions with boundaries
-            for bullet in tank.bullet_list:
+            for bullet in list(tank.bullet_list):  # Create copy to avoid modification during iteration
                 if self.check_bullet_boundary_collision(bullet):
+                    # Create explosion effect at boundary collision
+                    explosion = ExplosionEffect(bullet.center_x, bullet.center_y)
+                    self.effects_manager.add_effect(explosion)
                     bullet.remove_from_sprite_lists()
 
-        # Update static entities and check bullet collisions
-        all_bullets = arcade.SpriteList()
-        for tank in self.tanks:
-            all_bullets.extend(tank.bullet_list)
-
         # Update entity manager with bullet collisions
-        self.entity_manager.update(all_bullets)
+        self.entity_manager.update(all_bullets, self.effects_manager)
 
         # Remove destroyed entities from our sprite list
         for entity in self.static_entities:
