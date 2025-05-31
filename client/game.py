@@ -34,6 +34,30 @@ except json.JSONDecodeError:
     settings = {}
 
 
+class MapBoundary:
+    """Represents a map boundary for collision detection"""
+
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.center_x = x + width / 2
+        self.center_y = y + height / 2
+
+    def check_collision_with_point(self, x, y):
+        """Check if a point collides with this boundary"""
+        return (self.x <= x <= self.x + self.width and
+                self.y <= y <= self.y + self.height)
+
+    def check_collision_with_sprite(self, sprite):
+        """Check if a sprite collides with this boundary"""
+        return (sprite.center_x - sprite.width / 2 < self.x + self.width and
+                sprite.center_x + sprite.width / 2 > self.x and
+                sprite.center_y - sprite.height / 2 < self.y + self.height and
+                sprite.center_y + sprite.height / 2 > self.y)
+
+
 class GameView(arcade.View):
     def __init__(self, window, client_or_server, is_client, color_assignments=None, spawn_assignments=None):
         super().__init__()
@@ -51,6 +75,10 @@ class GameView(arcade.View):
         self.map_data = None
         self.spawn_positions = []
         self.background = None
+
+        # Map boundaries
+        self.map_boundaries = []
+        self.boundary_thickness = 20  # Thickness of invisible boundary walls
 
         # Static entities
         self.entity_manager = EntityManager()
@@ -76,7 +104,7 @@ class GameView(arcade.View):
         self.setup_ui()
 
         # Debug and game state
-        self.show_hitboxes = True
+        self.show_hitboxes = False
         self.game_over = False
         self.popup_active = False
         self.popup_box = None
@@ -105,6 +133,9 @@ class GameView(arcade.View):
 
             # Load background
             self.load_background()
+
+            # Setup map boundaries
+            self.setup_map_boundaries()
 
             # Load spawn positions
             self.load_spawn_positions()
@@ -140,23 +171,65 @@ class GameView(arcade.View):
         ]
 
         # Load default background
-        self.background = arcade.Sprite(":assets:images/forestBG.jpg")
-        self.background.center_x = self.game_width // 2
-        self.background.center_y = self.game_height // 2
+        self.load_background()
+        self.setup_map_boundaries()
 
     def load_background(self):
-        """Load map background"""
+        """Load and properly scale map background to fit window"""
         try:
             bg_path = self.map_data.get("map_info", {}).get("background", ":assets:images/forestBG.jpg")
-            self.background = arcade.Sprite(bg_path)
+
+            # Load the background texture
+            background_texture = arcade.load_texture(bg_path)
+            # Fix: Pass texture as positional argument, not keyword argument
+            self.background = arcade.Sprite(background_texture)
+
+            # Calculate scale to fit the background to the window
+            texture_width = background_texture.width
+            texture_height = background_texture.height
+
+            # Calculate scale factors for both dimensions
+            scale_x = self.game_width / texture_width
+            scale_y = self.game_height / texture_height
+
+            # For stretching to fill exactly (may distort aspect ratio):
+            self.background.scale_x = scale_x
+            self.background.scale_y = scale_y
+
+            # For maintaining aspect ratio (may leave black bars):
+            uniform_scale = min(scale_x, scale_y)
+            self.background.scale = uniform_scale
+
+            # Center the background
             self.background.center_x = self.game_width // 2
             self.background.center_y = self.game_height // 2
+
+            print(f"Background scaled: {scale_x:.2f}x, {scale_y:.2f}y")
+
         except Exception as e:
             print(f"ERROR: Failed to load background: {e}")
-            # Fallback background
+            # Fix: Fallback background creation
             self.background = arcade.Sprite(":assets:images/forestBG.jpg")
             self.background.center_x = self.game_width // 2
             self.background.center_y = self.game_height // 2
+
+    def setup_map_boundaries(self):
+        """Create invisible boundary walls around the map edges"""
+        self.map_boundaries = [
+            # Top boundary
+            MapBoundary(-self.boundary_thickness, self.game_height,
+                        self.game_width + 2 * self.boundary_thickness, self.boundary_thickness),
+            # Bottom boundary
+            MapBoundary(-self.boundary_thickness, -self.boundary_thickness,
+                        self.game_width + 2 * self.boundary_thickness, self.boundary_thickness),
+            # Left boundary
+            MapBoundary(-self.boundary_thickness, 0,
+                        self.boundary_thickness, self.game_height),
+            # Right boundary
+            MapBoundary(self.game_width, 0,
+                        self.boundary_thickness, self.game_height)
+        ]
+        print(f"Created {len(self.map_boundaries)} map boundaries")
 
     def load_spawn_positions(self):
         """Load tank spawn positions from map data"""
@@ -223,6 +296,29 @@ class GameView(arcade.View):
 
         except Exception as e:
             print(f"ERROR: Failed to load static entities: {e}")
+
+    def check_tank_boundary_collision(self, tank, new_x, new_y):
+        """Check if tank would collide with map boundaries at new position"""
+        # Create a temporary position to test
+        old_x, old_y = tank.center_x, tank.center_y
+        tank.center_x, tank.center_y = new_x, new_y
+
+        collision = False
+        for boundary in self.map_boundaries:
+            if boundary.check_collision_with_sprite(tank):
+                collision = True
+                break
+
+        # Restore original position
+        tank.center_x, tank.center_y = old_x, old_y
+        return collision
+
+    def check_bullet_boundary_collision(self, bullet):
+        """Check if bullet collides with map boundaries"""
+        for boundary in self.map_boundaries:
+            if boundary.check_collision_with_sprite(bullet):
+                return True
+        return False
 
     def setup_player_tank(self):
         """Setup the player tank with proper spawn position and color"""
@@ -299,7 +395,7 @@ class GameView(arcade.View):
     def on_draw(self):
         self.clear()
 
-        # Draw background
+        # Fix: Draw background using arcade.draw_sprite() instead of sprite.draw()
         if self.background:
             arcade.draw_sprite(self.background)
 
@@ -313,11 +409,21 @@ class GameView(arcade.View):
 
         self.tanks.draw()
 
+        # Draw debug information
         if self.show_hitboxes:
+            # Draw tank and bullet hitboxes
             for tank in self.tanks:
                 tank.bullet_list.draw_hit_boxes(arcade.color.RED)
             self.tanks.draw_hit_boxes(arcade.color.GREEN)
             self.static_entities.draw_hit_boxes(arcade.color.BLUE)
+
+            # Draw map boundaries
+            for boundary in self.map_boundaries:
+                arcade.draw_lrbt_rectangle_outline(
+                    boundary.x, boundary.x + boundary.width,
+                                boundary.y, boundary.y + boundary.height,
+                    arcade.color.YELLOW, 2
+                )
 
         if self.game_over:
             arcade.draw_text("GAME OVER - TANK DESTROYED!",
@@ -331,14 +437,28 @@ class GameView(arcade.View):
         if self.game_over or self.popup_active:
             return
 
-        # Update tanks
+        # Update tanks with boundary collision
         for tank in self.tanks:
+            # Store old position for collision checking
+            old_x, old_y = tank.center_x, tank.center_y
+
+            # Update tank
             tank.update(delta_time, self.game_width, self.game_height)
+
+            # Check boundary collision for tanks
+            if self.check_tank_boundary_collision(tank, tank.center_x, tank.center_y):
+                # Revert to old position if collision detected
+                tank.center_x, tank.center_y = old_x, old_y
 
             # Check bullet collisions with other tanks
             hit_tank = tank.check_bullet_collisions([t for t in self.tanks if t != tank])
             if hit_tank and hit_tank == self.player_tank and hit_tank.destroyed:
                 self.game_over = True
+
+            # Check bullet collisions with boundaries
+            for bullet in tank.bullet_list:
+                if self.check_bullet_boundary_collision(bullet):
+                    bullet.remove_from_sprite_lists()
 
         # Update static entities and check bullet collisions
         all_bullets = arcade.SpriteList()
@@ -543,5 +663,6 @@ class GameView(arcade.View):
 
                 # Add fire effect
                 angle_rad = math.radians(bullet.angle)
-                fire_effect = FireEffect(":assets:images/fire.png", 0.5, bullet.center_x, bullet.center_y, bullet.angle)
+                fire_effect = FireEffect(":assets:images/fire.png", 0.5,
+                                         bullet.center_x, bullet.center_y, bullet.angle)
                 tank.effects_list.append(fire_effect)
