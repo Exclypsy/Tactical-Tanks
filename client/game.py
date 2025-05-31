@@ -487,11 +487,6 @@ class GameView(arcade.View):
                     arcade.color.YELLOW, 2
                 )
 
-        if self.game_over:
-            arcade.draw_text("GAME OVER - TANK DESTROYED!",
-                             self.GAME_WIDTH / 2, self.GAME_HEIGHT / 2,
-                             arcade.color.RED, 24, anchor_x="center")
-
         # Switch to UI camera for UI elements
         self.ui_camera.use()
 
@@ -504,7 +499,7 @@ class GameView(arcade.View):
             arcade.draw_rect_outline(LBWH(vp[0] + vp[2] / 2, vp[1] + vp[3] / 2, vp[2], vp[3]), arcade.color.RED, 3)
 
     def on_update(self, delta_time):
-        if self.game_over or self.popup_active:
+        if self.popup_active:
             return
 
 
@@ -532,8 +527,6 @@ class GameView(arcade.View):
                 [t for t in self.tanks if t != tank],
                 self.effects_manager
             )
-            if hit_tank and hit_tank == self.player_tank and hit_tank.destroyed:
-                self.game_over = True
 
             # Check bullet collisions with boundaries
             for bullet in list(tank.bullet_list):  # Create copy to avoid modification during iteration

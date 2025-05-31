@@ -3,6 +3,7 @@ import arcade
 import time
 from client.Bullet import Bullet
 from client.assets.effects.FireEffect import FireEffect
+from client.assets.effects.ExplosionEffect import ExplosionEffect
 
 
 class Tank(arcade.Sprite):
@@ -61,11 +62,18 @@ class Tank(arcade.Sprite):
         self.effects_list = arcade.SpriteList()
 
     def update(self, delta_time: float, window_width=None, window_height=None):
-        if self.destroyed:
-            return
-
         for effect in self.effects_list:
             effect.update()
+
+        # Update bullets
+        self.bullet_list.update(delta_time)
+
+        # Clean up out-of-bounds bullets
+        if window_width and window_height:
+            self.cleanup_bullets(window_width, window_height)
+
+        if self.destroyed:
+            return
 
         # Handle recoil if active
         if hasattr(self, 'is_recoiling') and self.is_recoiling:
@@ -99,13 +107,6 @@ class Tank(arcade.Sprite):
             angle_rad = math.radians(self.angle)
             self.center_x += self.speed * math.sin(angle_rad) * delta_time
             self.center_y += self.speed * math.cos(angle_rad) * delta_time
-
-        # Update bullets
-        self.bullet_list.update(delta_time)
-
-        # Clean up out-of-bounds bullets
-        if window_width and window_height:
-            self.cleanup_bullets(window_width, window_height)
 
     def get_barrel_position(self):
         """Returns the position at the end of the barrel"""
@@ -167,15 +168,22 @@ class Tank(arcade.Sprite):
         hit_tank = None
         for bullet in self.bullet_list:
             for tank in other_tanks:
-                if tank != self and not tank.destroyed and arcade.check_for_collision(bullet, tank):
+                # Remove the "not tank.destroyed" condition - bullets can hit dead tanks too
+                if tank != self and arcade.check_for_collision(bullet, tank):
                     # Create explosion effect at bullet impact point
                     if effects_manager:
-                        explosion = ExplosionEffect(bullet.center_x, bullet.center_y, scale=0.8)
+                        explosion = ExplosionEffect(bullet.center_x, bullet.center_y)
                         effects_manager.add_effect(explosion)
 
                     bullet.remove_from_sprite_lists()
-                    tank.take_damage()
-                    hit_tank = tank
+
+                    # Only deal damage if tank is still alive
+                    if not tank.destroyed:
+                        tank.take_damage()
+                        hit_tank = tank
+                    else:
+                        # Tank is already dead, but bullet still hits it (creates explosion)
+                        hit_tank = tank
                     break
             if hit_tank:
                 break
@@ -186,6 +194,8 @@ class Tank(arcade.Sprite):
         self.health -= damage
         if self.health <= 0:
             self.destroyed = True
+            dead_texture_path = f":assets:images/tanks/dead.png"
+            self.texture = arcade.load_texture(dead_texture_path)
         return self.destroyed
 
     def handle_key_press(self, key, modifiers=None):
@@ -198,7 +208,7 @@ class Tank(arcade.Sprite):
 
     def handle_key_release(self, key, modifiers=None):
         """Handle key release for this tank"""
-        if key == arcade.key.SPACE:
+        if key == arcade.key.SPACE and not self.destroyed:
             self.is_moving = False
             self.is_rotating = True
             self.clockwise = not self.clockwise
