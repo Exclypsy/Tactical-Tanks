@@ -3,6 +3,7 @@ import math
 from pathlib import Path
 import random
 import arcade
+from arcade import LBWH
 from arcade.gui import (
     UIManager, UITextureButton, UIAnchorLayout, UIBoxLayout, UILabel, UISlider
 )
@@ -61,14 +62,24 @@ class MapBoundary:
 class GameView(arcade.View):
     def __init__(self, window, client_or_server, is_client, color_assignments=None, spawn_assignments=None):
         super().__init__()
-        self.window = window
-        self.game_width = self.window.width
-        self.game_height = self.window.height
 
+        window.set_vsync(True)
+
+
+        # Fixed game resolution - this defines the logical game world size
+        self.GAME_WIDTH = 1920
+        self.GAME_HEIGHT = 1080
+
+        self.window = window
         self.client_or_server = client_or_server
         self.is_client = is_client
         self.color_assignments = color_assignments or {}
         self.spawn_assignments = spawn_assignments or {}
+
+
+        # Create camera for scaling
+        self.game_camera = arcade.camera.Camera2D()
+        self.ui_camera = arcade.camera.Camera2D()
 
         # Map data
         self.current_map = client_or_server.current_map if is_client else client_or_server.picked_map
@@ -78,7 +89,7 @@ class GameView(arcade.View):
 
         # Map boundaries
         self.map_boundaries = []
-        self.boundary_thickness = 20  # Thickness of invisible boundary walls
+        self.boundary_thickness = 20
 
         # Static entities
         self.entity_manager = EntityManager()
@@ -87,7 +98,7 @@ class GameView(arcade.View):
         # Load the map first
         self.load_map(self.current_map)
 
-        arcade.set_background_color(arcade.color.DARK_GRAY)
+        arcade.set_background_color(arcade.color.ORANGE)
 
         # Tanks
         self.tanks = arcade.SpriteList()
@@ -111,6 +122,39 @@ class GameView(arcade.View):
         self.volume_slider = None
         self.initial_position_sent = False
 
+        self.setup_cameras()
+
+    def setup_cameras(self):
+        """Set up both game and UI cameras"""
+        window_width = self.window.width
+        window_height = self.window.height
+
+        # Calculate scale to fit game in window while maintaining aspect ratio
+        scale_x = window_width / self.GAME_WIDTH
+        scale_y = window_height / self.GAME_HEIGHT
+        scale = min(scale_x, scale_y)
+
+        # Calculate the scaled game size
+        scaled_width = self.GAME_WIDTH * scale
+        scaled_height = self.GAME_HEIGHT * scale
+
+        # Calculate offset to center the game
+        offset_x = (window_width - scaled_width) / 2
+        offset_y = (window_height - scaled_height) / 2
+
+        # Set up game camera
+        self.game_camera.viewport = LBWH(offset_x, offset_y, scaled_width, scaled_height)
+        self.game_camera.projection = LBWH(0, 0, self.GAME_WIDTH, self.GAME_HEIGHT)
+
+        # Set up UI camera to use full window
+        self.ui_camera.viewport = LBWH(0, 0, window_width, window_height)
+        self.ui_camera.projection = LBWH(0, 0, window_width, window_height)
+    def on_resize(self, width, height):
+        """Handle window resize"""
+        super().on_resize(width, height)
+        self.setup_cameras()
+
+
     def load_map(self, map_name):
         """Load map data from JSON file and create game objects"""
         if not map_name:
@@ -120,7 +164,6 @@ class GameView(arcade.View):
 
         try:
             map_file_path = project_root / ".config" / "maps" / f"{map_name}.json"
-
             if not map_file_path.exists():
                 print(f"ERROR: Map file not found: {map_file_path}")
                 self.setup_default_map()
@@ -162,12 +205,12 @@ class GameView(arcade.View):
             "static_entities": []
         }
 
-        # Default spawn positions
+        # Default spawn positions using fixed game coordinates
         self.spawn_positions = [
             {"position": {"x": 100, "y": 100}, "rotation": 45},
-            {"position": {"x": self.game_width - 100, "y": 100}, "rotation": 135},
-            {"position": {"x": 100, "y": self.game_height - 100}, "rotation": 315},
-            {"position": {"x": self.game_width - 100, "y": self.game_height - 100}, "rotation": 225}
+            {"position": {"x": self.GAME_WIDTH - 100, "y": 100}, "rotation": 135},
+            {"position": {"x": 100, "y": self.GAME_HEIGHT - 100}, "rotation": 315},
+            {"position": {"x": self.GAME_WIDTH - 100, "y": self.GAME_HEIGHT - 100}, "rotation": 225}
         ]
 
         # Load default background
@@ -175,61 +218,59 @@ class GameView(arcade.View):
         self.setup_map_boundaries()
 
     def load_background(self):
-        """Load and properly scale map background to fit window"""
+        """Load and properly scale map background to fit fixed game resolution"""
         try:
             bg_path = self.map_data.get("map_info", {}).get("background", ":assets:images/forestBG.jpg")
 
             # Load the background texture
             background_texture = arcade.load_texture(bg_path)
-            # Fix: Pass texture as positional argument, not keyword argument
             self.background = arcade.Sprite(background_texture)
 
-            # Calculate scale to fit the background to the window
+            # Scale background to fit fixed game resolution
             texture_width = background_texture.width
             texture_height = background_texture.height
 
             # Calculate scale factors for both dimensions
-            scale_x = self.game_width / texture_width
-            scale_y = self.game_height / texture_height
+            scale_x = self.GAME_WIDTH / texture_width
+            scale_y = self.GAME_HEIGHT / texture_height
 
             # For stretching to fill exactly (may distort aspect ratio):
             self.background.scale_x = scale_x
             self.background.scale_y = scale_y
 
-            # For maintaining aspect ratio (may leave black bars):
-            uniform_scale = min(scale_x, scale_y)
-            self.background.scale = uniform_scale
+            # Center the background in game coordinates
+            self.background.center_x = self.GAME_WIDTH // 2
+            self.background.center_y = self.GAME_HEIGHT // 2
 
-            # Center the background
-            self.background.center_x = self.game_width // 2
-            self.background.center_y = self.game_height // 2
-
-            print(f"Background scaled: {scale_x:.2f}x, {scale_y:.2f}y")
+            print(
+                f"Background scaled: {scale_x:.2f}x, {scale_y:.2f}y for game resolution {self.GAME_WIDTH}x{self.GAME_HEIGHT}")
 
         except Exception as e:
             print(f"ERROR: Failed to load background: {e}")
-            # Fix: Fallback background creation
+            # Fallback background creation
             self.background = arcade.Sprite(":assets:images/forestBG.jpg")
-            self.background.center_x = self.game_width // 2
-            self.background.center_y = self.game_height // 2
+            self.background.center_x = self.GAME_WIDTH // 2
+            self.background.center_y = self.GAME_HEIGHT // 2
 
     def setup_map_boundaries(self):
-        """Create invisible boundary walls around the map edges"""
+        """Create invisible boundary walls around the fixed game resolution edges"""
         self.map_boundaries = [
             # Top boundary
-            MapBoundary(-self.boundary_thickness, self.game_height,
-                        self.game_width + 2 * self.boundary_thickness, self.boundary_thickness),
+            MapBoundary(-self.boundary_thickness, self.GAME_HEIGHT,
+                        self.GAME_WIDTH + 2 * self.boundary_thickness, self.boundary_thickness),
             # Bottom boundary
             MapBoundary(-self.boundary_thickness, -self.boundary_thickness,
-                        self.game_width + 2 * self.boundary_thickness, self.boundary_thickness),
+                        self.GAME_WIDTH + 2 * self.boundary_thickness, self.boundary_thickness),
             # Left boundary
             MapBoundary(-self.boundary_thickness, 0,
-                        self.boundary_thickness, self.game_height),
+                        self.boundary_thickness, self.GAME_HEIGHT),
             # Right boundary
-            MapBoundary(self.game_width, 0,
-                        self.boundary_thickness, self.game_height)
+            MapBoundary(self.GAME_WIDTH, 0,
+                        self.boundary_thickness, self.GAME_HEIGHT)
         ]
-        print(f"Created {len(self.map_boundaries)} map boundaries")
+
+        print(
+            f"Created {len(self.map_boundaries)} map boundaries for game resolution {self.GAME_WIDTH}x{self.GAME_HEIGHT}")
 
     def load_spawn_positions(self):
         """Load tank spawn positions from map data"""
@@ -244,13 +285,13 @@ class GameView(arcade.View):
                 }
                 self.spawn_positions.append(spawn_data)
 
-            # Ensure we have at least 4 spawn positions
+            # Ensure we have at least 4 spawn positions using fixed game coordinates
             while len(self.spawn_positions) < 4:
                 fallback_spawns = [
                     {"position": {"x": 100, "y": 100}, "rotation": 45},
-                    {"position": {"x": self.game_width - 100, "y": 100}, "rotation": 135},
-                    {"position": {"x": 100, "y": self.game_height - 100}, "rotation": 315},
-                    {"position": {"x": self.game_width - 100, "y": self.game_height - 100}, "rotation": 225}
+                    {"position": {"x": self.GAME_WIDTH - 100, "y": 100}, "rotation": 135},
+                    {"position": {"x": 100, "y": self.GAME_HEIGHT - 100}, "rotation": 315},
+                    {"position": {"x": self.GAME_WIDTH - 100, "y": self.GAME_HEIGHT - 100}, "rotation": 225}
                 ]
                 self.spawn_positions.append(fallback_spawns[len(self.spawn_positions)])
 
@@ -264,7 +305,6 @@ class GameView(arcade.View):
         """Load static entities from map data"""
         try:
             static_entities_data = self.map_data.get("static_entities", [])
-
             for entity_data in static_entities_data:
                 try:
                     # Extract entity parameters
@@ -338,10 +378,10 @@ class GameView(arcade.View):
             spawn_position = (spawn_data["position"]["x"], spawn_data["position"]["y"])
             spawn_rotation = spawn_data["rotation"]
         else:
-            # Fallback to default positions
+            # Fallback to default positions using fixed game coordinates
             default_positions = [
-                (100, 100), (self.game_width - 100, 100),
-                (100, self.game_height - 100), (self.game_width - 100, self.game_height - 100)
+                (100, 100), (self.GAME_WIDTH - 100, 100),
+                (100, self.GAME_HEIGHT - 100), (self.GAME_WIDTH - 100, self.GAME_HEIGHT - 100)
             ]
             spawn_position = default_positions[spawn_index % len(default_positions)]
             spawn_rotation = 0
@@ -370,7 +410,6 @@ class GameView(arcade.View):
         self.player_tank.center_y = spawn_position[1]
         self.player_tank.angle = spawn_rotation
         self.player_tank.is_rotating = True
-
         self.tanks.append(self.player_tank)
 
     def setup_ui(self):
@@ -386,6 +425,7 @@ class GameView(arcade.View):
             width=60,
             height=60
         )
+
         exit_button.on_click = self.toggle_pause_menu
 
         anchor = UIAnchorLayout()
@@ -393,9 +433,13 @@ class GameView(arcade.View):
         self.manager.add(anchor)
 
     def on_draw(self):
+        # Clear the screen
         self.clear()
 
-        # Fix: Draw background using arcade.draw_sprite() instead of sprite.draw()
+        # Draw game content with game camera
+        self.game_camera.use()
+
+        # Draw background
         if self.background:
             arcade.draw_sprite(self.background)
 
@@ -406,29 +450,29 @@ class GameView(arcade.View):
         for tank in self.tanks:
             tank.bullet_list.draw()
             tank.effects_list.draw()
-
         self.tanks.draw()
 
         # Draw debug information
         if self.show_hitboxes:
-            # Draw tank and bullet hitboxes
             for tank in self.tanks:
                 tank.bullet_list.draw_hit_boxes(arcade.color.RED)
             self.tanks.draw_hit_boxes(arcade.color.GREEN)
             self.static_entities.draw_hit_boxes(arcade.color.BLUE)
 
-            # Draw map boundaries
             for boundary in self.map_boundaries:
                 arcade.draw_lrbt_rectangle_outline(
                     boundary.x, boundary.x + boundary.width,
-                                boundary.y, boundary.y + boundary.height,
+                    boundary.y, boundary.y + boundary.height,
                     arcade.color.YELLOW, 2
                 )
 
         if self.game_over:
             arcade.draw_text("GAME OVER - TANK DESTROYED!",
-                             self.game_width / 2, self.game_height / 2,
+                             self.GAME_WIDTH / 2, self.GAME_HEIGHT / 2,
                              arcade.color.RED, 24, anchor_x="center")
+
+        # Switch to UI camera for UI elements
+        self.ui_camera.use()
 
         # Draw UI elements
         self.manager.draw()
@@ -442,8 +486,8 @@ class GameView(arcade.View):
             # Store old position for collision checking
             old_x, old_y = tank.center_x, tank.center_y
 
-            # Update tank
-            tank.update(delta_time, self.game_width, self.game_height)
+            # Update tank (now uses fixed game coordinates)
+            tank.update(delta_time, self.GAME_WIDTH, self.GAME_HEIGHT)
 
             # Check boundary collision for tanks
             if self.check_tank_boundary_collision(tank, tank.center_x, tank.center_y):
@@ -490,6 +534,7 @@ class GameView(arcade.View):
                     width=300,
                     height=75
                 )
+
                 label = UILabel(text=text, text_color=arcade.color.WHITE, font_size=18, bold=True)
                 box = UIBoxLayout(vertical=True, align="center")
                 box.add(label)
@@ -555,7 +600,6 @@ class GameView(arcade.View):
             return
 
         updates_to_process = []
-
         if hasattr(self.client_or_server, 'pending_tank_updates'):
             with self.client_or_server.tank_updates_lock:
                 updates_to_process = self.client_or_server.pending_tank_updates.copy()
