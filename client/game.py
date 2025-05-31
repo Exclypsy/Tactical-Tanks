@@ -1,5 +1,6 @@
 import json
 import math
+import time
 from pathlib import Path
 import random
 import arcade
@@ -119,6 +120,9 @@ class GameView(arcade.View):
         self.volume_slider = None
         self.initial_position_sent = False
 
+        self.last_resize_time = 0
+        self.resize_delay = 0.05
+
         self.setup_cameras()
 
     def setup_cameras(self):
@@ -149,9 +153,20 @@ class GameView(arcade.View):
         self.ui_camera.position = (window_width / 2, window_height / 2)
 
     def on_resize(self, width, height):
-        """Handle window resize with debouncing"""
         super().on_resize(width, height)
         self.setup_cameras()
+
+        # Update the last resize time
+        self.last_resize_time = time.time()
+
+        # Schedule a delayed camera setup check
+        arcade.schedule(self._delayed_camera_setup, self.resize_delay)
+
+    def _delayed_camera_setup(self, delta_time):
+        """Check if enough time has passed since last resize, then setup cameras"""
+        if time.time() - self.last_resize_time >= self.resize_delay:
+            self.setup_cameras()
+            arcade.unschedule(self._delayed_camera_setup)
 
 
     def load_map(self, map_name):
