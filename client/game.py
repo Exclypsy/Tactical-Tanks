@@ -12,7 +12,8 @@ from arcade.types import Color
 from client.Bullet import Bullet
 from client.Tank import Tank
 from client.assets.effects.FireEffect import FireEffect
-from non_player.StaticEntity import StaticEntity, EntityManager
+from non_player.StaticEntity import StaticEntity
+from non_player.EntityManager import EntityManager
 from SettingsWindow import toggle_fullscreen
 from client.assets.effects.EffectsManager import EffectsManager
 from client.assets.effects.ExplosionEffect import ExplosionEffect
@@ -722,7 +723,7 @@ class GameView(arcade.View):
             for bullet_info in data["new_bullets"]:
                 bullet = Bullet(
                     ":assets:images/bullet.png",
-                    0.55,
+                    0.5,
                     bullet_info["x"],
                     bullet_info["y"],
                     bullet_info["angle"],

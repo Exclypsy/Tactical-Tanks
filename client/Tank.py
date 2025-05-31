@@ -8,7 +8,7 @@ from client.assets.effects.ExplosionEffect import ExplosionEffect
 
 class Tank(arcade.Sprite):
 
-    def __init__(self, tank_color="blue", bullet_type="normal", scale=0.5, player_id=None):
+    def __init__(self, tank_color="blue", bullet_type="normal", scale=0.4, player_id=None):
         self.tank_color = tank_color
         self.bullet_type = bullet_type
 
@@ -27,12 +27,12 @@ class Tank(arcade.Sprite):
 
 
         # Movement properties
-        self.rotation_speed = 90  # degrees per second
+        self.rotation_speed = 100  # degrees per second
         self.is_rotating = False
         self.is_moving = False
         self.speed = 200  # pixels per second
         self.clockwise = True
-        self.barrel_length = 80
+        self.barrel_length = 50
 
         # Game properties
         self.player_id = player_id
@@ -145,7 +145,7 @@ class Tank(arcade.Sprite):
         # Create and return the bullet
         bullet = Bullet(
             self.bullet_image,
-            0.55,
+            0.5,
             barrel_x,
             barrel_y,
             self.angle,
