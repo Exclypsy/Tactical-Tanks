@@ -46,6 +46,8 @@ class Client:
 
         self.current_map = None
 
+        self.latest_player_list = []
+
     def connect(self):
         try:
             # Create a new socket for each connection
@@ -71,12 +73,11 @@ class Client:
     def listen_for_commands(self):
         """Continuously listen for server commands in the background"""
         print("Starting listener thread")
-        self.socket.settimeout(0.5)  # Short timeout to check running flag
+        self.socket.settimeout(0.5)
 
         while self.running and self.connected:
             try:
                 data, addr = self.socket.recvfrom(1024)
-
                 if not data:
                     print("Server closed the connection")
                     self.disconnect()
@@ -85,29 +86,53 @@ class Client:
                 # Process the data
                 try:
                     decoded = data.decode()
+
+                    # Handle the "players:" fallback response HERE instead of in get_players_list
+                    if decoded.startswith("players:"):
+                        try:
+                            players_data = decoded[8:]  # Remove "players:" prefix
+                            if players_data:
+                                player_list = json.loads(players_data)
+                                print(f"Fallback player list received in listener: {[p[1] for p in player_list]}")
+                                # Cache it immediately
+                                self.latest_player_list = player_list
+                                # Notify lobby immediately
+                                current_view = self.window.current_view
+                                if hasattr(current_view, 'on_instant_player_update'):
+                                    arcade.schedule_once(lambda dt: current_view.on_instant_player_update(), 0)
+                            continue
+                        except json.JSONDecodeError as e:
+                            print(f"Error parsing fallback player list: {e}")
+                            continue
+
                     # Process JSON messages
                     try:
                         message = json.loads(decoded)
                         message_get = message.get("type")
+
                         # Handle command messages
                         if message_get == "command":
                             print(f"Received command: {message.get('command')}")
                             self.handle_command(message)
+
                         elif message_get == "heartbeat_ack":
-                            # Connection is alive, nothing to do
                             continue
+
                         elif message_get == "name_assignment":
                             assigned_name = message.get("assigned_name")
                             if assigned_name:
                                 print(f"Server assigned name: {assigned_name}")
                                 self.player_name = assigned_name
+
                         elif message_get == "connection_accepted":
                             self.client_id = message.get("client_id")
                             self.assigned_color = message.get("assigned_color")
                             assigned_name = message.get("assigned_name")
                             if assigned_name:
                                 self.player_name = assigned_name
-                            print(f"Connection accepted. Name: {self.player_name}, Color: {self.assigned_color}, ID: {self.client_id}")
+                            print(
+                                f"Connection accepted. Name: {self.player_name}, Color: {self.assigned_color}, ID: {self.client_id}")
+
                         elif message_get == "server_name":
                             print(f"Received server data: {message}")
                             try:
@@ -119,15 +144,26 @@ class Client:
 
                         elif message_get == "tank_state":
                             with self.tank_updates_lock:
-                                print(f"Client -> 95: Client received tank state: {message}")
+                                print(f"Client received tank state: {message}")
                                 self.pending_tank_updates.append(message)
-                            continue
 
+                        # Handle real-time player list updates
+                        elif message_get == "player_list_update":
+                            print("Received instant player list update")
+                            self.latest_player_list = message.get("players", [])
+                            print(f"Client cached player list: {[p[1] for p in self.latest_player_list]}")
 
+                            # Notify current view immediately if it's a lobby
+                            current_view = self.window.current_view
+                            if hasattr(current_view, 'on_instant_player_update'):
+                                arcade.schedule_once(lambda dt: current_view.on_instant_player_update(), 0)
+
+                        continue
 
                     except json.JSONDecodeError:
-                        # Not JSON, treat as regular message
-                        print(f"Received non-JSON message: {decoded}")
+                        # Not JSON and not players: format, treat as regular message
+                        print(f"Received unknown message: {decoded}")
+
                 except UnicodeDecodeError:
                     print("Received binary data")
 
@@ -135,10 +171,10 @@ class Client:
                 if time.time() - self.last_heartbeat_sent > self.heartbeat_interval:
                     self.send_heartbeat()
                 continue
+
             except Exception as e:
                 print(f"Listener error: {e}")
                 if self.running and self.connected:
-                    # Only try to recover if still running
                     print("Error in listener thread, will continue...")
                 else:
                     break
@@ -221,74 +257,26 @@ class Client:
             return None
 
     def get_players_list(self):
+        """Simplified fallback method - just send request, response handled in listener"""
         try:
-            # Check if socket is valid
-            if not self.check_socket_connection():
-                print("Socket is invalid or closed, reconnecting...")
-                # Create a new socket
-                self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                self.connect()
+            print("Requesting fallback player list...")
+            self.socket.sendto(b"get_players", self.server_address)
 
-            data = self.command_send_receive(b"get_players")
+            # Wait a short time for the response to be processed by the listener
+            import time
+            time.sleep(0.2)
 
-            # Handle no data case
-            if not data:
-                return []
+            # Return cached data if available
+            cached_list = self.get_latest_player_list()
+            if cached_list:
+                print(f"Using cached data from fallback: {[p[1] for p in cached_list]}")
+                return cached_list
 
-            # Check if data is already a list (when return was empty)
-            if isinstance(data, list):
-                return data
-
-            # Try to parse JSON data
-            try:
-                data = json.loads(data)
-            except json.JSONDecodeError as e:
-                print(f"JSON decode error in get_players_list: {e}")
-                print(f"Raw data received: {data}")
-                return []
-
-            if data.get("type") == "clients":
-                # Convert strings with new format that includes colors
-                client_tuples = []
-                for client_str in data["clients"]:
-                    try:
-                        # Handle format: "IP:PORT,PlayerName (color)" or "IP:PORT,PlayerName (color) (host)"
-                        if "," in client_str:
-                            ipPort, player_name_with_info = client_str.split(",", 1)  # Split only on first comma
-
-                            # Parse IP and port
-                            if ":" in ipPort:
-                                ip, port_str = ipPort.split(":")
-                                port = int(port_str)
-                            else:
-                                print(f"Invalid IP:PORT format: {ipPort}")
-                                continue
-
-                            # Keep the full player name with color and host info for display
-                            client_tuples.append(((ip, port), player_name_with_info))
-                        else:
-                            print(f"Invalid client string format: {client_str}")
-                            continue
-
-                    except Exception as parse_error:
-                        print(f"Error parsing client string '{client_str}': {parse_error}")
-                        continue
-
-                return client_tuples
-
-            elif data.get("type") == "command":
-                self.handle_command(data)
-                return []
-
-            else:
-                print(f"Unexpected response type: {data.get('type', 'unknown')}")
-                return []
+            print("No fallback response received")
+            return []
 
         except Exception as e:
-            print(f"Error getting player list: {e}")
-            import traceback
-            traceback.print_exc()  # Print full stack trace for debugging
+            print(f"Error requesting fallback player list: {e}")
             return []
 
     def send_data(self, data):
@@ -316,6 +304,7 @@ class Client:
             if require_ack and cmd_id:
                 ack_msg = json.dumps({"type": "ack", "id": cmd_id})
                 self.socket.sendto(ack_msg.encode(), self.server_address)
+                print(f"Sent ACK for command: {command}")
 
             if command == "map_selected":
                 map_name = command_data.get("map_name")
@@ -325,11 +314,76 @@ class Client:
                 else:
                     print("ERROR: Received map_selected command without map_name")
 
-            if command == "game_start":
+            elif command == "server_disconnect":
+                print("Server is disconnecting, returning to main menu...")
+                arcade.schedule_once(lambda dt: self._return_to_main_menu(), 0)
+
+            elif command == "game_start":
                 print("Game is starting!")
-                # Store the color assignments for use in GameView
                 self.color_assignments = command_data.get("color_assignments", {})
+                self.spawn_assignments = command_data.get("spawn_assignments", {})
                 arcade.schedule_once(lambda dt: self._start_game(), 0)
+
+    def _return_to_main_menu(self):
+        """Return to main menu (called from main thread)"""
+        try:
+            print("Returning to main menu due to server disconnect")
+
+            # Clean up current view if needed
+            current_view = self.window.current_view
+
+            # Unschedule specific functions instead of unschedule_all
+            functions_to_unschedule = []
+
+            if hasattr(current_view, 'update_player_list'):
+                functions_to_unschedule.append(current_view.update_player_list)
+
+            if hasattr(current_view, 'check_game_start'):
+                functions_to_unschedule.append(current_view.check_game_start)
+
+            if hasattr(current_view, 'send_tank_update'):
+                functions_to_unschedule.append(current_view.send_tank_update)
+
+            if hasattr(current_view, 'process_queued_tank_updates'):
+                functions_to_unschedule.append(current_view.process_queued_tank_updates)
+
+            if hasattr(current_view, '_delayed_camera_setup'):
+                functions_to_unschedule.append(current_view._delayed_camera_setup)
+
+            # Unschedule each function individually
+            for func in functions_to_unschedule:
+                try:
+                    arcade.unschedule(func)
+                    print(f"Unscheduled {func.__name__}")
+                except:
+                    pass  # Function might not be scheduled
+
+            # Disable UI manager if present
+            if hasattr(current_view, 'manager'):
+                try:
+                    current_view.manager.disable()
+                    current_view.manager.clear()
+                    print("Disabled and cleared UI manager")
+                except:
+                    pass
+
+            # Disconnect from server
+            self.disconnect()
+
+            # Return to main menu
+            from MainMenu import Mainview
+            from SettingsWindow import toggle_fullscreen, settings
+
+            if settings.get("fullscreen", True):
+                toggle_fullscreen(self.window)
+
+            self.window.show_view(Mainview(self.window))
+            print("Successfully returned to main menu")
+
+        except Exception as e:
+            print(f"Error returning to main menu: {e}")
+            import traceback
+            traceback.print_exc()
 
     def _start_game(self):
         """Transition to GameView (called from main thread)"""
@@ -383,3 +437,7 @@ class Client:
 
         # Send the player state to the server
         self.send_data(data)
+
+    def get_latest_player_list(self):
+        """Get the most recent player list from real-time updates"""
+        return getattr(self, 'latest_player_list', [])

@@ -62,6 +62,8 @@ class Server:
         self.clients_lock = threading.Lock()
         self.color_assignment_lock = threading.Lock()
         self.next_client_id = 0
+        self.available_client_ids = set()  # Track available IDs for reuse
+        self.max_client_ids = 4  # Maximum number of spawn positions
 
         self.server_color = None
 
@@ -182,10 +184,10 @@ class Server:
             client_tuples = []
 
             # First add server/host entry
-            server_name = getattr(self, 'player_name', 'host')
+            server_name = getattr(self, 'player_name', 'Host')
             server_color = getattr(self, 'server_color', 'blue')
-            server_ip = f"{self.ip}:{self.port}"
-            client_tuples.append(((self.ip, self.port), f"{server_name} ({server_color}) (host)"))
+            server_display = f"{server_name} ({server_color}) (host)"
+            client_tuples.append(((self.ip, self.port), server_display))
 
             # Then add connected clients
             for client in self.clients:
@@ -195,7 +197,7 @@ class Server:
                 client_display = f"{client_name} ({client_color})"
                 client_tuples.append((client_addr, client_display))
 
-            print(f"Server returning player list: {client_tuples}")  # Debug output
+            print(f"Server returning player list: {[p[1] for p in client_tuples]}")
             return client_tuples
 
     def handle_clients(self):
@@ -281,26 +283,23 @@ class Server:
                         base_name = parts[1]
                         unique_name = self.get_unique_player_name(base_name)
 
-                        # Assign color immediately upon connection
+                        # Assign color and client ID
                         assigned_color = self.assign_color_to_player(unique_name)
-                        self.debug_color_assignments()
+                        client_id = self.assign_client_id()
 
-                        # Assign client ID for spawn positioning
+                        client_data = {
+                            'addr': addr,
+                            'name': unique_name,
+                            'color': assigned_color,
+                            'client_id': client_id
+                        }
+
                         with self.clients_lock:
-                            client_id = self.next_client_id
-                            self.next_client_id += 1
-
-                            # Store address, name, color, and client_id together
-                            client_data = {
-                                'addr': addr,
-                                'name': unique_name,
-                                'color': assigned_color,
-                                'client_id': client_id
-                            }
                             self.clients.append(client_data)
-                            print(f"New connection: {base_name} -> {unique_name} ({assigned_color}) ID:{client_id}")
 
-                        # Send connection confirmation with color and client_id
+                        print(f"New connection: {base_name} -> {unique_name} ({assigned_color}) ID:{client_id}")
+
+                        # Send connection confirmation
                         connection_response = json.dumps({
                             "type": "connection_accepted",
                             "assigned_name": unique_name,
@@ -309,34 +308,35 @@ class Server:
                         })
                         self.server_socket.sendto(connection_response.encode(), addr)
 
-                        # Notify if name was changed
-                        if base_name != unique_name:
-                            name_assignment = json.dumps({
-                                "type": "name_assignment",
-                                "assigned_name": unique_name
-                            })
-                            self.server_socket.sendto(name_assignment.encode(), addr)
+                        # Broadcast to clients
+                        self.broadcast_player_list_update()
+
+                        # FIX: Also update server's own lobby view
+                        if hasattr(self, 'lobby_update_callback') and self.lobby_update_callback:
+                            arcade.schedule_once(lambda dt: self.lobby_update_callback(), 0)
 
                 # Handle get_players command
                 elif decoded == "get_players":
-                    print(f"Sending player list to {addr}")
-                    with self.clients_lock:
-                        client_info = []
+                    print(f"Client {addr} requesting player list (fallback)")
+                    try:
+                        player_list = self.get_players_list()
+                        # Convert tuples to lists for JSON
+                        serializable_players = []
+                        for player_tuple in player_list:
+                            addr_data, display_name = player_tuple
+                            if isinstance(addr_data, tuple):
+                                addr_list = list(addr_data)
+                            else:
+                                addr_list = addr_data
+                            serializable_players.append([addr_list, display_name])
 
-                        # First add server/host with color
-                        server_name = getattr(self, 'player_name', 'host')
-                        server_color = getattr(self, 'server_color', 'blue')
-                        server_ip = f"{self.ip}:{self.port}"
-                        server_entry = f"{server_ip},{server_name} ({server_color}) (host)"
-                        client_info.append(server_entry)
+                        players_json = json.dumps(serializable_players)
+                        response_msg = f"players:{players_json}"
+                        self.server_socket.sendto(response_msg.encode(), addr)
+                        print(f"Sent fallback player list to {addr}")
+                    except Exception as e:
+                        print(f"Error sending player list to {addr}: {e}")
 
-                        # Then add connected clients
-                        for client in self.clients:
-                            client_str = f"{client['addr'][0]}:{client['addr'][1]},{client['name']} ({client['color']})"
-                            client_info.append(client_str)
-
-                        response = json.dumps({"type": "clients", "clients": client_info})
-                        self.server_socket.sendto(response.encode(), addr)
 
                 elif decoded == "get_server_name":
                     print(f"Sending server name to {addr}")
@@ -354,25 +354,81 @@ class Server:
                 # Handle disconnect message
                 elif decoded == "disconnect":
                     print(f"{addr} is disconnecting")
-                    with self.clients_lock:
-                        for client in self.clients[:]:
-                            if client['addr'] == addr:
-                                # Release the player's color
-                                self.release_player_color(client['name'])
-                                self.clients.remove(client)
-                                print(f"Client {addr} ({client['name']}) disconnected")
-                                break
 
-                    # Also remove from last_seen
+                    in_game = hasattr(self, 'picked_map') and self.picked_map is not None
+
+                    if in_game:
+                        try:
+                            self.handle_client_disconnect_in_game(addr)
+                        except Exception as e:
+                            print(f"Error handling game disconnect for {addr}: {e}")
+                            with self.clients_lock:
+                                self.clients = [c for c in self.clients if c['addr'] != addr]
+                    else:
+                        # During lobby: remove and instantly update
+                        with self.clients_lock:
+                            for client in self.clients[:]:
+                                if client['addr'] == addr:
+                                    self.release_player_color(client['name'])
+                                    self.release_client_id(client['client_id'])
+                                    self.clients.remove(client)
+                                    print(f"Client {addr} ({client['name']}) disconnected from lobby")
+                                    break
+
+                        # Broadcast to clients
+                        self.broadcast_player_list_update()
+
+                        # FIX: Also update server's own lobby view
+                        if hasattr(self, 'lobby_update_callback') and self.lobby_update_callback:
+                            arcade.schedule_once(lambda dt: self.lobby_update_callback(), 0)
+
+                    # Remove from last_seen
                     if addr in self.client_last_seen:
                         del self.client_last_seen[addr]
 
+                    # Update timeout handling to also release client IDs:
+            except socket.timeout:
+                # Handle timeouts - check for disconnected clients
+                current_time = time.time()
+                with self.clients_lock:
+                    to_remove = []
+                    for client in self.clients:
+                        client_addr = client['addr']
+                        if client_addr not in self.client_last_seen or current_time - self.client_last_seen[
+                            client_addr] > self.client_timeout:
+                            to_remove.append(client)
 
+                    for client in to_remove:
+                        client_addr = client['addr']
+
+                        # Check if we're in game - if so, handle as game disconnect
+                        in_game = hasattr(self, 'picked_map') and self.picked_map is not None
+
+                        if in_game:
+                            # Handle as game disconnect (this will broadcast to other clients)
+                            self.handle_client_disconnect_in_game(client_addr)
+                        else:
+                            # Handle as lobby disconnect and release client ID
+                            self.release_player_color(client['name'])
+                            self.release_client_id(client['client_id'])
+                            self.clients.remove(client)
+                            print(f"Client {client['addr']} ({client['name']}) timed out in lobby")
+
+                            # Broadcast to clients
+                            self.broadcast_player_list_update()
+
+                            # FIX: Also update server's own lobby view
+                            if hasattr(self, 'lobby_update_callback') and self.lobby_update_callback:
+                                arcade.schedule_once(lambda dt: self.lobby_update_callback(), 0)
+
+                        # Remove from last_seen
+                        if client_addr in self.client_last_seen:
+                            del self.client_last_seen[client_addr]
+
+                continue
             except Exception as e:
-                print(f"Error in handle_clients: {e}")
+                print(f"Error handling client data: {e}")
                 traceback.print_exc()
-                if not self.running:
-                    break
 
         print("Client handler loop exited")
 
@@ -564,16 +620,44 @@ class Server:
             data_json = game_data
 
         with self.clients_lock:
-            for client in self.clients:
-                try:
-                    client_addr = client['addr']
-                    if except_ip and client_addr == except_ip:
-                        continue
+            clients_copy = self.clients[:]
 
-                    self.server_socket.sendto(data_json.encode(), client_addr)
-                    print(f"Sent game data to {client['name']} at {client_addr}")
-                except Exception as e:
-                    print(f"Error broadcasting game data to {client}: {e}")
+        for client in clients_copy:
+            try:
+                client_addr = client['addr']
+
+                # Skip if this is the excluded client
+                if except_ip and client_addr == except_ip:
+                    continue
+
+                # Skip if client is marked as disconnected
+                if client.get('status') == 'disconnected':
+                    continue
+
+                # Set timeout to prevent hanging
+                self.server_socket.settimeout(0.1)
+                self.server_socket.sendto(data_json.encode(), client_addr)
+                print(f"Sent game data to {client['name']} at {client_addr}")
+
+            except socket.timeout:
+                print(f"Timeout sending to {client.get('name', 'unknown')} at {client_addr}")
+                with self.clients_lock:
+                    for c in self.clients:
+                        if c['addr'] == client_addr:
+                            c['status'] = 'disconnected'
+                            break
+            except Exception as e:
+                print(f"Error broadcasting game data to {client.get('name', 'unknown')}: {e}")
+                with self.clients_lock:
+                    for c in self.clients:
+                        if c['addr'] == client_addr:
+                            c['status'] = 'disconnected'
+                            break
+            finally:
+                try:
+                    self.server_socket.settimeout(0.5)
+                except:
+                    pass
 
     def broadcast_selected_map(self):
         """Pick a random map and broadcast it to all connected clients with ACK requirement"""
@@ -585,3 +669,148 @@ class Server:
         self.picked_map = random.choice(self.all_maps)
 
         self.send_command("map_selected", require_ack=True)
+
+    def send_server_disconnect(self, notify_clients=True):
+        """Send disconnect command to all clients before shutting down"""
+        if notify_clients and self.clients:
+            print("Notifying all clients of server disconnect...")
+            self.send_command("server_disconnect", require_ack=True, retry_interval=0.3, max_retries=10)
+
+            # Wait for acknowledgments with timeout
+            max_wait_time = 3.0
+            start_time = time.time()
+
+            while (time.time() - start_time) < max_wait_time and self.pending_acks:
+                server_disconnect_pending = any(
+                    "server_disconnect" in data.get("command", "")
+                    for data in self.pending_acks.values()
+                )
+                if not server_disconnect_pending:
+                    break
+                time.sleep(0.1)
+
+            print("All clients notified of server disconnect")
+
+        # Now proceed with shutdown
+        self.shutdown()
+
+    def handle_client_disconnect_in_game(self, client_addr):
+        """Handle client disconnect during game - mark as dead but keep visible"""
+        with self.clients_lock:
+            disconnected_client = None
+            for client in self.clients[:]:
+                if client['addr'] == client_addr:
+                    disconnected_client = client
+                    break
+
+            if disconnected_client:
+                # Don't remove from clients list during game, just mark as disconnected
+                disconnected_client['status'] = 'disconnected'
+                print(f"Player {disconnected_client['name']} disconnected during game - marked as dead")
+
+        # Broadcast disconnect notification OUTSIDE the lock and EXCLUDE the disconnected client
+        if disconnected_client:
+            disconnect_data = {
+                "type": "player_disconnected",
+                "player_id": disconnected_client['name'],
+                "status": "dead"
+            }
+            self.game_broadcast_data(disconnect_data, except_ip=client_addr)
+
+    def assign_client_id(self):
+        """Assign a client ID, reusing available ones first"""
+        with self.clients_lock:
+            # First try to reuse an available ID
+            if self.available_client_ids:
+                client_id = min(self.available_client_ids)  # Get the smallest available ID
+                self.available_client_ids.remove(client_id)
+                print(f"Reusing client ID: {client_id}")
+                return client_id
+
+            # If no available IDs and we haven't reached the maximum, create a new one
+            if self.next_client_id < self.max_client_ids:
+                client_id = self.next_client_id
+                self.next_client_id += 1
+                print(f"Assigned new client ID: {client_id}")
+                return client_id
+
+            # If we've reached maximum clients, find the lowest available ID to reuse
+            # This shouldn't happen in normal operation but provides a fallback
+            all_used_ids = {client['client_id'] for client in self.clients}
+            for i in range(self.max_client_ids):
+                if i not in all_used_ids:
+                    print(f"Fallback: Assigned client ID: {i}")
+                    return i
+
+            # Ultimate fallback - return 0 (this means server is full)
+            print("WARNING: Server is full, reusing ID 0")
+            return 0
+
+    def release_client_id(self, client_id):
+        """Release a client ID back to the available pool"""
+        if client_id is not None and 0 <= client_id < self.max_client_ids:
+            self.available_client_ids.add(client_id)
+            print(f"Released client ID {client_id} for reuse")
+
+    def broadcast_player_list_update(self):
+        """Instantly broadcast updated player list to all clients"""
+        if not self.running:
+            return
+
+        try:
+            # Get current player list in the correct format
+            player_list = self.get_players_list()
+
+            # Convert tuples to lists for JSON serialization
+            serializable_players = []
+            for player_tuple in player_list:
+                # Convert tuple (addr, display_name) to list [addr, display_name]
+                addr, display_name = player_tuple
+                # Convert addr tuple to list as well
+                if isinstance(addr, tuple):
+                    addr_list = list(addr)
+                else:
+                    addr_list = addr
+                serializable_players.append([addr_list, display_name])
+
+            # Create player list update message
+            update_message = {
+                "type": "player_list_update",
+                "players": serializable_players
+            }
+
+            # Broadcast to all clients instantly
+            message_json = json.dumps(update_message)
+            with self.clients_lock:
+                for client in self.clients:
+                    try:
+                        self.server_socket.sendto(message_json.encode(), client['addr'])
+                        print(f"Sent instant update to {client['name']}: {message_json[:100]}...")
+                    except Exception as e:
+                        print(f"Error broadcasting to {client['name']}: {e}")
+
+            print(f"Broadcasted instant player list to {len(self.clients)} clients")
+
+        except Exception as e:
+            print(f"Error broadcasting player list: {e}")
+            import traceback
+            traceback.print_exc()
+
+def _extract_player_info(self, player_text):
+        """Extract player information from display text"""
+        import re
+
+        # Extract color using regex - look for (color) pattern
+        color_match = re.search(r'\((\w+)\)(?:\s*\([^)]*\))?', player_text)
+        if color_match:
+            color = color_match.group(1).lower()
+            # Remove all parenthetical parts to get clean name
+            clean_name = re.sub(r'\s*\([^)]*\)', '', player_text).strip()
+            # Check if it's a host
+            is_host = "(host)" in player_text.lower()
+            return clean_name, color, is_host
+        else:
+            # Fallback
+            clean_name = re.sub(r'\s*\([^)]*\)', '', player_text).strip()
+            return clean_name, "blue", False
+

@@ -14,7 +14,6 @@ from client.Tank import Tank
 from client.assets.effects.FireEffect import FireEffect
 from non_player.StaticEntity import StaticEntity
 from non_player.EntityManager import EntityManager
-from SettingsWindow import toggle_fullscreen
 from client.assets.effects.EffectsManager import EffectsManager
 from client.assets.effects.ExplosionEffect import ExplosionEffect
 
@@ -123,6 +122,7 @@ class GameView(arcade.View):
         self.popup_box = None
         self.volume_slider = None
         self.initial_position_sent = False
+        self.hitbox_line_thickness = 2
 
         self.last_resize_time = 0
         self.resize_delay = 0.05
@@ -477,9 +477,9 @@ class GameView(arcade.View):
         # Draw debug information
         if self.show_hitboxes:
             for tank in self.tanks:
-                tank.bullet_list.draw_hit_boxes(arcade.color.RED)
-            self.tanks.draw_hit_boxes(arcade.color.GREEN)
-            self.static_entities.draw_hit_boxes(arcade.color.BLUE)
+                tank.bullet_list.draw_hit_boxes(arcade.color.RED,self.hitbox_line_thickness)
+            self.tanks.draw_hit_boxes(arcade.color.GREEN,self.hitbox_line_thickness)
+            self.static_entities.draw_hit_boxes(arcade.color.BLUE,self.hitbox_line_thickness)
 
             for boundary in self.map_boundaries:
                 arcade.draw_lrbt_rectangle_outline(
@@ -605,22 +605,55 @@ class GameView(arcade.View):
             self.player_tank.handle_key_release(key)
 
     def on_back_click(self, event):
-        arcade.unschedule(self.send_tank_update)
-        arcade.unschedule(self.process_queued_tank_updates)
-        self.manager.disable()
+        """Handle exit from game with proper cleanup"""
+        print("Exiting game...")
 
+        # Unschedule specific functions instead of unschedule_all
+        functions_to_unschedule = [
+            self.send_tank_update,
+            self.process_queued_tank_updates,
+        ]
+
+        # Add _delayed_camera_setup if it exists
+        if hasattr(self, '_delayed_camera_setup'):
+            functions_to_unschedule.append(self._delayed_camera_setup)
+
+        for func in functions_to_unschedule:
+            try:
+                arcade.unschedule(func)
+                print(f"Unscheduled {func.__name__}")
+            except:
+                pass  # Function might not be scheduled
+
+        # Disable UI manager
+        if hasattr(self, 'manager'):
+            try:
+                self.manager.disable()
+                self.manager.clear()
+                print("UI manager disabled and cleared")
+            except:
+                pass
+
+        # Handle network cleanup
+        if self.client_or_server:
+            if self.is_client:
+                print("Client disconnecting from game...")
+                self.client_or_server.disconnect()
+            else:
+                print("Server shutting down from game...")
+                self.client_or_server.send_server_disconnect(notify_clients=True)
+
+            self.client_or_server = None
+
+        # Return to main menu
         from MainMenu import Mainview
+        from SettingsWindow import toggle_fullscreen, settings
+
         if settings.get("fullscreen", True):
             toggle_fullscreen(self.window)
 
-        self.manager.clear()
         self.window.show_view(Mainview(self.window))
-
-        if self.is_client:
-            self.client_or_server.disconnect()
-        else:
-            self.client_or_server.shutdown()
-        self.client_or_server = None
+        print("Returned to main menu")
 
     def process_queued_tank_updates(self, delta_time=None):
         """Process any queued tank updates from the networking thread"""
@@ -679,6 +712,16 @@ class GameView(arcade.View):
 
         # Skip our own tank
         if player_id == self.player_tank.player_id:
+            return
+
+        # Handle player disconnection
+        if data.get("type") == "player_disconnected":
+            print(f"Player {player_id} disconnected during game")
+            if player_id in self.other_player_tanks:
+                tank = self.other_player_tanks[player_id]
+                tank.take_damage(100)  # Kill the tank
+                tank.destroyed = True
+                print(f"Marked tank {player_id} as dead due to disconnect")
             return
 
         print(f"Processing tank update: {player_id} (our ID: {self.player_tank.player_id})")

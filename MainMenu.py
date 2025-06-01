@@ -7,9 +7,9 @@ from arcade.gui import (
     UIGridLayout, UITextureButtonStyle,
 )
 from pathlib import Path
-from SettingsWindow import save_setting, SettingsView, settings  # Importing save_setting, SettingsView, and settings
-from Join import JoinGameView  # Import JoinGameView from the Join file
-from Create import CreateGameView  # Import CreateGameView from the Create file
+from SettingsWindow import save_setting, SettingsView, settings
+from Join import JoinGameView
+from Create import CreateGameView
 from SettingsWindow import background_music, music_player
 from GameButton import GameButton
 
@@ -28,6 +28,71 @@ def load_settings():
     """Load settings from the JSON file."""
     with open(SETTINGS_FILE, "r") as file:
         return json.load(file)
+
+
+class GameWindow(arcade.Window):
+    """Custom window class with proper close handling"""
+
+    def __init__(self, title, fullscreen, width, height, resizable=True):
+        super().__init__(title=title, fullscreen=fullscreen, width=width, height=height, resizable=resizable)
+
+    def on_close(self):
+        """Handle window close event (X button, Alt+F4, etc.)"""
+        print("Window close detected - handling graceful disconnect...")
+
+        # Get the current view to determine context
+        current_view = self.current_view
+
+        # Handle network cleanup based on current view
+        if hasattr(current_view, 'client_or_server') and current_view.client_or_server:
+            if hasattr(current_view, 'is_client'):
+                if current_view.is_client:
+                    print("Client disconnecting due to window close...")
+                    current_view.client_or_server.disconnect()
+                else:
+                    print("Server shutting down due to window close...")
+                    current_view.client_or_server.send_server_disconnect(notify_clients=True)
+
+        # Unschedule specific functions based on view type
+        self._unschedule_view_functions(current_view)
+
+        # Call parent close method to actually close the window
+        super().on_close()
+        print("Window closed gracefully")
+
+    def _unschedule_view_functions(self, view):
+        """Unschedule all known scheduled functions for different view types"""
+        try:
+            # Common functions that might be scheduled in any view
+            functions_to_unschedule = []
+
+            # Check what type of view we have and unschedule appropriate functions
+            if hasattr(view, 'update_player_list'):
+                functions_to_unschedule.append(view.update_player_list)
+
+            if hasattr(view, 'check_game_start'):
+                functions_to_unschedule.append(view.check_game_start)
+
+            if hasattr(view, 'send_tank_update'):
+                functions_to_unschedule.append(view.send_tank_update)
+
+            if hasattr(view, 'process_queued_tank_updates'):
+                functions_to_unschedule.append(view.process_queued_tank_updates)
+
+            if hasattr(view, '_delayed_camera_setup'):
+                functions_to_unschedule.append(view._delayed_camera_setup)
+
+            # Unschedule each function individually
+            for func in functions_to_unschedule:
+                try:
+                    arcade.unschedule(func)
+                    print(f"Unscheduled {func.__name__}")
+                except:
+                    pass  # Function might not be scheduled
+
+            print("All scheduled functions unscheduled")
+        except Exception as e:
+            print(f"Error unscheduling functions: {e}")
 
 
 class Mainview(UIView):
@@ -134,14 +199,16 @@ class Mainview(UIView):
             arcade.LBWH(0, 0, self.width, self.height),
         )
 
+def play_music():
+    global music_player
+    music_player = background_music.play(volume=settings.get("music_volume", 1.0), loop=True)
 
-def main():
-    """ Main function """
+if __name__ == "__main__":
     # Load user settings
     settings = load_settings()
 
-    # Create a window with user-defined settings
-    window = arcade.Window(
+    # Create a window with user-defined settings using our custom GameWindow class
+    window = GameWindow(
         title="Tactical Tank's",
         fullscreen=settings["fullscreen"],
         width=settings["window_width"],
@@ -149,7 +216,7 @@ def main():
         resizable=True
     )
 
-    # Set minimum size for the windo
+    # Set minimum size for the window
     window.set_minimum_size(800, 500)
 
     # Show the main view
@@ -157,10 +224,3 @@ def main():
 
     # Run the application
     arcade.run()
-
-def play_music():
-    global music_player
-    music_player = background_music.play(volume=settings.get("music_volume", 1.0), loop=True)
-
-if __name__ == "__main__":
-    main()
