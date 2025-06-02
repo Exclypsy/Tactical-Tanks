@@ -19,7 +19,7 @@ class Bullet(arcade.Sprite):
 
         # Game properties
         self.source_tank = source_tank
-        self.damage = 100
+        self.damage = 1
 
     def update(self, delta_time: float):
         """Update bullet position based on constant direction and speed."""

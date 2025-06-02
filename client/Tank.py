@@ -36,7 +36,7 @@ class Tank(arcade.Sprite):
 
         # Game properties
         self.player_id = player_id
-        self.health = 100
+        self.health = 1
         self.destroyed = False
 
         # Bullet management
@@ -189,7 +189,7 @@ class Tank(arcade.Sprite):
                 break
         return hit_tank
 
-    def take_damage(self, damage=100):
+    def take_damage(self, damage=1):
         """Handle taking damage"""
         self.health -= damage
         if self.health <= 0:

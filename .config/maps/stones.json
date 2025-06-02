@@ -1,0 +1,207 @@
+{
+  "map_info": {
+    "name": "Forest",
+    "background": ":assets:images/forestBG.jpg"
+  },
+  "tank_spawns": [
+    {
+      "spawn_id": 0,
+      "position": {
+        "x": 150,
+        "y": 150
+      },
+      "rotation": 45
+    },
+    {
+      "spawn_id": 1,
+      "position": {
+        "x": 1770,
+        "y": 150
+      },
+      "rotation": 135
+    },
+    {
+      "spawn_id": 2,
+      "position": {
+        "x": 150,
+        "y": 930
+      },
+      "rotation": 315
+    },
+    {
+      "spawn_id": 3,
+      "position": {
+        "x": 1770,
+        "y": 930
+      },
+      "rotation": 225
+    }
+  ],
+  "static_entities": [
+    {
+      "entity_id": "rock_001",
+      "type": "rock0",
+      "position": {
+        "x": 960,
+        "y": 540
+      },
+      "rotation": 0,
+      "scale": 1.5,
+      "hp": 0
+    },
+    {
+      "entity_id": "rock_002",
+      "type": "rock1",
+      "position": {
+        "x": 400,
+        "y": 300
+      },
+      "rotation": 45,
+      "scale": 1.2,
+      "hp": 4
+    },
+    {
+      "entity_id": "rock_003",
+      "type": "rock3",
+      "position": {
+        "x": 1520,
+        "y": 300
+      },
+      "rotation": 90,
+      "scale": 1.0,
+      "hp": 3
+    },
+    {
+      "entity_id": "rock_004",
+      "type": "rock0",
+      "position": {
+        "x": 400,
+        "y": 780
+      },
+      "rotation": 180,
+      "scale": 1.1,
+      "hp": 5
+    },
+    {
+      "entity_id": "rock_005",
+      "type": "rock1",
+      "position": {
+        "x": 1520,
+        "y": 780
+      },
+      "rotation": 270,
+      "scale": 0.9,
+      "hp": 3
+    },
+    {
+      "entity_id": "rock_006",
+      "type": "rock3",
+      "position": {
+        "x": 200,
+        "y": 540
+      },
+      "rotation": 30,
+      "scale": 1.3,
+      "hp": 0
+    },
+    {
+      "entity_id": "rock_007",
+      "type": "rock0",
+      "position": {
+        "x": 1720,
+        "y": 540
+      },
+      "rotation": 60,
+      "scale": 1.4,
+      "hp": 0
+    },
+    {
+      "entity_id": "rock_008",
+      "type": "rock1",
+      "position": {
+        "x": 700,
+        "y": 200
+      },
+      "rotation": 120,
+      "scale": 0.8,
+      "hp": 2
+    },
+    {
+      "entity_id": "rock_009",
+      "type": "rock3",
+      "position": {
+        "x": 1220,
+        "y": 200
+      },
+      "rotation": 150,
+      "scale": 0.7,
+      "hp": 2
+    },
+    {
+      "entity_id": "rock_010",
+      "type": "rock0",
+      "position": {
+        "x": 700,
+        "y": 880
+      },
+      "rotation": 210,
+      "scale": 0.9,
+      "hp": 3
+    },
+    {
+      "entity_id": "rock_011",
+      "type": "rock1",
+      "position": {
+        "x": 1220,
+        "y": 880
+      },
+      "rotation": 240,
+      "scale": 0.8,
+      "hp": 2
+    },
+    {
+      "entity_id": "rock_012",
+      "type": "rock3",
+      "position": {
+        "x": 600,
+        "y": 450
+      },
+      "rotation": 75,
+      "scale": 1.0,
+      "hp": 4
+    },
+    {
+      "entity_id": "rock_013",
+      "type": "rock0",
+      "position": {
+        "x": 1320,
+        "y": 630
+      },
+      "rotation": 105,
+      "scale": 1.1,
+      "hp": 4
+    },
+    {
+      "entity_id": "rock_014",
+      "type": "rock1",
+      "position": {
+        "x": 480,
+        "y": 600
+      },
+      "rotation": 315,
+      "scale": 0.6,
+      "hp": 1
+    },
+    {
+      "entity_id": "rock_015",
+      "type": "rock3",
+      "position": {
+        "x": 1440,
+        "y": 480
+      },
+      "rotation": 345,
+      "scale": 0.7,
+      "hp": 1
+    }
+  ]
+}

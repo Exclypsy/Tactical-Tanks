@@ -1,7 +1,6 @@
 import arcade
 import random
 
-
 class StaticEntity(arcade.Sprite):
     """
     A general-purpose static (non-moving) entity class for game objects like trees, rocks, walls, etc.
@@ -22,10 +21,9 @@ class StaticEntity(arcade.Sprite):
     # Class-level sound cache for optimization
     _destroy_sound = None
 
-    def __init__(self, x_pos, y_pos, entity_type="bush_big", hp=1, scale=1.0, rotation=0):
+    def __init__(self, x_pos, y_pos, entity_type="bush_big", hp=3, scale=1.0, rotation=0):
         """
         Initialize a static entity.
-
         Args:
             x_pos (float): X position on the screen
             y_pos (float): Y position on the screen
@@ -36,7 +34,6 @@ class StaticEntity(arcade.Sprite):
         """
         # Get the appropriate image for the entity type
         image_path = self.ENTITY_ASSETS.get(entity_type, self.ENTITY_ASSETS["bush_big"])
-
         super().__init__(image_path, scale)
 
         # Set position and properties
@@ -52,23 +49,16 @@ class StaticEntity(arcade.Sprite):
         if StaticEntity._destroy_sound is None:
             StaticEntity._destroy_sound = arcade.load_sound(":assets:sounds/hush.mp3")
 
-        # Arcade automatically calculates hitbox based on texture using the newest algorithm
-        # The hitbox will be calculated based on the actual image shape
-        # For more precise hitboxes, arcade uses the texture's alpha channel
-
     def update(self, bullet_list, effects_manager=None):
         """
         Handle collision detection with bullets.
-
         Args:
             bullet_list: List or SpriteList of bullets to check collision against
+            effects_manager: Effects manager for creating explosion effects
         """
-        # Skip collision detection for indestructible entities (optimization)
-        if self.is_indestructible:
-            return
-
-        # Check for collisions with bullets
+        # Check for collisions with bullets (ALWAYS check, even for indestructible)
         hit_list = arcade.check_for_collision_with_list(self, bullet_list)
+
         for bullet in hit_list:
             # Create explosion effect if effects_manager is provided
             if effects_manager is not None:
@@ -76,24 +66,22 @@ class StaticEntity(arcade.Sprite):
                 explosion = ExplosionEffect(bullet.center_x, bullet.center_y)
                 effects_manager.add_effect(explosion)
 
-            # Remove bullet and deal damage
+            # Always remove bullet on collision (even with indestructible entities)
             bullet.remove_from_sprite_lists()
 
-            # Get damage from bullet if available, otherwise default to 1
-            damage = getattr(bullet, 'damage', 1)
-
-            # Deal damage and check if entity was destroyed
-            if self.take_damage(damage):
-                break  # Entity destroyed, no need to process more bullets
-
+            # Only deal damage to destructible entities
+            if not self.is_indestructible:
+                # Get damage from bullet if available, otherwise default to 1
+                damage = getattr(bullet, 'damage', 1)
+                # Deal damage and check if entity was destroyed
+                if self.take_damage(damage):
+                    break  # Entity destroyed, no need to process more bullets
 
     def take_damage(self, damage=1):
         """
         Deal damage to the entity and handle destruction.
-
         Args:
             damage (int): Amount of damage to deal
-
         Returns:
             bool: True if entity was destroyed, False if it survived
         """
@@ -101,14 +89,17 @@ class StaticEntity(arcade.Sprite):
             return False
 
         self.current_hp -= damage
+        print(f"Entity {self.entity_type} took {damage} damage. HP: {self.current_hp}/{self.max_hp}")
 
         if self.current_hp <= 0:
             self.destroy()
             return True  # Entity was destroyed
+
         return False  # Entity survived
 
     def destroy(self):
         """Handle entity destruction with sound and cleanup."""
+        print(f"Entity {self.entity_type} destroyed!")
         arcade.play_sound(StaticEntity._destroy_sound)
         self.remove_from_sprite_lists()
 
@@ -124,24 +115,22 @@ class StaticEntity(arcade.Sprite):
 
     @classmethod
     def create_random_entity(cls, window_width, window_height, entity_types=None,
-                             min_hp=1, max_hp=3, min_scale=0.3, max_scale=0.8,
-                             border_margin=50):
+                           min_hp=2, max_hp=5, min_scale=0.3, max_scale=0.8,
+                           border_margin=50):
         """
         Factory method to create a random entity (useful for procedural level generation).
-
         Args:
             window_width (int): Game window width
             window_height (int): Game window height
             entity_types (list): List of entity types to choose from
-            min_hp, max_hp (int): HP range for random entities
+            min_hp, max_hp (int): HP range for random entities (increased defaults)
             min_scale, max_scale (float): Scale range for random entities
             border_margin (int): Margin from screen edges
-
         Returns:
             StaticEntity: A randomly generated entity
         """
         if entity_types is None:
-            entity_types = ["tree", "bush", "rock"]
+            entity_types = ["bush_small", "bush_big", "rock0", "rock1"]
 
         return cls(
             x_pos=random.randint(border_margin, window_width - border_margin),
