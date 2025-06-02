@@ -131,6 +131,27 @@ class GameView(arcade.View):
 
         self.effects_manager = EffectsManager()
 
+        # Auto rematch functionality
+        self.game_ended = False
+        self.winner_name = None
+        self.end_game_timer = 0
+        self.rematch_delay = 3.0  # 3 seconds before restart
+        self.flash_timer = 0
+        self.show_winner_text = True
+        self.original_spawn_positions = {}  # Store original positions for restart
+
+        self.game_start_time = 0
+        self.winner_check_delay = 5.0  # 5 seconds delay before checking for winners
+        self.winner_check_enabled = False
+
+        self.start_game_timer()
+
+    def start_game_timer(self):
+        """Start the game timer for winner check delay"""
+        self.game_start_time = 0
+        self.winner_check_enabled = False
+        print("Game started! Winner checking will begin in 5 seconds...")
+
     def setup_cameras(self):
         """Set up cameras using modern Arcade camera methods"""
         window_width = self.window.width
@@ -381,7 +402,16 @@ class GameView(arcade.View):
 
     def setup_player_tank(self):
         """Setup the player tank with proper spawn position and color"""
-        player_id = "host" if not self.is_client else self.client_or_server.player_name
+        if not self.is_client:
+            # Host should use their actual name, not just "host"
+            if hasattr(self.client_or_server, 'player_name') and self.client_or_server.player_name:
+                player_id = self.client_or_server.player_name
+            elif hasattr(self.client_or_server, 'server_name') and self.client_or_server.server_name:
+                player_id = self.client_or_server.server_name
+            else:
+                player_id = "host"  # Fallback only if no name is available
+        else:
+            player_id = self.client_or_server.player_name
         spawn_index = 0
 
         if self.is_client:
@@ -491,6 +521,25 @@ class GameView(arcade.View):
         # Switch to UI camera for UI elements
         self.ui_camera.use()
 
+        # Draw winner text (flashing)
+        if self.game_ended and self.winner_name and self.show_winner_text:
+            winner_text = f"{self.winner_name} won!"
+            # Center the text on screen
+            text_x = self.window.width // 2
+            text_y = self.window.height // 2 + 50
+
+            # Draw text with outline for better visibility
+            arcade.draw_text(
+                winner_text,
+                text_x, text_y,
+                arcade.color.YELLOW,
+                font_size=48,
+                anchor_x="center",
+                anchor_y="center",
+                font_name="ARCO"
+            )
+
+
         # Draw UI elements
         self.manager.draw()
 
@@ -503,6 +552,30 @@ class GameView(arcade.View):
         if self.popup_active:
             return
 
+        # Handle game end sequence
+        if self.game_ended:
+            self.end_game_timer += delta_time
+            self.flash_timer += delta_time
+
+            # Create flashing effect (visible 0.5s, hidden 0.3s)
+            cycle_time = 0.8  # Total cycle: 0.5s visible + 0.3s hidden
+            position_in_cycle = self.flash_timer % cycle_time
+            self.show_winner_text = position_in_cycle < 0.5
+
+            # Auto restart after delay
+            if self.end_game_timer >= self.rematch_delay:
+                self.restart_game()
+            return
+
+            # Update game start timer and enable winner checking after delay
+        if not self.winner_check_enabled:
+            self.game_start_time += delta_time
+            if self.game_start_time >= self.winner_check_delay:
+                self.winner_check_enabled = True
+                print("Winner checking now enabled!")
+
+            # Check for game end condition (only if enabled)
+        self.check_game_end_condition()
 
         self.effects_manager.update(delta_time)
 
@@ -781,3 +854,240 @@ class GameView(arcade.View):
                 fire_effect = FireEffect(":assets:images/fire.png", 0.5,
                                          bullet.center_x, bullet.center_y, bullet.angle)
                 tank.effects_list.append(fire_effect)
+
+    def check_game_end_condition(self):
+        """Check if only one player is alive and handle game end"""
+        # Don't check for winners if game already ended
+        if self.game_ended:
+            return
+
+        # Don't check for winners until delay has passed
+        if not self.winner_check_enabled:
+            return
+
+        alive_tanks = []
+        for tank in self.tanks:
+            if not tank.destroyed:
+                alive_tanks.append(tank)
+
+        # Game ends when only one tank is alive (or no tanks alive)
+        if len(alive_tanks) <= 1:
+            self.game_ended = True
+            self.end_game_timer = 0
+
+            if len(alive_tanks) == 1:
+                winner_tank = alive_tanks[0]
+                # Stop the winner's rotation
+                winner_tank.is_rotating = False
+                winner_tank.is_moving = False
+
+                # Get winner name
+                self.winner_name = winner_tank.player_id
+                print(f"Game ended! Winner: {self.winner_name}")
+            else:
+                # No survivors (draw)
+                self.winner_name = "Nobody"
+                print("Game ended in a draw!")
+
+            # Store current positions for restart
+            self.store_spawn_positions()
+
+    def store_spawn_positions(self):
+        """Store original spawn positions for each tank"""
+        for tank in self.tanks:
+            if tank.player_id not in self.original_spawn_positions:
+                # Find the original spawn position for this tank
+                spawn_index = 0
+                if tank.player_id == "host" or not self.is_client:
+                    spawn_index = 0
+                else:
+                    # Find client spawn index based on client ID or player ID
+                    for i, client_tank in enumerate(self.tanks):
+                        if client_tank.player_id == tank.player_id:
+                            spawn_index = (i % len(self.spawn_positions))
+                            break
+
+                if spawn_index < len(self.spawn_positions):
+                    spawn_data = self.spawn_positions[spawn_index]
+                    self.original_spawn_positions[tank.player_id] = {
+                        "x": spawn_data["position"]["x"],
+                        "y": spawn_data["position"]["y"],
+                        "rotation": spawn_data["rotation"]
+                    }
+
+    def restart_game(self):
+        """Restart the game with auto rematch and complete map reload"""
+        print("Auto restarting game with complete map reload...")
+
+        # Reset game state
+        self.game_ended = False
+        self.winner_name = None
+        self.end_game_timer = 0
+        self.flash_timer = 0
+        self.show_winner_text = True
+
+        # Reset winner check delay
+        self.game_start_time = 0
+        self.winner_check_enabled = False
+
+        # Clear all existing game objects
+        self.clear_game_objects()
+
+        # Completely reload the map
+        self.reload_complete_map()
+
+        # Recreate player tank with fresh spawn data
+        self.recreate_player_tank()
+
+        # Recreate other player tanks
+        self.recreate_other_player_tanks()
+
+        # Clear effects manager safely
+        if hasattr(self, 'effects_manager'):
+            try:
+                if hasattr(self.effects_manager, 'clear'):
+                    self.effects_manager.clear()
+                elif hasattr(self.effects_manager, 'clear_all'):
+                    self.effects_manager.clear_all()
+                elif hasattr(self.effects_manager, 'remove_all'):
+                    self.effects_manager.remove_all()
+                elif hasattr(self.effects_manager, 'effects'):
+                    self.effects_manager.effects.clear()
+                else:
+                    self.effects_manager = EffectsManager()
+                    print("Recreated effects manager due to missing clear method")
+            except Exception as e:
+                print(f"Warning: Could not clear effects manager: {e}")
+                self.effects_manager = EffectsManager()
+
+        # Start the new game timer
+        self.start_game_timer()
+
+        print("Game restarted successfully with complete map reload!")
+
+    def clear_game_objects(self):
+        """Clear all existing game objects before map reload"""
+        print("Clearing existing game objects...")
+
+        # Clear all tanks and their associated objects
+        for tank in self.tanks:
+            tank.bullet_list.clear()
+            tank.effects_list.clear()
+            if hasattr(tank, 'new_bullets'):
+                tank.new_bullets.clear()
+            tank.remove_from_sprite_lists()
+
+        # Clear tank lists
+        self.tanks.clear()
+        self.other_player_tanks.clear()
+
+        # Clear static entities
+        for entity in self.static_entities:
+            entity.remove_from_sprite_lists()
+        self.static_entities.clear()
+
+        # Clear entity manager
+        if hasattr(self, 'entity_manager'):
+            self.entity_manager = EntityManager()
+
+        # Clear boundaries
+        self.map_boundaries.clear()
+
+        # Clear spawn positions cache
+        self.original_spawn_positions.clear()
+
+        print("Game objects cleared successfully")
+
+    def reload_complete_map(self):
+        """Completely reload the current map from file"""
+        print(f"Reloading map: {self.current_map}")
+
+        # Reset map data
+        self.map_data = None
+        self.spawn_positions = []
+        self.background = None
+
+        # Reload the entire map
+        self.load_map(self.current_map)
+
+        print("Map reloaded successfully")
+
+    def recreate_player_tank(self):
+        """Recreate the player tank with fresh spawn data"""
+        print("Recreating player tank...")
+
+        # Store player info
+        if not self.is_client:
+            # Host should use their actual name, not just "host"
+            if hasattr(self.client_or_server, 'player_name') and self.client_or_server.player_name:
+                player_id = self.client_or_server.player_name
+            elif hasattr(self.client_or_server, 'server_name') and self.client_or_server.server_name:
+                player_id = self.client_or_server.server_name
+            else:
+                player_id = "host"  # Fallback only if no name is available
+        else:
+            player_id = self.client_or_server.player_name
+
+        # Determine spawn index
+        spawn_index = 0
+        if self.is_client:
+            if self.client_or_server.client_id is not None:
+                spawn_index = (self.client_or_server.client_id % 3) + 1
+            else:
+                spawn_index = random.randint(1, 3)
+
+        # Get fresh spawn position
+        if spawn_index < len(self.spawn_positions):
+            spawn_data = self.spawn_positions[spawn_index]
+            spawn_position = (spawn_data["position"]["x"], spawn_data["position"]["y"])
+            spawn_rotation = spawn_data["rotation"]
+        else:
+            # Fallback to default positions
+            default_positions = [
+                (100, 100), (self.GAME_WIDTH - 100, 100),
+                (100, self.GAME_HEIGHT - 100), (self.GAME_WIDTH - 100, self.GAME_HEIGHT - 100)
+            ]
+            spawn_position = default_positions[spawn_index % len(default_positions)]
+            spawn_rotation = 0
+
+        # Determine tank color
+        if not self.is_client:
+            if hasattr(self.client_or_server, 'server_color') and self.client_or_server.server_color:
+                tank_color = self.client_or_server.server_color
+            elif player_id in self.color_assignments:
+                tank_color = self.color_assignments[player_id]
+            else:
+                tank_color = "red"
+        else:
+            if hasattr(self.client_or_server, 'assigned_color') and self.client_or_server.assigned_color:
+                tank_color = self.client_or_server.assigned_color
+            elif player_id in self.color_assignments:
+                tank_color = self.color_assignments[player_id]
+            else:
+                tank_color = "blue"
+
+        # Create fresh player tank
+        self.player_tank = Tank(tank_color=tank_color, player_id=player_id)
+        self.player_tank.center_x = spawn_position[0]
+        self.player_tank.center_y = spawn_position[1]
+        self.player_tank.angle = spawn_rotation
+        self.player_tank.is_rotating = True
+        self.player_tank.health = 100
+        self.player_tank.destroyed = False
+
+        self.tanks.append(self.player_tank)
+
+        print(f"Player tank recreated at position ({spawn_position[0]}, {spawn_position[1]})")
+
+    def recreate_other_player_tanks(self):
+        """Recreate other player tanks that were connected before restart"""
+        print("Recreating other player tanks...")
+
+        # Note: Other player tanks will be recreated when we receive their next tank updates
+        # This is because we don't store persistent data about disconnected players
+        # The networking system will handle creating new tanks when players send updates
+
+        # Reset the initial position flag so fresh spawn data gets sent
+        self.initial_position_sent = False
+
+        print("Other player tanks will be recreated when they send updates")
