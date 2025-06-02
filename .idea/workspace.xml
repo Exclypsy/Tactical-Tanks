@@ -4,15 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="943984de-205b-4b9b-a54d-0d0f9a3a3d64" name="Changes" comment="trosku optimalizacia, zmena velkosti">
+    <list default="true" id="943984de-205b-4b9b-a54d-0d0f9a3a3d64" name="Changes" comment="fix ked sa odpoji client (zatial iba lobby), ked sa odpoji server tak vsetkych vyhodi, rychlejsie stabilnejsie lobby.">
       <change beforePath="$PROJECT_DIR$/.config/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/.config/settings.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.copy_files.py" beforeDir="false" afterPath="$PROJECT_DIR$/.copy_files.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Lobby.py" beforeDir="false" afterPath="$PROJECT_DIR$/Lobby.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MainMenu.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainMenu.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/Client.py" beforeDir="false" afterPath="$PROJECT_DIR$/client/Client.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/client/game.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/Server.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/Server.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -116,7 +112,7 @@
       <command value="format" />
     </option>
   </component>
-  <component name="RunManager" selected="Python..copy_files">
+  <component name="RunManager" selected="Python.MainMenu">
     <configuration name="Create" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Tactical-Tanks" />
       <option name="ENV_FILES" value="" />
@@ -234,8 +230,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python..copy_files" />
         <item itemvalue="Python.MainMenu" />
+        <item itemvalue="Python..copy_files" />
         <item itemvalue="Python.a" />
         <item itemvalue="Python.game" />
         <item itemvalue="Python.Create" />
@@ -312,15 +308,9 @@
       <workItem from="1748693106955" duration="16816000" />
       <workItem from="1748710419491" duration="92000" />
       <workItem from="1748777077215" duration="26000" />
-      <workItem from="1748778018966" duration="16610000" />
-    </task>
-    <task id="LOCAL-00008" summary="Game a Tank">
-      <option name="closed" value="true" />
-      <created>1743581614417</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1743581614417</updated>
+      <workItem from="1748778018966" duration="17341000" />
+      <workItem from="1748847809059" duration="1320000" />
+      <workItem from="1748851361294" duration="2295000" />
     </task>
     <task id="LOCAL-00009" summary="Game # comms">
       <option name="closed" value="true" />
@@ -706,7 +696,15 @@
       <option name="project" value="LOCAL" />
       <updated>1748710125931</updated>
     </task>
-    <option name="localTasksCounter" value="57" />
+    <task id="LOCAL-00057" summary="fix ked sa odpoji client (zatial iba lobby), ked sa odpoji server tak vsetkych vyhodi, rychlejsie stabilnejsie lobby.">
+      <option name="closed" value="true" />
+      <created>1748795986811</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1748795986811</updated>
+    </task>
+    <option name="localTasksCounter" value="58" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -725,7 +723,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="#54 oprava fontov" />
     <MESSAGE value="'s'" />
     <MESSAGE value="Uprava tlacidiel v pause menu #78" />
     <MESSAGE value="fix: zobrazenie server mena #80" />
@@ -750,7 +747,8 @@
     <MESSAGE value="explosion animacia (po zasahu) #65" />
     <MESSAGE value="Tank zomre po zasahu" />
     <MESSAGE value="trosku optimalizacia, zmena velkosti" />
-    <option name="LAST_COMMIT_MESSAGE" value="trosku optimalizacia, zmena velkosti" />
+    <MESSAGE value="fix ked sa odpoji client (zatial iba lobby), ked sa odpoji server tak vsetkych vyhodi, rychlejsie stabilnejsie lobby." />
+    <option name="LAST_COMMIT_MESSAGE" value="fix ked sa odpoji client (zatial iba lobby), ked sa odpoji server tak vsetkych vyhodi, rychlejsie stabilnejsie lobby." />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$ButtonRed.coverage" NAME="ButtonRed Coverage Results" MODIFIED="1744493543268" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -767,7 +765,7 @@
     <SUITE FILE_PATH="coverage/Tactical_Tanks$a.coverage" NAME="a Coverage Results" MODIFIED="1748680294957" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$settings.coverage" NAME="settings Coverage Results" MODIFIED="1744220937438" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Tactical_Tanks$client.coverage" NAME="client Coverage Results" MODIFIED="1745783928181" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
-    <SUITE FILE_PATH="coverage/Tactical_Tanks$MainMenu.coverage" NAME="MainMenu Coverage Results" MODIFIED="1748792582059" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
+    <SUITE FILE_PATH="coverage/Tactical_Tanks$MainMenu.coverage" NAME="MainMenu Coverage Results" MODIFIED="1748854778190" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
     <SUITE FILE_PATH="coverage/Tactical_Tanks$Join.coverage" NAME="Join Coverage Results" MODIFIED="1745782509170" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Tactical_Tanks$Server.coverage" NAME="Server Coverage Results" MODIFIED="1745785025628" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/server" />
     <SUITE FILE_PATH="coverage/Tactical_Tanks$Tank.coverage" NAME="Tank Coverage Results" MODIFIED="1745958227516" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
