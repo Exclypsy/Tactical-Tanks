@@ -549,8 +549,6 @@ class GameView(arcade.View):
             arcade.draw_rect_outline(LBWH(vp[0] + vp[2] / 2, vp[1] + vp[3] / 2, vp[2], vp[3]), arcade.color.RED, 3)
 
     def on_update(self, delta_time):
-        if self.popup_active:
-            return
 
         # Handle game end sequence
         if self.game_ended:
@@ -623,6 +621,8 @@ class GameView(arcade.View):
             self.manager.remove(self.popup_box)
             self.popup_active = False
         else:
+            self.player_tank.is_moving = False
+
             layout = UIBoxLayout(vertical=True, space_between=50)
 
             def create_textured_button(text, click_handler):
@@ -666,6 +666,9 @@ class GameView(arcade.View):
         if self.game_over:
             return
 
+        if self.popup_active and key != arcade.key.ESCAPE:
+            return
+
         if key == arcade.key.SPACE:
             self.player_tank.handle_key_press(key)
         elif key == arcade.key.H:
@@ -674,7 +677,13 @@ class GameView(arcade.View):
             self.toggle_pause_menu()
 
     def on_key_release(self, key, modifiers):
-        if not self.game_over and key == arcade.key.SPACE:
+        if self.game_over:
+            return
+
+        if self.popup_active and key != arcade.key.ESCAPE:
+            return
+
+        if key == arcade.key.SPACE:
             self.player_tank.handle_key_release(key)
 
     def on_back_click(self, event):
