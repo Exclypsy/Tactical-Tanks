@@ -28,7 +28,7 @@ class Tank(arcade.Sprite):
 
         # Movement properties
         self.rotation_speed = 100  # degrees per second
-        self.is_rotating = False
+        self.is_rotating = True
         self.is_moving = False
         self.speed = 200  # pixels per second
         self.clockwise = True
@@ -61,7 +61,8 @@ class Tank(arcade.Sprite):
 
         self.effects_list = arcade.SpriteList()
 
-    def update(self, delta_time: float, window_width=None, window_height=None):
+    def update(self, delta_time: float, window_width=None, window_height=None, skip_movement=False):
+        # Handle recoil and effects first
         for effect in self.effects_list:
             effect.update()
 
@@ -79,15 +80,12 @@ class Tank(arcade.Sprite):
         if hasattr(self, 'is_recoiling') and self.is_recoiling:
             current_time = time.time()
             elapsed = current_time - self.recoil_start_time
-
             if elapsed < self.recoil_duration:
                 # Move in the opposite direction of the barrel
                 angle_rad = math.radians(self.angle + 180)  # Opposite direction
-
                 # Calculate smooth ease-out effect
                 progress = elapsed / self.recoil_duration
                 ease_factor = 1 - (1 - progress) * (1 - progress)  # Quadratic ease-out
-
                 # Apply recoil movement
                 recoil_speed = (self.recoil_distance / self.recoil_duration) * (1 - ease_factor)
                 self.center_x += recoil_speed * math.sin(angle_rad) * delta_time
@@ -96,14 +94,15 @@ class Tank(arcade.Sprite):
                 # End recoil
                 self.is_recoiling = False
 
-        # Regular movement code continues below...
+        # Always handle rotation, regardless of skip_movement
         if self.is_rotating:
             if self.clockwise:
                 self.angle += self.rotation_speed * delta_time
             else:
                 self.angle -= self.rotation_speed * delta_time
 
-        if self.is_moving:
+        # Only handle movement if not skipped
+        if not skip_movement and self.is_moving:
             angle_rad = math.radians(self.angle)
             self.center_x += self.speed * math.sin(angle_rad) * delta_time
             self.center_y += self.speed * math.cos(angle_rad) * delta_time

@@ -579,31 +579,53 @@ class GameView(arcade.View):
 
         all_bullets = arcade.SpriteList()
 
-        # Update tanks with boundary collision
+        # Update tanks with sliding collision
         for tank in self.tanks:
             all_bullets.extend(tank.bullet_list)
 
             # Store old position for collision checking
             old_x, old_y = tank.center_x, tank.center_y
 
-            # Update tank (now uses fixed game coordinates)
-            tank.update(delta_time, self.GAME_WIDTH, self.GAME_HEIGHT)
+            # Let tank update normally (including recoil) but skip regular movement
+            tank.update(delta_time, self.GAME_WIDTH, self.GAME_HEIGHT, skip_movement=True)
 
-            # Check boundary collision for tanks
-            if self.check_tank_boundary_collision(tank, tank.center_x, tank.center_y):
-                # Revert to old position if collision detected
+            # Check if recoil caused collision and revert if needed
+            if (self.check_tank_boundary_collision(tank, tank.center_x, tank.center_y) or
+                    self.check_tank_static_entity_collision(tank, tank.center_x, tank.center_y)):
+                # Recoil caused collision, revert to old position
                 tank.center_x, tank.center_y = old_x, old_y
 
-            # Check bullet collisions with other tanks - PASS EFFECTS MANAGER
+            # Store position after recoil (but before movement)
+            post_recoil_x, post_recoil_y = tank.center_x, tank.center_y
+
+            # Now handle movement collision detection separately
+            if tank.is_moving and not tank.destroyed:
+                # Calculate what the movement should have been
+                angle_rad = math.radians(tank.angle)
+                intended_delta_x = tank.speed * math.sin(angle_rad) * delta_time
+                intended_delta_y = tank.speed * math.cos(angle_rad) * delta_time
+
+                # Try X movement only
+                new_x = post_recoil_x + intended_delta_x
+                if not (self.check_tank_boundary_collision(tank, new_x, post_recoil_y) or
+                        self.check_tank_static_entity_collision(tank, new_x, post_recoil_y)):
+                    tank.center_x = new_x
+
+                # Try Y movement only
+                new_y = post_recoil_y + intended_delta_y
+                if not (self.check_tank_boundary_collision(tank, tank.center_x, new_y) or
+                        self.check_tank_static_entity_collision(tank, tank.center_x, new_y)):
+                    tank.center_y = new_y
+
+            # Check bullet collisions with other tanks
             hit_tank = tank.check_bullet_collisions(
                 [t for t in self.tanks if t != tank],
                 self.effects_manager
             )
 
             # Check bullet collisions with boundaries
-            for bullet in list(tank.bullet_list):  # Create copy to avoid modification during iteration
+            for bullet in list(tank.bullet_list):
                 if self.check_bullet_boundary_collision(bullet):
-                    # Create explosion effect at boundary collision
                     explosion = ExplosionEffect(bullet.center_x, bullet.center_y)
                     self.effects_manager.add_effect(explosion)
                     bullet.remove_from_sprite_lists()
@@ -1100,3 +1122,19 @@ class GameView(arcade.View):
         self.initial_position_sent = False
 
         print("Other player tanks will be recreated when they send updates")
+
+    def check_tank_static_entity_collision(self, tank, new_x, new_y):
+        """Check if tank would collide with static entities at new position"""
+        # Store original position
+        old_x, old_y = tank.center_x, tank.center_y
+
+        # Set temporary position
+        tank.center_x, tank.center_y = new_x, new_y
+
+        # Check collision with static entities using Arcade 3.0.1 feature
+        collision_list = arcade.check_for_collision_with_list(tank, self.static_entities)
+
+        # Restore original position
+        tank.center_x, tank.center_y = old_x, old_y
+
+        return len(collision_list) > 0
