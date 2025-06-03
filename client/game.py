@@ -915,6 +915,13 @@ class GameView(arcade.View):
                 # Get winner name
                 self.winner_name = winner_tank.player_id
                 print(f"Game ended! Winner: {self.winner_name}")
+
+                # If server, broadcast map selection AND load the new map
+                if not self.is_client:
+                    self.client_or_server.broadcast_selected_map()
+                    self.current_map = self.client_or_server.picked_map
+                else:
+                    self.current_map = self.client_or_server.current_map
             else:
                 # No survivors (draw)
                 self.winner_name = "Nobody"
@@ -961,12 +968,6 @@ class GameView(arcade.View):
         # Clear only game objects, keep map data
         self.clear_game_objects()
 
-        # If server, broadcast map selection AND load the new map
-        if not self.is_client:
-            self.client_or_server.broadcast_selected_map()
-            self.current_map = self.client_or_server.picked_map
-        else:
-            self.current_map = self.client_or_server.current_map
         self.load_map(self.current_map)
 
         # Recreate player tank with existing spawn data
