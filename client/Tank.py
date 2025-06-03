@@ -195,6 +195,7 @@ class Tank(arcade.Sprite):
             self.destroyed = True
             dead_texture_path = f":assets:images/tanks/dead.png"
             self.texture = arcade.load_texture(dead_texture_path)
+            print(f"Tank {self.player_id} destroyed!")
         return self.destroyed
 
     def handle_key_press(self, key, modifiers=None):
@@ -211,3 +212,16 @@ class Tank(arcade.Sprite):
             self.is_moving = False
             self.is_rotating = True
             self.clockwise = not self.clockwise
+
+    def set_destroyed(self):
+        if not self.destroyed:
+            self.destroyed = True
+            dead_texture_path = f":assets:images/tanks/dead.png"
+            self.texture = arcade.load_texture(dead_texture_path)
+            print(f"Tank {self.player_id} destroyed!")
+
+    def set_not_destroyed(self):
+        self.destroyed = False
+        self.health = 1
+        self.texture = arcade.load_texture(self.tank_texture)
+        print(f"Tank {self.player_id} is now active again!")

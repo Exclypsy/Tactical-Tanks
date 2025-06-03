@@ -144,7 +144,7 @@ class Client:
 
                         elif message_get == "tank_state":
                             with self.tank_updates_lock:
-                                print(f"Client received tank state: {message}")
+                                # print(f"Client received tank state: {message}")
                                 self.pending_tank_updates.append(message)
 
                         # Handle real-time player list updates
@@ -288,7 +288,7 @@ class Client:
             if isinstance(data, (dict, list)):
                 data = json.dumps(data)
             self.socket.sendto(data.encode(), self.server_address)
-            print(f"Sent: {data}")
+            # print(f"Sent: {data}")
         except Exception as e:
             print(f"Error sending data: {e}")
             self.disconnect()
@@ -311,8 +311,14 @@ class Client:
                 if map_name:
                     self.current_map = map_name
                     print(f"Received selected map: {self.current_map}")
+
+                    # Trigger immediate map load on game view
+                    current_view = self.window.current_view
+                    if hasattr(current_view, 'load_map_and_setup'):
+                        current_view.load_map_and_setup(map_name)
                 else:
                     print("ERROR: Received map_selected command without map_name")
+
 
             elif command == "server_disconnect":
                 print("Server is disconnecting, returning to main menu...")
@@ -433,7 +439,7 @@ class Client:
             print("Not connected, can't send game state")
             return
 
-        print(f"Sending player state: {data}")
+        # print(f"Sending player state: {data}")
 
         # Send the player state to the server
         self.send_data(data)

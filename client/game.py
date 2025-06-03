@@ -563,7 +563,7 @@ class GameView(arcade.View):
             # Auto restart after delay
             if self.end_game_timer >= self.rematch_delay:
                 self.restart_game()
-            return
+                return
 
             # Update game start timer and enable winner checking after delay
         if not self.winner_check_enabled:
@@ -828,7 +828,7 @@ class GameView(arcade.View):
                 print(f"Marked tank {player_id} as dead due to disconnect")
             return
 
-        print(f"Processing tank update: {player_id} (our ID: {self.player_tank.player_id})")
+        # print(f"Processing tank update: {player_id} (our ID: {self.player_tank.player_id})")
 
         # Create or update the tank for this player
         if player_id not in self.other_player_tanks:
@@ -947,8 +947,7 @@ class GameView(arcade.View):
                     }
 
     def restart_game(self):
-        """Restart the game with auto rematch and complete map reload"""
-        print("Auto restarting game with complete map reload...")
+        print("Restarting game...")
 
         # Reset game state
         self.game_ended = False
@@ -956,51 +955,38 @@ class GameView(arcade.View):
         self.end_game_timer = 0
         self.flash_timer = 0
         self.show_winner_text = True
-
-        # Reset winner check delay
         self.game_start_time = 0
         self.winner_check_enabled = False
 
-        # Clear all existing game objects
+        # Clear only game objects, keep map data
         self.clear_game_objects()
 
-        # Completely reload the map
-        self.reload_complete_map()
+        # If server, broadcast map selection AND load the new map
+        if not self.is_client:
+            self.client_or_server.broadcast_selected_map()
+            self.current_map = self.client_or_server.picked_map
+        else:
+            self.current_map = self.client_or_server.current_map
+        self.load_map(self.current_map)
 
-        # Recreate player tank with fresh spawn data
-        self.recreate_player_tank()
+        # Recreate player tank with existing spawn data
+        self.setup_player_tank()
 
-        # Recreate other player tanks
-        self.recreate_other_player_tanks()
+        # Reset multiplayer state
+        self.initial_position_sent = False
 
-        # Clear effects manager safely
-        if hasattr(self, 'effects_manager'):
-            try:
-                if hasattr(self.effects_manager, 'clear'):
-                    self.effects_manager.clear()
-                elif hasattr(self.effects_manager, 'clear_all'):
-                    self.effects_manager.clear_all()
-                elif hasattr(self.effects_manager, 'remove_all'):
-                    self.effects_manager.remove_all()
-                elif hasattr(self.effects_manager, 'effects'):
-                    self.effects_manager.effects.clear()
-                else:
-                    self.effects_manager = EffectsManager()
-                    print("Recreated effects manager due to missing clear method")
-            except Exception as e:
-                print(f"Warning: Could not clear effects manager: {e}")
-                self.effects_manager = EffectsManager()
+        # Reset effects
+        self.effects_manager = EffectsManager()
 
-        # Start the new game timer
+        # Start game timer
         self.start_game_timer()
 
-        print("Game restarted successfully with complete map reload!")
+        print("Game restarted successfully!")
 
     def clear_game_objects(self):
-        """Clear all existing game objects before map reload"""
-        print("Clearing existing game objects...")
+        print("Clearing game objects...")
 
-        # Clear all tanks and their associated objects
+        # Clear tanks and their components
         for tank in self.tanks:
             tank.bullet_list.clear()
             tank.effects_list.clear()
@@ -1008,7 +994,6 @@ class GameView(arcade.View):
                 tank.new_bullets.clear()
             tank.remove_from_sprite_lists()
 
-        # Clear tank lists
         self.tanks.clear()
         self.other_player_tanks.clear()
 
@@ -1017,111 +1002,16 @@ class GameView(arcade.View):
             entity.remove_from_sprite_lists()
         self.static_entities.clear()
 
-        # Clear entity manager
-        if hasattr(self, 'entity_manager'):
-            self.entity_manager = EntityManager()
+        # Reset entity manager
+        self.entity_manager = EntityManager()
 
-        # Clear boundaries
-        self.map_boundaries.clear()
 
-        # Clear spawn positions cache
-        self.original_spawn_positions.clear()
+        # Clear pending network updates
+        if hasattr(self.client_or_server, 'pending_tank_updates'):
+            with self.client_or_server.tank_updates_lock:
+                self.client_or_server.pending_tank_updates.clear()
 
         print("Game objects cleared successfully")
-
-    def reload_complete_map(self):
-        """Completely reload the current map from file"""
-        print(f"Reloading map: {self.current_map}")
-
-        # Reset map data
-        self.map_data = None
-        self.spawn_positions = []
-        self.background = None
-
-        # Reload the entire map
-        self.load_map(self.current_map)
-
-        print("Map reloaded successfully")
-
-    def recreate_player_tank(self):
-        """Recreate the player tank with fresh spawn data"""
-        print("Recreating player tank...")
-
-        # Store player info
-        if not self.is_client:
-            # Host should use their actual name, not just "host"
-            if hasattr(self.client_or_server, 'player_name') and self.client_or_server.player_name:
-                player_id = self.client_or_server.player_name
-            elif hasattr(self.client_or_server, 'server_name') and self.client_or_server.server_name:
-                player_id = self.client_or_server.server_name
-            else:
-                player_id = "host"  # Fallback only if no name is available
-        else:
-            player_id = self.client_or_server.player_name
-
-        # Determine spawn index
-        spawn_index = 0
-        if self.is_client:
-            if self.client_or_server.client_id is not None:
-                spawn_index = (self.client_or_server.client_id % 3) + 1
-            else:
-                spawn_index = random.randint(1, 3)
-
-        # Get fresh spawn position
-        if spawn_index < len(self.spawn_positions):
-            spawn_data = self.spawn_positions[spawn_index]
-            spawn_position = (spawn_data["position"]["x"], spawn_data["position"]["y"])
-            spawn_rotation = spawn_data["rotation"]
-        else:
-            # Fallback to default positions
-            default_positions = [
-                (100, 100), (self.GAME_WIDTH - 100, 100),
-                (100, self.GAME_HEIGHT - 100), (self.GAME_WIDTH - 100, self.GAME_HEIGHT - 100)
-            ]
-            spawn_position = default_positions[spawn_index % len(default_positions)]
-            spawn_rotation = 0
-
-        # Determine tank color
-        if not self.is_client:
-            if hasattr(self.client_or_server, 'server_color') and self.client_or_server.server_color:
-                tank_color = self.client_or_server.server_color
-            elif player_id in self.color_assignments:
-                tank_color = self.color_assignments[player_id]
-            else:
-                tank_color = "red"
-        else:
-            if hasattr(self.client_or_server, 'assigned_color') and self.client_or_server.assigned_color:
-                tank_color = self.client_or_server.assigned_color
-            elif player_id in self.color_assignments:
-                tank_color = self.color_assignments[player_id]
-            else:
-                tank_color = "blue"
-
-        # Create fresh player tank
-        self.player_tank = Tank(tank_color=tank_color, player_id=player_id)
-        self.player_tank.center_x = spawn_position[0]
-        self.player_tank.center_y = spawn_position[1]
-        self.player_tank.angle = spawn_rotation
-        self.player_tank.is_rotating = True
-        self.player_tank.health = 100
-        self.player_tank.destroyed = False
-
-        self.tanks.append(self.player_tank)
-
-        print(f"Player tank recreated at position ({spawn_position[0]}, {spawn_position[1]})")
-
-    def recreate_other_player_tanks(self):
-        """Recreate other player tanks that were connected before restart"""
-        print("Recreating other player tanks...")
-
-        # Note: Other player tanks will be recreated when we receive their next tank updates
-        # This is because we don't store persistent data about disconnected players
-        # The networking system will handle creating new tanks when players send updates
-
-        # Reset the initial position flag so fresh spawn data gets sent
-        self.initial_position_sent = False
-
-        print("Other player tanks will be recreated when they send updates")
 
     def check_tank_static_entity_collision(self, tank, new_x, new_y):
         """Check if tank would collide with static entities at new position"""
@@ -1138,3 +1028,19 @@ class GameView(arcade.View):
         tank.center_x, tank.center_y = old_x, old_y
 
         return len(collision_list) > 0
+
+    def load_map_and_setup(self, map_name):
+        """Client method: load map and setup after server selection"""
+        print(f"Client loading and setting up map: {map_name}")
+
+        # Set the game view's current_map to the new map
+        self.current_map = map_name
+
+        # Clear existing game objects
+        self.clear_game_objects()
+
+        # Then load the new map
+        self.load_map(self.current_map)
+        self.setup_player_tank()
+
+        print("Client setup complete")

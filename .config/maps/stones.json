@@ -1,7 +1,7 @@
 {
   "map_info": {
     "name": "Forest",
-    "background": ":assets:images/forestBG.jpg"
+    "background": ":assets:images/map_bg/stone.jpg"
   },
   "tank_spawns": [
     {

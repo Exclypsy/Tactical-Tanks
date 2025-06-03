@@ -249,7 +249,7 @@ class Server:
                 # Process the received data
                 try:
                     decoded = data.decode()
-                    print(f"Received from {addr}: {decoded}")
+                    # print(f"Received from {addr}: {decoded}")
                 except UnicodeDecodeError:
                     print(f"Received non-text data from {addr}")
                     continue
@@ -637,7 +637,7 @@ class Server:
                 # Set timeout to prevent hanging
                 self.server_socket.settimeout(0.1)
                 self.server_socket.sendto(data_json.encode(), client_addr)
-                print(f"Sent game data to {client['name']} at {client_addr}")
+                # print(f"Sent game data to {client['name']} at {client_addr}")
 
             except socket.timeout:
                 print(f"Timeout sending to {client.get('name', 'unknown')} at {client_addr}")
@@ -667,6 +667,10 @@ class Server:
 
         # Pick the map
         self.picked_map = random.choice(self.all_maps)
+        print(f"Selected map: {self.picked_map}")
+
+        # MAP DEBUG
+        # self.picked_map = "stones"
 
         self.send_command("map_selected", require_ack=True)
 
