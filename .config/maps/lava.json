@@ -2,8 +2,7 @@
   "map_info": {
     "name": "LavaLand",
     "background": ":assets:images/map_bg/lavaBG.jpg"
-  }
-},
+  },
   "tank_spawns": [
     {
       "spawn_id": 0,
@@ -28,4 +27,71 @@
         "y": 930
       },
       "rotation": 315
+    },
+    {
+      "spawn_id": 3,
+      "position": {
+        "x": 1770,
+        "y": 930
+      },
+      "rotation": 225
     }
+  ],
+  "static_entities": [
+    {
+      "entity_id": "rock_lava_001",
+      "type": "rock0",
+      "position": {
+        "x": 800,
+        "y": 400
+      },
+      "rotation": 10,
+      "scale": 1.2,
+      "hp": 4
+    },
+    {
+      "entity_id": "rock_lava_002",
+      "type": "rock1",
+      "position": {
+        "x": 1000,
+        "y": 500
+      },
+      "rotation": 45,
+      "scale": 0.9,
+      "hp": 3
+    },
+    {
+      "entity_id": "rock_lava_003",
+      "type": "rock2",
+      "position": {
+        "x": 600,
+        "y": 700
+      },
+      "rotation": 90,
+      "scale": 1.0,
+      "hp": 4
+    },
+    {
+      "entity_id": "rock_lava_004",
+      "type": "rock3",
+      "position": {
+        "x": 1300,
+        "y": 600
+      },
+      "rotation": 135,
+      "scale": 0.8,
+      "hp": 3
+    },
+    {
+      "entity_id": "rock_lava_005",
+      "type": "rock1",
+      "position": {
+        "x": 400,
+        "y": 850
+      },
+      "rotation": 180,
+      "scale": 0.7,
+      "hp": 2
+    }
+  ]
+}
