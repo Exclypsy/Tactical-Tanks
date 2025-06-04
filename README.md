@@ -1,16 +1,15 @@
 # 🎯 Tactical Tanks
 
-**Tactical Tanks** is a strategic multiplayer tank game developed in Python using the Tkinter library. Designed as a school project, it emphasizes object-oriented programming principles and modular architecture, offering both client and server components for networked gameplay.
+**Tactical Tanks** is a strategic multiplayer tank game developed in Python using the Arcade library. Designed as a school project, it emphasizes object-oriented programming principles and modular architecture, offering both client and server components for networked gameplay.
 
 ---
 
 ## 🚀 Features
 
-- **Multiplayer Support**: Engage in battles with multiple players over a network.
+- **Multiplayer Support**: Engage in battles with multiple players over a local network.
 - **Lobby System**: Create or join game lobbies with customizable settings.
-- **Turn-Based Mechanics**: Strategic gameplay with turn-based actions.
-- **Customizable Settings**: Adjust game parameters such as map size and tank attributes.
-- **Graphical User Interface**: Intuitive GUI built with Tkinter for seamless interaction.
+- **Turn-Based Mechanics**: Strategic gameplay with rotating actions.
+- **Graphical User Interface**: Intuitive GUI built with Arcade for seamless interaction.
 
 ---
 
@@ -86,15 +85,6 @@ Once all players are ready, start the game and take turns to outmaneuver your op
 
 ---
 
-## 🧪 Future Enhancements
-
-- **AI Opponents**: Introduce computer-controlled tanks for solo play.
-- **Enhanced Graphics**: Upgrade from Tkinter to a more advanced graphics library.
-- **Power-Ups**: Add in-game items that provide temporary advantages.
-- **Map Editor**: Allow players to create and share custom maps.
-
----
-
 ## 📸 Screenshots
 
 > *Add your own screenshots here to showcase the game's interface and gameplay.*
@@ -114,20 +104,9 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ---
 
 ## 👥 Contributors
-
-- [Šimon Jedinák](https://github.com/Exclypsy)
+- [Martin Bartko](https://github.com/Exclypsy)
+- [Šimon Jedinák](https://github.com/simonjedinak)
 - Oliver Komka
 - Soňa Miháliková
 
 ---
-
-## 📬 Contact
-
-For questions or suggestions, please open an issue on the [GitHub repository](https://github.com/Exclypsy/Tactical-Tanks/issues).
-
----
-
-
-⸻
-
-Feel free to customize this README.md further by adding screenshots, a UML diagram, or additional details specific to your project’s implementation. If you need assistance generating a UML diagram or setting up a license file, let me know!
