@@ -289,7 +289,7 @@ class GameView(arcade.View):
         except Exception as e:
             print(f"ERROR: Failed to load background: {e}")
             # Fallback background creation
-            self.background = arcade.Sprite(":assets:images/forestBG.jpg")
+            self.background = arcade.Sprite(":assets:images/map_bg/forestBG.jpg")
             self.background.center_x = self.GAME_WIDTH // 2
             self.background.center_y = self.GAME_HEIGHT // 2
 
