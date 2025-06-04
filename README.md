@@ -86,8 +86,10 @@ Once all players are ready, start the game and take turns to outmaneuver your op
 ---
 
 ## 📸 Screenshots
+<img width="1284" alt="Screenshot 2025-06-04 at 21 11 46" src="https://github.com/user-attachments/assets/0c236f42-4703-40dc-be4c-34cd2533c8c5" />
+<img width="1287" alt="Screenshot 2025-06-04 at 21 15 26" src="https://github.com/user-attachments/assets/046a1c2d-fa09-451b-8841-2758d3731276" />
+<img width="1284" alt="Screenshot 2025-06-04 at 21 15 13" src="https://github.com/user-attachments/assets/3b329671-c6a4-45fc-a210-e308599bdcd1" />
 
-> *Add your own screenshots here to showcase the game's interface and gameplay.*
 
 ---
 
