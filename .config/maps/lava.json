@@ -1,7 +1,9 @@
-"map_info": {
+{
+  "map_info": {
     "name": "LavaLand",
     "background": ":assets:images/map_bg/lavaBG.jpg"
-  },
+  }
+},
   "tank_spawns": [
     {
       "spawn_id": 0,

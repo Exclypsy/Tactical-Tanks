@@ -1,4 +1,5 @@
-"map_info": {
+{
+  "map_info": {
     "name": "Snow",
     "background": ":assets:images/map_bg/snowBG.jpg"
   },
@@ -6,24 +7,135 @@
     {
       "spawn_id": 0,
       "position": {
-        "x": 150,
+        "x": 200,
         "y": 150
       },
-      "rotation": 45
+      "rotation": 30
     },
     {
       "spawn_id": 1,
       "position": {
-        "x": 1770,
-        "y": 150
+        "x": 1700,
+        "y": 200
       },
-      "rotation": 135
+      "rotation": 150
     },
     {
       "spawn_id": 2,
       "position": {
-        "x": 150,
-        "y": 930
+        "x": 300,
+        "y": 950
       },
-      "rotation": 315
+      "rotation": 300
     },
+    {
+      "spawn_id": 3,
+      "position": {
+        "x": 1650,
+        "y": 920
+      },
+      "rotation": 210
+    }
+  ],
+  "static_entities": [
+    {
+      "entity_id": "bush_snow_001",
+      "type": "bush_small_snow",
+      "position": {
+        "x": 500,
+        "y": 350
+      },
+      "rotation": 15,
+      "scale": 0.7,
+      "hp": 2
+    },
+    {
+      "entity_id": "bush_snow_002",
+      "type": "bush_big_snow",
+      "position": {
+        "x": 1100,
+        "y": 600
+      },
+      "rotation": 60,
+      "scale": 1.1,
+      "hp": 3
+    },
+    {
+      "entity_id": "bush_snow_003",
+      "type": "bush_small_snow",
+      "position": {
+        "x": 900,
+        "y": 800
+      },
+      "rotation": 120,
+      "scale": 0.8,
+      "hp": 2
+    },
+    {
+      "entity_id": "bush_snow_004",
+      "type": "bush_big_snow",
+      "position": {
+        "x": 400,
+        "y": 550
+      },
+      "rotation": 45,
+      "scale": 0.9,
+      "hp": 2
+    },
+    {
+      "entity_id": "bush_snow_005",
+      "type": "bush_big_snow",
+      "position": {
+        "x": 1350,
+        "y": 350
+      },
+      "rotation": 135,
+      "scale": 0.6,
+      "hp": 1
+    },
+    {
+      "entity_id": "bush_snow_006",
+      "type": "bush_small_snow",
+      "position": {
+        "x": 700,
+        "y": 650
+      },
+      "rotation": 270,
+      "scale": 0.6,
+      "hp": 1
+    },
+    {
+      "entity_id": "rock_snow_001",
+      "type": "rock0",
+      "position": {
+        "x": 1000,
+        "y": 450
+      },
+      "rotation": 25,
+      "scale": 1.0,
+      "hp": 4
+    },
+    {
+      "entity_id": "rock_snow_002",
+      "type": "rock1",
+      "position": {
+        "x": 300,
+        "y": 700
+      },
+      "rotation": 100,
+      "scale": 0.7,
+      "hp": 3
+    },
+    {
+      "entity_id": "rock_snow_003",
+      "type": "rock3",
+      "position": {
+        "x": 1250,
+        "y": 520
+      },
+      "rotation": 160,
+      "scale": 0.85,
+      "hp": 3
+    }
+  ]
+}
