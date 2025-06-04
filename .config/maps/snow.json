@@ -1,7 +1,7 @@
 {
   "map_info": {
     "name": "Snow",
-    "background": ":assets:images/map_bg/snowBG.jpg"
+    "background": ":assets:images/map_bg/snowBG.png"
   },
   "tank_spawns": [
     {
