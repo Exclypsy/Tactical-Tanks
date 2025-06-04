@@ -16,7 +16,11 @@ class StaticEntity(arcade.Sprite):
         "rock2": ":assets:images/static_entities/rock2.png",
         "rock3": ":assets:images/static_entities/rock3.png",
         "bush_small_snow": ":assets:images/static_entities/bush_small_snow.png",
-        "bush_big_snow": ":assets:images/static_entities/bush_big_snow.png"
+        "bush_big_snow": ":assets:images/static_entities/bush_big_snow.png",
+        "lavarock0": ":assets:images/static_entities/lavarock0.png",
+        "lavarock1": ":assets:images/static_entities/lavarock1.png",
+        "lavarock2": ":assets:images/static_entities/lavarock2.png",
+        "lavarock3": ":assets:images/static_entities/lavarock3.png",
         # Add more entity types as needed
     }
 
