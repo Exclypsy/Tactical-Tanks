@@ -16,6 +16,8 @@ from non_player.StaticEntity import StaticEntity
 from non_player.EntityManager import EntityManager
 from client.assets.effects.EffectsManager import EffectsManager
 from client.assets.effects.ExplosionEffect import ExplosionEffect
+from client.assets.effects.OutlinedText import OutlinedText
+
 
 
 # Resource paths
@@ -104,6 +106,12 @@ class GameView(arcade.View):
         # Tanks
         self.tanks = arcade.SpriteList()
         self.other_player_tanks = {}
+        self.player_tank = None
+
+        # Scoreboard management
+        self.scoreboard = {}
+        self.death_order = []
+        self.show_scoreboard = False
 
         # Initialize player tank with map spawn data
         self.setup_player_tank()
@@ -113,6 +121,7 @@ class GameView(arcade.View):
         arcade.schedule(self.process_queued_tank_updates, 1 / 64)
 
         # UI setup
+        self.manager = None
         self.setup_ui()
 
         # Debug and game state
@@ -135,9 +144,8 @@ class GameView(arcade.View):
         self.game_ended = False
         self.winner_name = None
         self.end_game_timer = 0
-        self.rematch_delay = 3.0  # 3 seconds before restart
+        self.rematch_delay = 5.0
         self.flash_timer = 0
-        self.show_winner_text = True
         self.original_spawn_positions = {}  # Store original positions for restart
 
         self.game_start_time = 0
@@ -461,6 +469,10 @@ class GameView(arcade.View):
         self.player_tank.is_rotating = True
         self.tanks.append(self.player_tank)
 
+        if player_id not in self.scoreboard:
+            self.scoreboard[player_id] = 0
+            print(f"Initialized scoreboard for player: {player_id}")
+
     def setup_ui(self):
         """Setup the user interface"""
         self.manager = UIManager()
@@ -521,24 +533,8 @@ class GameView(arcade.View):
         # Switch to UI camera for UI elements
         self.ui_camera.use()
 
-        # Draw winner text (flashing)
-        if self.game_ended and self.winner_name and self.show_winner_text:
-            winner_text = f"{self.winner_name} won!"
-            # Center the text on screen
-            text_x = self.window.width // 2
-            text_y = self.window.height // 2 + 50
-
-            # Draw text with outline for better visibility
-            arcade.draw_text(
-                winner_text,
-                text_x, text_y,
-                arcade.color.YELLOW,
-                font_size=48,
-                anchor_x="center",
-                anchor_y="center",
-                font_name="ARCO"
-            )
-
+        if self.show_scoreboard:
+            self.draw_scoreboard_overlay()
 
         # Draw UI elements
         self.manager.draw()
@@ -555,10 +551,13 @@ class GameView(arcade.View):
             self.end_game_timer += delta_time
             self.flash_timer += delta_time
 
-            # Create flashing effect (visible 0.5s, hidden 0.3s)
-            cycle_time = 0.8  # Total cycle: 0.5s visible + 0.3s hidden
-            position_in_cycle = self.flash_timer % cycle_time
-            self.show_winner_text = position_in_cycle < 0.5
+            # Scoreboard timing logic
+            if 0.3 <= self.end_game_timer < self.rematch_delay:
+                self.show_scoreboard = True
+            else:
+                # Hide scoreboard before 1 second and after 5 seconds
+                self.show_scoreboard = False
+
 
             # Auto restart after delay
             if self.end_game_timer >= self.rematch_delay:
@@ -600,6 +599,9 @@ class GameView(arcade.View):
 
             # Now handle movement collision detection separately
             if tank.is_moving and not tank.destroyed:
+                if tank.destroyed and tank.player_id not in self.death_order:
+                    self.record_tank_death(tank)
+
                 # Calculate what the movement should have been
                 angle_rad = math.radians(tank.angle)
                 intended_delta_x = tank.speed * math.sin(angle_rad) * delta_time
@@ -617,8 +619,8 @@ class GameView(arcade.View):
                         self.check_tank_static_entity_collision(tank, tank.center_x, new_y)):
                     tank.center_y = new_y
 
-            # Check bullet collisions with other tanks
-            hit_tank = tank.check_bullet_collisions(
+            # # Check bullet collisions with other tanks
+            tank.check_bullet_collisions(
                 [t for t in self.tanks if t != tank],
                 self.effects_manager
             )
@@ -697,6 +699,8 @@ class GameView(arcade.View):
             self.show_hitboxes = not self.show_hitboxes
         elif key == arcade.key.ESCAPE:
             self.toggle_pause_menu()
+        elif key == arcade.key.TAB:
+            self.show_scoreboard = True
 
     def on_key_release(self, key, modifiers):
         if self.game_over:
@@ -707,6 +711,8 @@ class GameView(arcade.View):
 
         if key == arcade.key.SPACE:
             self.player_tank.handle_key_release(key)
+        elif key == arcade.key.TAB:
+            self.show_scoreboard = False
 
     def on_back_click(self, event):
         """Handle exit from game with proper cleanup"""
@@ -858,6 +864,10 @@ class GameView(arcade.View):
             self.other_player_tanks[player_id] = new_tank
             self.tanks.append(new_tank)
 
+            if player_id not in self.scoreboard:
+                self.scoreboard[player_id] = 0
+                print(f"Initialized scoreboard for new player: {player_id}")
+
         # Update tank state
         tank = self.other_player_tanks[player_id]
         tank.center_x = data.get("x", tank.center_x)
@@ -881,7 +891,6 @@ class GameView(arcade.View):
                 tank.bullet_list.append(bullet)
 
                 # Add fire effect
-                angle_rad = math.radians(bullet.angle)
                 fire_effect = FireEffect(":assets:images/fire.png", 0.5,
                                          bullet.center_x, bullet.center_y, bullet.angle)
                 tank.effects_list.append(fire_effect)
@@ -906,6 +915,10 @@ class GameView(arcade.View):
             self.game_ended = True
             self.end_game_timer = 0
 
+            # Calculate and update scoreboard
+            self.calculate_and_update_scoreboard()
+
+
             if len(alive_tanks) == 1:
                 winner_tank = alive_tanks[0]
                 # Stop the winner's rotation
@@ -927,32 +940,6 @@ class GameView(arcade.View):
                 self.winner_name = "Nobody"
                 print("Game ended in a draw!")
 
-            # Store current positions for restart
-            self.store_spawn_positions()
-
-    def store_spawn_positions(self):
-        """Store original spawn positions for each tank"""
-        for tank in self.tanks:
-            if tank.player_id not in self.original_spawn_positions:
-                # Find the original spawn position for this tank
-                spawn_index = 0
-                if tank.player_id == "host" or not self.is_client:
-                    spawn_index = 0
-                else:
-                    # Find client spawn index based on client ID or player ID
-                    for i, client_tank in enumerate(self.tanks):
-                        if client_tank.player_id == tank.player_id:
-                            spawn_index = (i % len(self.spawn_positions))
-                            break
-
-                if spawn_index < len(self.spawn_positions):
-                    spawn_data = self.spawn_positions[spawn_index]
-                    self.original_spawn_positions[tank.player_id] = {
-                        "x": spawn_data["position"]["x"],
-                        "y": spawn_data["position"]["y"],
-                        "rotation": spawn_data["rotation"]
-                    }
-
     def restart_game(self):
         print("Restarting game...")
 
@@ -961,9 +948,12 @@ class GameView(arcade.View):
         self.winner_name = None
         self.end_game_timer = 0
         self.flash_timer = 0
-        self.show_winner_text = True
         self.game_start_time = 0
         self.winner_check_enabled = False
+        self.show_scoreboard = False
+
+        # Reset death tracking
+        self.death_order = []
 
         # Clear only game objects, keep map data
         self.clear_game_objects()
@@ -1045,3 +1035,197 @@ class GameView(arcade.View):
         self.setup_player_tank()
 
         print("Client setup complete")
+
+    def record_tank_death(self, tank):
+        """Record when a tank dies for scoreboard purposes"""
+        if tank.player_id not in self.death_order and tank.destroyed:
+            self.death_order.append(tank.player_id)
+            print(f"Tank {tank.player_id} died. Death order position: {len(self.death_order)}")
+
+    def calculate_and_update_scoreboard(self):
+        """Calculate scores based on survival order and update scoreboard"""
+        # Initialize scoreboard entries for all players
+        for tank in self.tanks:
+            if tank.player_id not in self.scoreboard:
+                self.scoreboard[tank.player_id] = 0
+
+        # Find alive tanks (winners)
+        alive_tanks = [tank for tank in self.tanks if not tank.destroyed]
+
+        # Award points based on survival
+        total_players = len(self.tanks)
+
+        if len(alive_tanks) == 1:
+            # One winner
+            winner = alive_tanks[0]
+            self.scoreboard[winner.player_id] += 3
+            print(f"{winner.player_id} gets 3 points for winning!")
+
+            # Award points to last survivors based on death order (reverse order)
+            if len(self.death_order) >= 1:
+                # Last to die before winner gets 2 points
+                second_place = self.death_order[-1]
+                self.scoreboard[second_place] += 2
+                print(f"{second_place} gets 2 points for 2nd place!")
+
+            if len(self.death_order) >= 2:
+                # Second to last to die gets 1 point
+                third_place = self.death_order[-2]
+                self.scoreboard[third_place] += 1
+                print(f"{third_place} gets 1 point for 3rd place!")
+
+        elif len(alive_tanks) == 0:
+            # All died - award points to last 3 survivors
+            if len(self.death_order) >= 1:
+                last_survivor = self.death_order[-1]
+                self.scoreboard[last_survivor] += 3
+                print(f"{last_survivor} gets 3 points for being last survivor!")
+
+            if len(self.death_order) >= 2:
+                second_last = self.death_order[-2]
+                self.scoreboard[second_last] += 2
+                print(f"{second_last} gets 2 points for 2nd place!")
+
+            if len(self.death_order) >= 3:
+                third_last = self.death_order[-3]
+                self.scoreboard[third_last] += 1
+                print(f"{third_last} gets 1 point for 3rd place!")
+
+    def draw_scoreboard_overlay(self):
+        """Draw the scoreboard overlay with darkened background"""
+        # Draw darkened background
+        arcade.draw_lbwh_rectangle_filled(0, 0, self.window.width, self.window.height, Color(0, 0, 0, 170))
+
+        # Get sorted scoreboard data
+        sorted_scores = sorted(self.scoreboard.items(), key=lambda x: x[1], reverse=True)
+
+        if not sorted_scores:
+            return
+
+        # Calculate layout dimensions
+        title_y = self.window.height // 2 + 150
+        entry_height = 70
+        start_y = title_y - 100
+
+        # Draw title
+        title_text = OutlinedText(
+            "SCOREBOARD",
+            self.window.width // 2, title_y,
+            text_color=arcade.color.WHITE,
+            outline_color=arcade.color.BLACK,
+            font_size=48,
+            stroke_width=8,
+            anchor_x="center",
+            anchor_y="center"
+        )
+        title_text.draw()
+
+        # Calculate positioning for entries
+        max_name_width = 0
+        score_width = 60  # Approximate width for scores
+
+        # First pass: calculate maximum name width for alignment
+        for player_id, score in sorted_scores:
+            name_width = len(player_id) * 14  # Approximate character width at font size 24
+            max_name_width = max(max_name_width, name_width)
+
+        # Entry layout calculations
+        color_rect_width = 40
+        name_start_x = self.window.width // 2 - 250
+        color_rect_x = name_start_x - color_rect_width - 10
+        score_end_x = self.window.width // 2 + 250
+        dots_start_x = name_start_x + max_name_width + 20
+        dots_end_x = score_end_x - score_width - 10
+
+        # Draw each player entry
+        for i, (player_id, score) in enumerate(sorted_scores):
+            y_pos = start_y - (i * entry_height)
+
+            # Get tank color for this player
+            tank_color = self.get_player_tank_color(player_id)
+            color_rgb = self.get_color_rgb(tank_color)
+
+            # Draw tank color indicator (rounded rectangle)
+            arcade.draw_lbwh_rectangle_filled(
+                color_rect_x, y_pos - 15, color_rect_width, 30, color_rgb
+            )
+
+            # Draw black border around color indicator
+            arcade.draw_lbwh_rectangle_outline(
+                color_rect_x, y_pos - 15, color_rect_width, 30, arcade.color.BLACK, 2
+            )
+
+            # Draw player name with outline
+            name_text = OutlinedText(
+                player_id,
+                name_start_x, y_pos,
+                text_color=arcade.color.WHITE,
+                outline_color=arcade.color.BLACK,
+                font_size=24,
+                stroke_width=3,
+                anchor_x="left",
+                anchor_y="center"
+            )
+            name_text.draw()
+
+            # Draw score
+            score_text = f"{score}"
+            arcade.Text(
+                score_text,
+                score_end_x, y_pos,
+                arcade.color.WHITE,
+                font_size=24,
+                anchor_x="right",
+                anchor_y="center",
+                font_name="ARCO"
+            ).draw()
+
+            # Draw dots between name and score
+            self.draw_connecting_dots(dots_start_x, y_pos, dots_end_x)
+
+    def get_player_tank_color(self, player_id):
+        """Get the tank color for a specific player"""
+        # Check current tanks first
+        for tank in self.tanks:
+            if tank.player_id == player_id:
+                return tank.tank_color
+
+        # Fallback to color assignments
+        if player_id in self.color_assignments:
+            return self.color_assignments[player_id]
+
+        # Default fallback
+        return "blue"
+
+    def get_color_rgb(self, color_name):
+        """Convert color name to RGB tuple"""
+        color_map = {
+            "blue": arcade.color.DODGER_BLUE,
+            "red": arcade.color.RED,
+            "green": arcade.color.LIME_GREEN,
+            "yellow": arcade.color.YELLOW
+        }
+        return color_map.get(color_name.lower(), arcade.color.DODGER_BLUE)
+
+    def draw_connecting_dots(self, start_x, y, end_x):
+        """Draw connecting dots between player name and score with variable spacing"""
+        available_width = end_x - start_x
+
+        if available_width <= 0:
+            return
+
+        # Calculate optimal dot spacing
+        dot_diameter = 3
+        min_spacing = 8
+        ideal_spacing = 12
+
+        # Try ideal spacing first
+        num_dots = int(available_width // ideal_spacing)
+
+        if num_dots > 0:
+            # Adjust spacing to distribute dots evenly
+            actual_spacing = available_width / num_dots
+
+            for i in range(num_dots):
+                dot_x = start_x + (i * actual_spacing) + (actual_spacing / 2)
+                arcade.draw_circle_filled(dot_x, y, dot_diameter // 2, arcade.color.GRAY)
