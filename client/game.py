@@ -566,7 +566,7 @@ class GameView(arcade.View):
                 return
 
             # Update game start timer and enable winner checking after delay
-        if not self.winner_check_enabled:
+        if not self.winner_check_enabled and len(self.tanks) >= 2:
             self.game_start_time += delta_time
             if self.game_start_time >= self.winner_check_delay:
                 self.winner_check_enabled = True

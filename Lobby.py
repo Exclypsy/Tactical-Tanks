@@ -4,7 +4,7 @@ from arcade.gui import (
     UIAnchorLayout,
     UIBoxLayout,
     UILabel,
-    UITextureButton, UIInputText,
+    UITextureButton
 )
 from arcade.types import Color
 from pathlib import Path
@@ -77,60 +77,13 @@ class LobbyView(UIView):
         # Set up real-time updates for server
         if not self.is_client:
             self.client_or_server.lobby_update_callback = self.force_player_list_update
-
-
-            # Create horizontal layout for bottom controls
-            bottom_layout = UIBoxLayout(vertical=False, space_between=15)
-            # Game loops label
-            game_loops_label = UILabel(
-                text="Game loops:",
-                font_name="ARCO",
-                font_size=16,
-                text_color=arcade.color.WHITE
-            )
-            # Game loops number input (small width)
-            self.game_loops_input = UIInputText(
-                text="1",
-                width=60,
-                height=30,
-                font_name="ARCO",
-                font_size=14
-            )
-            # Play button
+            # Add play button for server
             play_button = GameButton(text="PLAY")
             play_button.on_click = self.on_play_click
-            # Add components to horizontal layout
-            bottom_layout.add(game_loops_label)
-            bottom_layout.add(self.game_loops_input)
-            # Add bigger blank space between input and play button
-            spacer = UILabel(text="", width=120, height=1)  # Invisible spacer for bigger gap
-            bottom_layout.add(spacer)
-            bottom_layout.add(play_button)
-            # Position the entire layout at bottom center
             anchor = UIAnchorLayout()
-            anchor.add(child=bottom_layout, anchor_x="center", anchor_y="bottom", align_y=30)
+            anchor.add(child=play_button, anchor_x="center", anchor_y="bottom", align_y=30)
             self.ui.add(anchor)
 
-    def get_game_loops_value(self):
-        """Get the number of game loops from input, defaulting to 0 if invalid"""
-        if hasattr(self, 'game_loops_input'):
-            try:
-                value = int(self.game_loops_input.text) if self.game_loops_input.text else 0
-                return max(0, value)  # Ensure non-negative value
-            except (ValueError, AttributeError):
-                return 0
-        return 0
-
-    def validate_game_loops_input(self):
-        """Ensure only numeric input in game loops field"""
-        if hasattr(self, 'game_loops_input'):
-            text = self.game_loops_input.text
-            # Filter out non-digit characters, keeping only numbers
-            filtered_text = ''.join(filter(str.isdigit, text))
-            if filtered_text != text:
-                self.game_loops_input.text = filtered_text
-            if self.game_loops_input.text == "0" or self.game_loops_input.text == "":
-                self.game_loops_input.text = "1"
 
     def load_initial_players(self):
         """Load initial player list with retry mechanism"""
@@ -312,21 +265,17 @@ class LobbyView(UIView):
 
     def on_play_click(self, event):
         if not self.is_client:
-            # Validate input before starting game
-            self.validate_game_loops_input()
-            game_loops = self.get_game_loops_value()
-
-            print(f"Starting game with {game_loops} loops")
-
             self.show_loading = True
+
             self.client_or_server.broadcast_selected_map()
 
-            # You can pass the game_loops value to your game logic here
+            # Send with acknowledgment requirement
 
             self.client_or_server.send_command("game_start", require_ack=True)
-            arcade.schedule_once(self.start_game_for_server, 0.5)
 
-            print("Game loops = ", game_loops)
+            # Schedule the server to transition to game view after a short delay
+
+            arcade.schedule_once(self.start_game_for_server, 0.5)
 
     def start_game_for_server(self, delta_time):
         if not self.is_client:
