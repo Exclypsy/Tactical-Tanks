@@ -18,6 +18,9 @@ class Client:
         self.connected = False
         self.running = False
 
+        self.connection_state = "disconnected"
+        self.connection_error = None
+
         self.pending_tank_updates = []
         self.tank_updates_lock = threading.Lock()
 
@@ -48,27 +51,86 @@ class Client:
 
         self.latest_player_list = []
 
-    def connect(self):
+    def connect(self, timeout=5.0):
+        """Connect to server with proper handshake and timeout"""
         try:
             # Create a new socket for each connection
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            # Now send the connection message
+            self.socket.settimeout(timeout)
+
+            # Set connection state to pending
+            self.connection_state = "pending"
+            self.connection_error = None
+
+            # Send connection request
             message = f"connection,{self.player_name}"
             self.socket.sendto(message.encode('utf-8'), self.server_address)
-            print(f"Trying connection -> {self.server_ip}:{self.server_port}")
-        except Exception as e:
-            print(e)
-            return False
-        else:
-            self.connected = True
-            self.running = True
-            print(f"Connected -> {self.server_ip}:{self.server_port}")
+            print(f"Sent connection request to {self.server_ip}:{self.server_port}")
 
-            # Start a background thread to listen for server messages
-            self.listener_thread = threading.Thread(target=self.listen_for_commands, daemon=True)
-            self.listener_thread.start()
-            return True
+            # Wait for server response
+            start_time = time.time()
+            while time.time() - start_time < timeout:
+                try:
+                    data, addr = self.socket.recvfrom(1024)
+                    decoded = data.decode()
+
+                    try:
+                        message = json.loads(decoded)
+                        message_type = message.get("type")
+
+                        if message_type == "connection_accepted":
+                            self.connection_state = "accepted"
+                            self.connected = True
+                            self.running = True
+
+                            # Store connection details
+                            self.client_id = message.get("client_id")
+                            self.assigned_color = message.get("assigned_color")
+                            assigned_name = message.get("assigned_name")
+                            if assigned_name:
+                                self.player_name = assigned_name
+
+                            print(
+                                f"Connection accepted! Name: {self.player_name}, Color: {self.assigned_color}, ID: {self.client_id}")
+
+                            # Start listener thread after successful connection
+                            self.listener_thread = threading.Thread(target=self.listen_for_commands, daemon=True)
+                            self.listener_thread.start()
+
+                            return True
+
+                        elif message_type == "connection_rejected":
+                            self.connection_state = "rejected"
+                            self.connection_error = message.get("reason", "Connection rejected by server")
+                            print(f"Connection rejected: {self.connection_error}")
+                            return False
+
+                    except json.JSONDecodeError:
+                        continue  # Ignore non-JSON messages during handshake
+
+                except socket.timeout:
+                    continue  # Keep waiting until overall timeout
+
+            # If we get here, connection timed out
+            self.connection_state = "timeout"
+            self.connection_error = "Connection timeout - server did not respond"
+            print(self.connection_error)
+            return False
+
+        except Exception as e:
+            self.connection_state = "rejected"
+            self.connection_error = f"Connection failed: {str(e)}"
+            print(self.connection_error)
+            return False
+        finally:
+            if not self.connected and self.socket:
+                self.socket.close()
+                self.socket = None
+
+    def get_connection_error(self):
+        """Get the last connection error message"""
+        return self.connection_error
 
     def listen_for_commands(self):
         """Continuously listen for server commands in the background"""

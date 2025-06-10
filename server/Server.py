@@ -281,9 +281,11 @@ class Server:
                     parts = decoded.split(",", 1)
                     if len(parts) == 2:
                         base_name = parts[1]
-                        unique_name = self.get_unique_player_name(base_name)
 
-                        # Assign color and client ID
+                    validation_result = self.validate_connection_request(base_name, addr)
+
+                    if validation_result["accepted"]:
+                        unique_name = self.get_unique_player_name(base_name)
                         assigned_color = self.assign_color_to_player(unique_name)
                         client_id = self.assign_client_id()
 
@@ -297,9 +299,16 @@ class Server:
                         with self.clients_lock:
                             self.clients.append(client_data)
 
-                        print(f"New connection: {base_name} -> {unique_name} ({assigned_color}) ID:{client_id}")
+                        print(f"Connection accepted: {base_name} -> {unique_name} ({assigned_color}) ID:{client_id}")
 
                         # Send connection confirmation
+                        connection_response = json.dumps({
+                            "type": "connection_accepted",
+                            "assigned_name": unique_name,
+                            "assigned_color": assigned_color,
+                            "client_id": client_id
+                        })
+                        # Send connection acceptance
                         connection_response = json.dumps({
                             "type": "connection_accepted",
                             "assigned_name": unique_name,
@@ -311,9 +320,17 @@ class Server:
                         # Broadcast to clients
                         self.broadcast_player_list_update()
 
-                        # FIX: Also update server's own lobby view
+                        # Update server's own lobby view
                         if hasattr(self, 'lobby_update_callback') and self.lobby_update_callback:
                             arcade.schedule_once(lambda dt: self.lobby_update_callback(), 0)
+                    else:
+                        # Send connection rejection
+                        rejection_response = json.dumps({
+                            "type": "connection_rejected",
+                            "reason": validation_result["reason"]
+                        })
+                        self.server_socket.sendto(rejection_response.encode(), addr)
+                        print(f"Connection rejected for {addr}: {validation_result['reason']}")
 
                 # Handle get_players command
                 elif decoded == "get_players":
@@ -431,6 +448,46 @@ class Server:
                 traceback.print_exc()
 
         print("Client handler loop exited")
+
+    def validate_connection_request(self, player_name, client_addr):
+        """Validate incoming connection request"""
+
+        # Check if server is full (max 4 players including server)
+        with self.clients_lock:
+            if len(self.clients) >= 3:  # 3 clients + 1 server = 4 total
+                return {
+                    "accepted": False,
+                    "reason": "Server is full (maximum 4 players)"
+                }
+
+        # Check if we're already in game
+        if hasattr(self, 'picked_map') and self.picked_map is not None:
+            return {
+                "accepted": False,
+                "reason": "Game already in progress"
+            }
+
+        # Check for empty player name
+        if not player_name or player_name.strip() == "":
+            return {
+                "accepted": False,
+                "reason": "Invalid player name"
+            }
+
+        # Check if client is already connected (reconnection attempt)
+        with self.clients_lock:
+            for client in self.clients:
+                if client['addr'] == client_addr:
+                    return {
+                        "accepted": False,
+                        "reason": "Already connected from this address"
+                    }
+
+        # All validation passed
+        return {
+            "accepted": True,
+            "reason": None
+        }
 
     def get_unique_player_name(self, base_name):
         """Generate a unique player name by appending numbers if necessary"""
