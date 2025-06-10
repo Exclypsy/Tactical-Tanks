@@ -824,14 +824,23 @@ class GameView(arcade.View):
         if player_id == self.player_tank.player_id:
             return
 
-        # Handle player disconnection
-        if data.get("type") == "player_disconnected":
+        # Handle player disconnection (check both old and new format)
+        if (data.get("type") == "player_disconnected" or
+                (data.get("type") == "tank_state" and data.get("subtype") == "player_disconnected")):
             print(f"Player {player_id} disconnected during game")
             if player_id in self.other_player_tanks:
-                tank = self.other_player_tanks[player_id]
-                tank.take_damage(100)  # Kill the tank
-                tank.destroyed = True
-                print(f"Marked tank {player_id} as dead due to disconnect")
+                try:
+                    tank = self.other_player_tanks[player_id]
+                    if tank and not tank.destroyed:
+                        tank.take_damage(100)  # Kill the tank
+                        tank.destroyed = True
+                        print(f"Marked tank {player_id} as dead due to disconnect")
+                    else:
+                        print(f"Tank {player_id} was already destroyed")
+                except Exception as e:
+                    print(f"Error handling tank destruction for {player_id}: {e}")
+            else:
+                print(f"Tank {player_id} not found in other_player_tanks")
             return
 
         # print(f"Processing tank update: {player_id} (our ID: {self.player_tank.player_id})")
@@ -1229,3 +1238,31 @@ class GameView(arcade.View):
             for i in range(num_dots):
                 dot_x = start_x + (i * actual_spacing) + (actual_spacing / 2)
                 arcade.draw_circle_filled(dot_x, y, dot_diameter // 2, arcade.color.GRAY)
+
+    def handle_player_disconnect(self, player_name):
+        """Handle player disconnection from main thread (called by server)"""
+        print(f"Handling player disconnect for {player_name}")
+
+        # Kill the tank locally on server's game view
+        if player_name in self.other_player_tanks:
+            try:
+                tank = self.other_player_tanks[player_name]
+                if tank and not tank.destroyed:
+                    tank.take_damage(100)  # Kill the tank
+                    tank.destroyed = True
+                    print(f"Marked tank {player_name} as dead due to disconnect")
+            except Exception as e:
+                print(f"Error handling tank destruction for {player_name}: {e}")
+
+        # Send as tank_state message so clients process it correctly
+        if hasattr(self, 'client_or_server') and not self.is_client:
+            disconnect_message = {
+                "type": "tank_state",  # Changed from "player_disconnected" to "tank_state"
+                "subtype": "player_disconnected",  # Add subtype for identification
+                "player_id": player_name
+            }
+            try:
+                self.client_or_server.game_broadcast_data(disconnect_message)
+                print(f"Broadcasted disconnection of {player_name} to all clients")
+            except Exception as e:
+                print(f"Error broadcasting disconnection: {e}")

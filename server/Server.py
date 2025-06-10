@@ -756,7 +756,7 @@ class Server:
         self.shutdown()
 
     def handle_client_disconnect_in_game(self, client_addr):
-        """Handle client disconnect during game - mark as dead but keep visible"""
+        """Handle client disconnect during game - mark as dead and notify all players"""
         with self.clients_lock:
             disconnected_client = None
             for client in self.clients[:]:
@@ -765,18 +765,37 @@ class Server:
                     break
 
             if disconnected_client:
+                player_name = disconnected_client['name']
+
                 # Don't remove from clients list during game, just mark as disconnected
                 disconnected_client['status'] = 'disconnected'
-                print(f"Player {disconnected_client['name']} disconnected during game - marked as dead")
+                print(f"Player {player_name} disconnected during game - marking as dead")
 
-        # Broadcast disconnect notification OUTSIDE the lock and EXCLUDE the disconnected client
-        if disconnected_client:
-            disconnect_data = {
-                "type": "player_disconnected",
-                "player_id": disconnected_client['name'],
-                "status": "dead"
-            }
-            self.game_broadcast_data(disconnect_data, except_ip=client_addr)
+                # Instead of broadcasting directly from networking thread,
+                # schedule the broadcast to happen from main thread
+                if hasattr(self, 'window') and self.window and hasattr(self.window, 'current_view'):
+                    current_view = self.window.current_view
+                    if hasattr(current_view, 'handle_player_disconnect'):
+                        # Schedule on main thread to avoid socket contention
+                        arcade.schedule_once(
+                            lambda dt, name=player_name: current_view.handle_player_disconnect(name),
+                            0
+                        )
+                        print(f"Scheduled player disconnect handling for {player_name}")
+                    else:
+                        # Fallback: try to handle it directly in game view
+                        if hasattr(current_view, 'process_tank_update'):
+                            disconnect_message = {
+                                "type": "player_disconnected",
+                                "player_id": player_name
+                            }
+                            arcade.schedule_once(
+                                lambda dt, data=disconnect_message: current_view.process_tank_update(data),
+                                0
+                            )
+                            print(f"Scheduled tank kill for {player_name} on server's game view")
+
+                print(f"Disconnection handling complete for {player_name}")
 
     def assign_client_id(self):
         """Assign a client ID, reusing available ones first"""
