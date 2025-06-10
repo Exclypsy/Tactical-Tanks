@@ -109,6 +109,6 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 - [Martin Bartko](https://github.com/Exclypsy)
 - [Šimon Jedinák](https://github.com/simonjedinak)
 - Oliver Komka
-- Soňa Miháliková
+- Soňa Mihaliková
 
 ---

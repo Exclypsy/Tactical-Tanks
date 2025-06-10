@@ -148,6 +148,12 @@ class JoinGameView(UIView):
         if not server_ip:
             server_ip = "127.0.0.1:5000"
 
+        allowed_chars = "0123456789.:"
+        for char in server_ip:
+            if char not in allowed_chars:
+                self.show_error("Server address can only contain numbers, dots, and colons")
+                return
+
         # Parse IP and port
         try:
             if ":" in server_ip:
