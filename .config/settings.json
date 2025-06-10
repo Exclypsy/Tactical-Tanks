@@ -1,8 +1,8 @@
 {
     "fullscreen": false,
-    "window_width": 1036,
-    "window_height": 640,
-    "music_on": false,
+    "window_width": 1280,
+    "window_height": 660,
+    "music_on": true,
     "music_volume": 1.0,
-    "player_name": "Sonicka"
+    "player_name": "Martin"
 }

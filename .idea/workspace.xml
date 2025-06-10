@@ -4,12 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="943984de-205b-4b9b-a54d-0d0f9a3a3d64" name="Changes" comment="trosku optimalizacia, zmena velkosti">
-      <change beforePath="$PROJECT_DIR$/.config/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/.config/settings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/Tactical-Tanks.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Tactical-Tanks.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="943984de-205b-4b9b-a54d-0d0f9a3a3d64" name="Changes" comment="Fix: Zobrazovanie inej textury">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,7 +22,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="main" />
+        <entry key="$PROJECT_DIR$" value="server" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -61,7 +57,6 @@
   &quot;keyToString&quot;: {
     &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
     &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;Python..copy_files.executor&quot;: &quot;Run&quot;,
     &quot;Python.Client (1).executor&quot;: &quot;Run&quot;,
     &quot;Python.Create.executor&quot;: &quot;Run&quot;,
     &quot;Python.Join.executor&quot;: &quot;Run&quot;,
@@ -81,31 +76,28 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;ShowUsagesActions.previewPropertyKey&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Admin/PycharmProjects/OPGP-Projekt-MOS-&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Admin/PycharmProjects/OPGP-Projekt-MOS-/server&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\Admin\PycharmProjects\OPGP-Projekt-MOS-" />
-      <recent name="C:\Users\Admin\PycharmProjects\OPGP-Projekt-MOS-\client\assets\images\vybuch" />
       <recent name="C:\Users\Admin\PycharmProjects\OPGP-Projekt-MOS-\server" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\Admin\PycharmProjects\OPGP-Projekt-MOS-\non-player" />
-      <recent name="C:\Users\Admin\PycharmProjects\OPGP-Projekt-MOS-\client\assets\images\vybuch" />
+      <recent name="$PROJECT_DIR$/client/assets/images/static_entities" />
+      <recent name="$PROJECT_DIR$/client/assets/images/map_bg" />
+      <recent name="C:\Users\User\PycharmProjects\Tactical-Tanks\client\assets\sounds" />
       <recent name="C:\Users\Admin\PycharmProjects\OPGP-Projekt-MOS-\client" />
       <recent name="$PROJECT_DIR$/client/assets/sounds" />
-      <recent name="$PROJECT_DIR$/client/assets/images" />
     </key>
   </component>
   <component name="RunAnythingCache">
@@ -160,7 +152,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name=".copy_files" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="Server (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Tactical-Tanks" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -169,12 +161,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/server" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/.copy_files.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/server/Server.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -183,7 +175,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="a" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="Tank" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Tactical-Tanks" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -192,12 +184,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/client" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/a.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/client/Tank.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -232,18 +224,18 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.MainMenu" />
-        <item itemvalue="Python..copy_files" />
-        <item itemvalue="Python.a" />
-        <item itemvalue="Python.game" />
         <item itemvalue="Python.Create" />
+        <item itemvalue="Python.game" />
+        <item itemvalue="Python.Tank" />
+        <item itemvalue="Python.Server (1)" />
       </list>
     </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-1d06a55b98c1-91d5c284f522-JavaScript-PY-241.15989.155" />
-        <option value="bundled-python-sdk-babbdf50b680-7c6932dee5e4-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-241.15989.155" />
+        <option value="bundled-js-predefined-1d06a55b98c1-0b3e54e931b4-JavaScript-PY-241.19416.19" />
+        <option value="bundled-python-sdk-337b0a7a993a-2767605e8bc2-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-241.19416.19" />
       </set>
     </attachedChunks>
   </component>
@@ -284,32 +276,63 @@
       <workItem from="1746124826113" duration="1113000" />
       <workItem from="1746529952240" duration="675000" />
       <workItem from="1746531889423" duration="254000" />
-      <workItem from="1747208866045" duration="2391000" />
-      <workItem from="1747216299455" duration="21000" />
-      <workItem from="1747481085883" duration="28000" />
-      <workItem from="1747482437768" duration="11117000" />
-      <workItem from="1747556531306" duration="3834000" />
-      <workItem from="1747560746795" duration="7138000" />
-      <workItem from="1747574357213" duration="7240000" />
-      <workItem from="1747842212887" duration="5313000" />
-      <workItem from="1747939942052" duration="89000" />
-      <workItem from="1747940136644" duration="45000" />
-      <workItem from="1747940195579" duration="402000" />
-      <workItem from="1747940619942" duration="455000" />
-      <workItem from="1747941094290" duration="1483000" />
-      <workItem from="1747993677100" duration="880000" />
-      <workItem from="1748015004111" duration="1292000" />
-      <workItem from="1748115052508" duration="607000" />
-      <workItem from="1748161337955" duration="11783000" />
-      <workItem from="1748329073984" duration="23000" />
-      <workItem from="1748355107906" duration="7463000" />
-      <workItem from="1748621059661" duration="14333000" />
-      <workItem from="1748676730461" duration="4551000" />
-      <workItem from="1748686206477" duration="5970000" />
-      <workItem from="1748693106955" duration="16816000" />
-      <workItem from="1748710419491" duration="92000" />
-      <workItem from="1748777077215" duration="26000" />
-      <workItem from="1748778018966" duration="16610000" />
+      <workItem from="1749019304462" duration="12000" />
+    </task>
+    <task id="LOCAL-00001" summary="Push 1 test">
+      <option name="closed" value="true" />
+      <created>1742979708118</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1742979708118</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Push 1 test">
+      <option name="closed" value="true" />
+      <created>1742979776210</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1742979776210</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Push 3 test, delete Test_folder">
+      <option name="closed" value="true" />
+      <created>1742979806679</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1742979806679</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Push 4 test, pridanie suboru">
+      <option name="closed" value="true" />
+      <created>1742981282956</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1742981282956</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Push 5 test, odsranenie suboru">
+      <option name="closed" value="true" />
+      <created>1742981322780</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1742981322780</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Push, &#10;Pridanie Assets (Images, Sounds), server.py a main.py">
+      <option name="closed" value="true" />
+      <created>1742983009938</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1742983009938</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Push, &#10;Pridanie zvukov do Assets/sounds">
+      <option name="closed" value="true" />
+      <created>1742983202886</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1742983202886</updated>
     </task>
     <task id="LOCAL-00008" summary="Game a Tank">
       <option name="closed" value="true" />
@@ -511,199 +534,87 @@
       <option name="project" value="LOCAL" />
       <updated>1746532053082</updated>
     </task>
-    <task id="LOCAL-00033" summary="Uprava tlacidiel v pause menu #78">
+    <task id="LOCAL-00033" summary="tank robí pju pju">
       <option name="closed" value="true" />
-      <created>1747160495388</created>
+      <created>1747169265234</created>
       <option name="number" value="00033" />
       <option name="presentableId" value="LOCAL-00033" />
       <option name="project" value="LOCAL" />
-      <updated>1747160495388</updated>
+      <updated>1747169265234</updated>
     </task>
-    <task id="LOCAL-00034" summary="fix: zobrazenie server mena #80">
+    <task id="LOCAL-00034" summary="pridanie .gitignore a pozadia pre 2 nove mapy">
       <option name="closed" value="true" />
-      <created>1747486634419</created>
+      <created>1749016498780</created>
       <option name="number" value="00034" />
       <option name="presentableId" value="LOCAL-00034" />
       <option name="project" value="LOCAL" />
-      <updated>1747486634419</updated>
+      <updated>1749016498780</updated>
     </task>
-    <task id="LOCAL-00035" summary="multiplayer kinda works (len tanky)">
+    <task id="LOCAL-00035" summary="Pridanie mapy Snow">
       <option name="closed" value="true" />
-      <created>1747493632450</created>
+      <created>1749016727006</created>
       <option name="number" value="00035" />
       <option name="presentableId" value="LOCAL-00035" />
       <option name="project" value="LOCAL" />
-      <updated>1747493632450</updated>
+      <updated>1749016727006</updated>
     </task>
-    <task id="LOCAL-00036" summary="tank colors">
+    <task id="LOCAL-00036" summary="Ignorovanie settingov do commitov/pushov">
       <option name="closed" value="true" />
-      <created>1747562268752</created>
+      <created>1749017073782</created>
       <option name="number" value="00036" />
       <option name="presentableId" value="LOCAL-00036" />
       <option name="project" value="LOCAL" />
-      <updated>1747562268752</updated>
+      <updated>1749017073782</updated>
     </task>
-    <task id="LOCAL-00037" summary="effect vystrelenia">
+    <task id="LOCAL-00037" summary="Pridanie zimnych stromov a dokoncenie mapy Snow">
       <option name="closed" value="true" />
-      <created>1747565768808</created>
+      <created>1749017807584</created>
       <option name="number" value="00037" />
       <option name="presentableId" value="LOCAL-00037" />
       <option name="project" value="LOCAL" />
-      <updated>1747565768808</updated>
+      <updated>1749017807584</updated>
     </task>
-    <task id="LOCAL-00038" summary="Server improvements">
+    <task id="LOCAL-00038" summary="Pridanie zimnych stromov a dokoncenie mapy Snow">
       <option name="closed" value="true" />
-      <created>1747577078083</created>
+      <created>1749017888555</created>
       <option name="number" value="00038" />
       <option name="presentableId" value="LOCAL-00038" />
       <option name="project" value="LOCAL" />
-      <updated>1747577078083</updated>
+      <updated>1749017888555</updated>
     </task>
-    <task id="LOCAL-00039" summary="color assigning">
+    <task id="LOCAL-00039" summary="Dokoncenie mapy lava.json">
       <option name="closed" value="true" />
-      <created>1747772217273</created>
+      <created>1749018094469</created>
       <option name="number" value="00039" />
       <option name="presentableId" value="LOCAL-00039" />
       <option name="project" value="LOCAL" />
-      <updated>1747772217273</updated>
+      <updated>1749018094469</updated>
     </task>
-    <task id="LOCAL-00040" summary="LAN funguje (aj tanky, aj strely)">
+    <task id="LOCAL-00040" summary="Fix: nacitanie opbrazka forestBG.jpg">
       <option name="closed" value="true" />
-      <created>1747853340111</created>
+      <created>1749018964615</created>
       <option name="number" value="00040" />
       <option name="presentableId" value="LOCAL-00040" />
       <option name="project" value="LOCAL" />
-      <updated>1747853340111</updated>
+      <updated>1749018964615</updated>
     </task>
-    <task id="LOCAL-00041" summary="vybuch obrazky">
+    <task id="LOCAL-00041" summary="Fix: snow.json, nacitanie bg">
       <option name="closed" value="true" />
-      <created>1747941857232</created>
+      <created>1749019120488</created>
       <option name="number" value="00041" />
       <option name="presentableId" value="LOCAL-00041" />
       <option name="project" value="LOCAL" />
-      <updated>1747941857232</updated>
+      <updated>1749019120488</updated>
     </task>
-    <task id="LOCAL-00042" summary="pridelenie farby tanku uz v lobby (zatial len backend)">
+    <task id="LOCAL-00042" summary="Fix: Zobrazovanie inej textury">
       <option name="closed" value="true" />
-      <created>1748166560855</created>
+      <created>1749019270571</created>
       <option name="number" value="00042" />
       <option name="presentableId" value="LOCAL-00042" />
       <option name="project" value="LOCAL" />
-      <updated>1748166560855</updated>
+      <updated>1749019270571</updated>
     </task>
-    <task id="LOCAL-00043" summary="lobby - farby tankov">
-      <option name="closed" value="true" />
-      <created>1748174522116</created>
-      <option name="number" value="00043" />
-      <option name="presentableId" value="LOCAL-00043" />
-      <option name="project" value="LOCAL" />
-      <updated>1748174522116</updated>
-    </task>
-    <task id="LOCAL-00044" summary="fixed pridelovanie farieb zase">
-      <option name="closed" value="true" />
-      <created>1748175895249</created>
-      <option name="number" value="00044" />
-      <option name="presentableId" value="LOCAL-00044" />
-      <option name="project" value="LOCAL" />
-      <updated>1748175895249</updated>
-    </task>
-    <task id="LOCAL-00045" summary="v hre iba fullscreen">
-      <option name="closed" value="true" />
-      <created>1748367392683</created>
-      <option name="number" value="00045" />
-      <option name="presentableId" value="LOCAL-00045" />
-      <option name="project" value="LOCAL" />
-      <updated>1748367392683</updated>
-    </task>
-    <task id="LOCAL-00046" summary="map selection (bez nacitania mapy) + nove obrazky :)">
-      <option name="closed" value="true" />
-      <created>1748637811378</created>
-      <option name="number" value="00046" />
-      <option name="presentableId" value="LOCAL-00046" />
-      <option name="project" value="LOCAL" />
-      <updated>1748637811378</updated>
-    </task>
-    <task id="LOCAL-00047" summary="map selection (bez nacitania mapy) + nove obrazky :)">
-      <option name="closed" value="true" />
-      <created>1748638034892</created>
-      <option name="number" value="00047" />
-      <option name="presentableId" value="LOCAL-00047" />
-      <option name="project" value="LOCAL" />
-      <updated>1748638034892</updated>
-    </task>
-    <task id="LOCAL-00048" summary="premenovanie suborov">
-      <option name="closed" value="true" />
-      <created>1748642341192</created>
-      <option name="number" value="00048" />
-      <option name="presentableId" value="LOCAL-00048" />
-      <option name="project" value="LOCAL" />
-      <updated>1748642341192</updated>
-    </task>
-    <task id="LOCAL-00049" summary="nacitanie mapy funguje">
-      <option name="closed" value="true" />
-      <created>1748679019965</created>
-      <option name="number" value="00049" />
-      <option name="presentableId" value="LOCAL-00049" />
-      <option name="project" value="LOCAL" />
-      <updated>1748679019965</updated>
-    </task>
-    <task id="LOCAL-00050" summary="hranice mapy, hitboxy + marny pokus o fixnutie scalovania">
-      <option name="closed" value="true" />
-      <created>1748681141547</created>
-      <option name="number" value="00050" />
-      <option name="presentableId" value="LOCAL-00050" />
-      <option name="project" value="LOCAL" />
-      <updated>1748681141547</updated>
-    </task>
-    <task id="LOCAL-00051" summary="uz to skoro funguje">
-      <option name="closed" value="true" />
-      <created>1748690459909</created>
-      <option name="number" value="00051" />
-      <option name="presentableId" value="LOCAL-00051" />
-      <option name="project" value="LOCAL" />
-      <updated>1748690459909</updated>
-    </task>
-    <task id="LOCAL-00052" summary="scalovanie funguje🤯">
-      <option name="closed" value="true" />
-      <created>1748699311709</created>
-      <option name="number" value="00052" />
-      <option name="presentableId" value="LOCAL-00052" />
-      <option name="project" value="LOCAL" />
-      <updated>1748699311709</updated>
-    </task>
-    <task id="LOCAL-00053" summary="scalovanie funguje na 100% #83">
-      <option name="closed" value="true" />
-      <created>1748703447672</created>
-      <option name="number" value="00053" />
-      <option name="presentableId" value="LOCAL-00053" />
-      <option name="project" value="LOCAL" />
-      <updated>1748703447672</updated>
-    </task>
-    <task id="LOCAL-00054" summary="explosion animacia (po zasahu) #65">
-      <option name="closed" value="true" />
-      <created>1748708010063</created>
-      <option name="number" value="00054" />
-      <option name="presentableId" value="LOCAL-00054" />
-      <option name="project" value="LOCAL" />
-      <updated>1748708010063</updated>
-    </task>
-    <task id="LOCAL-00055" summary="Tank zomre po zasahu">
-      <option name="closed" value="true" />
-      <created>1748708996364</created>
-      <option name="number" value="00055" />
-      <option name="presentableId" value="LOCAL-00055" />
-      <option name="project" value="LOCAL" />
-      <updated>1748708996364</updated>
-    </task>
-    <task id="LOCAL-00056" summary="trosku optimalizacia, zmena velkosti">
-      <option name="closed" value="true" />
-      <created>1748710125931</created>
-      <option name="number" value="00056" />
-      <option name="presentableId" value="LOCAL-00056" />
-      <option name="project" value="LOCAL" />
-      <updated>1748710125931</updated>
-    </task>
-    <option name="localTasksCounter" value="57" />
+    <option name="localTasksCounter" value="43" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -722,56 +633,55 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <MESSAGE value="Fullscreen menu a pridanie tlacidla na exit" />
+    <MESSAGE value="Pridanie prekliku na settings.py" />
+    <MESSAGE value="buttons color" />
+    <MESSAGE value="Ulozenie nastaveni, premenovanie suborov #40" />
+    <MESSAGE value="preklik fix" />
+    <MESSAGE value="Settings" />
+    <MESSAGE value="basic Client/Server" />
+    <MESSAGE value="UDP, lobby (cez AI -&gt; neide), v Join input na server IP" />
+    <MESSAGE value="working lobby (todo: fix disconnecting)" />
+    <MESSAGE value="Lobby viac menej funkcne #53 #22" />
+    <MESSAGE value="Cleanup" />
+    <MESSAGE value="Improvements" />
+    <MESSAGE value="vela errorov" />
+    <MESSAGE value="IDE TO (bude treba poriesit vynimky a optimalizovat kod)" />
     <MESSAGE value="#54 oprava fontov" />
     <MESSAGE value="'s'" />
-    <MESSAGE value="Uprava tlacidiel v pause menu #78" />
-    <MESSAGE value="fix: zobrazenie server mena #80" />
-    <MESSAGE value="multiplayer kinda works (len tanky)" />
-    <MESSAGE value="tank colors" />
-    <MESSAGE value="effect vystrelenia" />
-    <MESSAGE value="Server improvements" />
-    <MESSAGE value="color assigning" />
-    <MESSAGE value="LAN funguje (aj tanky, aj strely)" />
-    <MESSAGE value="vybuch obrazky" />
-    <MESSAGE value="pridelenie farby tanku uz v lobby (zatial len backend)" />
-    <MESSAGE value="lobby - farby tankov" />
-    <MESSAGE value="fixed pridelovanie farieb zase" />
-    <MESSAGE value="v hre iba fullscreen" />
-    <MESSAGE value="map selection (bez nacitania mapy) + nove obrazky :)" />
-    <MESSAGE value="premenovanie suborov" />
-    <MESSAGE value="nacitanie mapy funguje" />
-    <MESSAGE value="hranice mapy, hitboxy + marny pokus o fixnutie scalovania" />
-    <MESSAGE value="uz to skoro funguje" />
-    <MESSAGE value="scalovanie funguje" />
-    <MESSAGE value="scalovanie funguje na 100% #83" />
-    <MESSAGE value="explosion animacia (po zasahu) #65" />
-    <MESSAGE value="Tank zomre po zasahu" />
-    <MESSAGE value="trosku optimalizacia, zmena velkosti" />
-    <option name="LAST_COMMIT_MESSAGE" value="trosku optimalizacia, zmena velkosti" />
+    <MESSAGE value="tank robí pju pju" />
+    <MESSAGE value="pridanie .gitignore a pozadia pre 2 nove mapy" />
+    <MESSAGE value="Pridanie mapy Snow" />
+    <MESSAGE value="Ignorovanie settingov do commitov/pushov" />
+    <MESSAGE value="Pridanie zimnych stromov a dokoncenie mapy Snow" />
+    <MESSAGE value="Dokoncenie mapy lava.json" />
+    <MESSAGE value="Fix: nacitanie opbrazka forestBG.jpg" />
+    <MESSAGE value="Fix: snow.json, nacitanie bg" />
+    <MESSAGE value="Fix: Zobrazovanie inej textury" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix: Zobrazovanie inej textury" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Tactical_Tanks$Lobby.coverage" NAME="Lobby Coverage Results" MODIFIED="1747579212666" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Tactical_Tanks$Join.coverage" NAME="Join Coverage Results" MODIFIED="1745782509170" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Tactical_Tanks$Server.coverage" NAME="Server Coverage Results" MODIFIED="1745785025628" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/server" />
+    <SUITE FILE_PATH="coverage/Tactical_Tanks$Tank.coverage" NAME="Tank Coverage Results" MODIFIED="1745958227516" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
+    <SUITE FILE_PATH="coverage/Tactical_Tanks$client.coverage" NAME="client Coverage Results" MODIFIED="1745783928181" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
+    <SUITE FILE_PATH="coverage/Tactical_Tanks$client2.coverage" NAME="client2 Coverage Results" MODIFIED="1745701911861" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/server" />
     <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$main.coverage" NAME="main Coverage Results" MODIFIED="1744223023859" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$Tank.coverage" NAME="Tank Coverage Results" MODIFIED="1744314027094" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
-    <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$SettingsWindow.coverage" NAME="SettingsWindow Coverage Results" MODIFIED="1744223591669" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Tactical_Tanks$a.coverage" NAME="a Coverage Results" MODIFIED="1748680294957" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Tactical_Tanks$Server__1_.coverage" NAME="Server (1) Coverage Results" MODIFIED="1745953993700" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/server" />
-    <SUITE FILE_PATH="coverage/Tactical_Tanks$client2.coverage" NAME="client2 Coverage Results" MODIFIED="1745701911861" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/server" />
-    <SUITE FILE_PATH="coverage/Tactical_Tanks$game.coverage" NAME="game Coverage Results" MODIFIED="1748364376180" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
-    <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$MainMenu.coverage" NAME="MainMenu Coverage Results" MODIFIED="1744698336568" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
-    <SUITE FILE_PATH="coverage/Tactical_Tanks$Create.coverage" NAME="Create Coverage Results" MODIFIED="1745961449812" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$Create.coverage" NAME="Create Coverage Results" MODIFIED="1744490465086" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Tactical_Tanks$Client__1_.coverage" NAME="Client (1) Coverage Results" MODIFIED="1745831787444" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
-    <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$game.coverage" NAME="game Coverage Results" MODIFIED="1744698454013" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
-    <SUITE FILE_PATH="coverage/Tactical_Tanks$MainMenu.coverage" NAME="MainMenu Coverage Results" MODIFIED="1749578706765" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
-    <SUITE FILE_PATH="coverage/Tactical_Tanks$_copy_files.coverage" NAME=".copy_files Coverage Results" MODIFIED="1748795210298" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Tactical_Tanks$server.coverage" NAME="Server Coverage Results" MODIFIED="1745784771712" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/server" />
-    <SUITE FILE_PATH="coverage/Tactical_Tanks$Join.coverage" NAME="Join Coverage Results" MODIFIED="1745782509170" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Tactical_Tanks$Tank.coverage" NAME="Tank Coverage Results" MODIFIED="1745958227516" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
-    <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$TimesNewRomanButton.coverage" NAME="TimesNewRomanButton Coverage Results" MODIFIED="1744494008322" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Tactical_Tanks$client.coverage" NAME="client Coverage Results" MODIFIED="1745783928181" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
     <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$ButtonRed.coverage" NAME="ButtonRed Coverage Results" MODIFIED="1744493543268" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Tactical_Tanks$Lobby.coverage" NAME="Lobby Coverage Results" MODIFIED="1745831418325" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$SettingsWindow.coverage" NAME="SettingsWindow Coverage Results" MODIFIED="1744223591669" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$settings.coverage" NAME="settings Coverage Results" MODIFIED="1744220937438" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Tactical_Tanks$Server__1_.coverage" NAME="Server (1) Coverage Results" MODIFIED="1745953993700" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/server" />
+    <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$TimesNewRomanButton.coverage" NAME="TimesNewRomanButton Coverage Results" MODIFIED="1744494008322" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Tactical_Tanks$a.coverage" NAME="a Coverage Results" MODIFIED="1745843290131" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Tactical_Tanks$Create.coverage" NAME="Create Coverage Results" MODIFIED="1745961449812" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Tactical_Tanks$Client__1_.coverage" NAME="Client (1) Coverage Results" MODIFIED="1745831787444" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
+    <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$MainMenu.coverage" NAME="MainMenu Coverage Results" MODIFIED="1744698336568" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
+    <SUITE FILE_PATH="coverage/Tactical_Tanks$server.coverage" NAME="Server Coverage Results" MODIFIED="1745784771712" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/server" />
+    <SUITE FILE_PATH="coverage/Tactical_Tanks$MainMenu.coverage" NAME="MainMenu Coverage Results" MODIFIED="1749019133334" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
+    <SUITE FILE_PATH="coverage/Tactical_Tanks$game.coverage" NAME="game Coverage Results" MODIFIED="1745959574354" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
+    <SUITE FILE_PATH="coverage/OPGP_Projekt_MOS_$game.coverage" NAME="game Coverage Results" MODIFIED="1744698454013" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/client" />
   </component>
 </project>
