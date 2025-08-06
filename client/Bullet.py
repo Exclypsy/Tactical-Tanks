@@ -1,7 +1,7 @@
 import math
 import arcade
 
-
+"""Test"""
 class Bullet(arcade.Sprite):
     """Bullet sprite that travels in a straight line at constant speed.
     Supports collision with other bullets."""
